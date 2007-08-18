@@ -1,0 +1,17 @@
+package scala.specs
+import scala.specs.integration._
+
+object sugarSuite extends JUnit3TestSuite(sugarSpec)
+object sugarSpec extends Specification with Sugar {
+  "A sugar trait" should {
+    "allow tuples to have List methods, like (1, 2, 3).tail // List(2, 3)" in {
+       (1, 2, 3).tail must_== List(2, 3)
+    }
+    "have a times methods to iterate n times a given block: 3.times {println _}" in {
+      var j = 0
+      3 times {j += _}
+      j mustBe 6
+    }
+  }
+  
+}
