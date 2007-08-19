@@ -67,10 +67,10 @@ trait Matchers extends ScalaCheck {
   def function[T](f: T => Boolean) = Matcher((x: T) => (f(x), x + " verifies the property", x + " doesn't verify the expected property"))
   def pass[T](g: Gen[T]) = {
     implicit def toGenerator(c: Arbitrary[T]): Gen[T] = g
-    Matcher[Function1[T, Boolean]]( (x: Function1[T, Boolean]) => {
-      check(x) match {
-        case TestStats(TestPropException(FailureException(msg), ex), _, _) => (false, "", "A counter-example is '"+ex(0).toString+"': " + msg) 
-        case _ => (true, "The property passed without any counter-example", "") 
+    Matcher[T => Boolean]( (x: T => Boolean) => {
+      Test.check(Test.defaultTestPrms, property(x)) match {
+        case TestStats(TestPropException(FailureException(msg), ex), tries, _) => (false, "", "A counter-example is '"+ex(0).toString+"': " + msg) 
+        case TestStats(_, tries, _) => (true, "The property passed without any counter-example after "+tries+" tries", "") 
       }
     })
   }
