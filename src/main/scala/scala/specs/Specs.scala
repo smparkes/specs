@@ -3,11 +3,9 @@ package scala.specs
 import scala.util._
 import scala.collection.mutable._
 import scala.specs.integration._
-import scala.specs.integration.sCheck._
 
-abstract class Specification extends Matchers with ScalaCheck {
+abstract class Specification extends Matchers {
   var description = createDescription(getClass.getName)
-  def isInteger(s: String): Boolean = {try {s.toInt} catch {case _ => return false}; true}
   var suts : List[Sut] = Nil
   private[this] var lastExample : Example = _ 
   
@@ -63,6 +61,9 @@ abstract class Specification extends Matchers with ScalaCheck {
     specifications.flatMap(_.suts) foreach {sut: Sut => suts = sut::suts}
   }
   def fail(m: String) = lastExample.addFailure(FailureException(m))
+  def failures = suts.flatMap {_.failures}
+  def errors = suts.flatMap {_.errors}
+  def assertionsNb = suts.foldLeft(0) {_ + _.assertionsNb}
 }
 
 case class Sut(description: String) {
@@ -73,11 +74,14 @@ case class Sut(description: String) {
   def can(ex : Example) = {verb = "can"}
   def should(ex : Example) = {}
   def should(noExampleGiven : Unit) = {}
+  def failures = examples.flatMap {_.failures}
+  def errors = examples.flatMap {_.errors}
+  def assertionsNb = examples.foldLeft(0) {_ + _.assertionsNb}
 }
 
-case class Example(description: String, parent: Sut) extends ScalaCheck {
-  var failures = new Queue[FailureException]
-  var errors = new Queue[Throwable]
+case class Example(description: String, parent: Sut) {
+  var thisFailures = new Queue[FailureException]
+  var thisErrors = new Queue[Throwable]
   var assertionsNb = 0
   var isInsideDefinition = false
   var subExamples = new Queue[Example]
@@ -101,11 +105,10 @@ case class Example(description: String, parent: Sut) extends ScalaCheck {
     isInsideDefinition = false
     this
   }
-  def addError(t: Throwable) = {
-    errors += t
-    println(t.getMessage)
-  }
-  def addFailure(failure: FailureException) = failures += failure
+  def addError(t: Throwable) = thisErrors += t
+  def addFailure(failure: FailureException) = thisFailures += failure
+  def failures: Seq[FailureException] = thisFailures ++ subExamples.flatMap { _.thisFailures }
+  def errors = thisErrors ++ subExamples.flatMap {_.thisErrors}
 }
 
 class Assert[+T](value: => T, example: Example) extends Matchers {

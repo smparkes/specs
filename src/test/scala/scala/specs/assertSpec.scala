@@ -216,5 +216,4 @@ object assertSpec extends Specification with ExampleReporter with Sugar {
 trait ExampleReporter {
   var reported: Example = new Example("this example serves as a stub to collect failure messages", new Sut(""))
   def clearExample = { reported = new Example("", new Sut("")) }
-  def failures = reported.failures map {_.getMessage}
 }

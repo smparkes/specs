@@ -1,13 +1,11 @@
 package scala.specs
 import java.util.regex._
-import scala.specs.integration.sCheck._
-import scala.specs.integration.ScalaCheck
 import scalacheck._
 import scalacheck.Gen._
 import scalacheck.Prop._
 import scalacheck.Test._
 
-trait Matchers extends ScalaCheck {
+trait Matchers {
   def not[T](matcher: Matcher[T]) = matcher.not
   def beIn[T <: AnyRef](iterable: Iterable[T]) = Matcher[T]((a: T) => (iterable.exists(_ == a), q(a) + " is in " + iterable, q(a) + " is not in " + iterable)) 
   def contain[T <: AnyRef](a: T) = Matcher[Iterable[T]]((iterable: Iterable[T]) => (iterable.exists(_ == a), iterable + " contains " + q(a), iterable + " doesn't contain " + q(a))) 
@@ -38,7 +36,7 @@ trait Matchers extends ScalaCheck {
     override def apply(a: Option[T]) = whichFunction match {
       case None => matcher(a)
       case Some(g) => {
-          (try { a match {case Some(x) => {println(x); println(g(x));g(x)}; case None => false}} catch { case e: scala.MatchError => false }, 
+          (try { a match {case Some(x) => g(x); case None => false}} catch { case e: scala.MatchError => false }, 
               "there is a Some(x) verifying the given property", "there is no Some(x) verifying the given property") 
         }
     } 
@@ -66,11 +64,11 @@ trait Matchers extends ScalaCheck {
   def notHavePair[S, T](p: (S, T)) = not(havePair(p)) 
   def function[T](f: T => Boolean) = Matcher((x: T) => (f(x), x + " verifies the property", x + " doesn't verify the expected property"))
   def pass[T](g: Gen[T]) = {
-    implicit def toGenerator(c: Arbitrary[T]): Gen[T] = g
-    Matcher[T => Boolean]( (x: T => Boolean) => {
-      Test.check(Test.defaultTestPrms, property(x)) match {
-        case TestStats(TestPropException(FailureException(msg), ex), tries, _) => (false, "", "A counter-example is '"+ex(0).toString+"': " + msg) 
-        case TestStats(_, tries, _) => (true, "The property passed without any counter-example after "+tries+" tries", "") 
+    Matcher[T => Boolean]( (f: T => Boolean) => {
+      val prop = forAll(g)((a: T) => { if (f(a)) proved else falsified })
+      check(Test.defaultParams, prop) match {
+        case Stats(PropException(List((msg, _)), FailureException(ex)), tries, _) => (false, "", "A counter-example is '"+msg.toString+"': " + ex) 
+        case Stats(_, tries, _) => (true, "The property passed without any counter-example after "+tries+" tries", "") 
       }
     })
   }
@@ -78,6 +76,7 @@ trait Matchers extends ScalaCheck {
   def matches[T <: String](a: String)(b: T) = Pattern.compile(a).matcher(b).find 
   def q(a: Any)  = "'" + a.toString + "'"
   def testCase(a: Any)(v: => (Any => Boolean)) = Some(a) map v
+  def isInteger(s: String): Boolean = {try {s.toInt} catch {case _ => return false}; true}
 }
 case class Matcher[T](matcher: T => (Boolean, String, String)) {
   def apply(a: T) = matcher(a) 
