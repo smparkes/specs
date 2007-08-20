@@ -17,7 +17,7 @@ trait Sugar {
   implicit def unitToList(a: Unit) = List()
   implicit def anyToList[T](a: T) = List[T](a)
   implicit def productToList1[T](t: Product1[T]) = List(t._1)
-  implicit def productToList2[T](t: Product2[T, T]) = List(t._1, t._2)
+  implicit def productToList2[T](t: Product2[T, T]) = List[T](t._1, t._2)
   implicit def productToList3[T](t: Product3[T, T, T]) = List(t._1, t._2, t._3)
   implicit def productToList4[T](t: Product4[T, T, T, T]) = List(t._1, t._2, t._3, t._4)
   implicit def productToList5[T](t: Product5[T, T, T, T, T]) = List(t._1, t._2, t._3, t._4, t._5)
