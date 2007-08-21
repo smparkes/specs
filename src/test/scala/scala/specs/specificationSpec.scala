@@ -1,21 +1,18 @@
 package scala.specs
 
-import scala.specs._
-import scala.specs.Sugar._
 import scala.specs.integration._
-import scala.util._
-import scala.collection.mutable._
-import scalacheck.Gen._
+import scala.specs.Matcher._
 
 object specificationSuite extends JUnit3TestSuite(specificationSpec)
-object specificationSpec extends Specification {
+object specificationSpec extends Specification with Sugar { 
+  "A specification" isSpecifiedBy (basicFeatures, advancedFeatures)
+}
 
+object basicFeatures extends SpecificationWithSamples {
   "A specification" should {
     "have a description being its unqualified class name by default" in { 
-      oneEx(that.isOk).description must_== "mySpec"
-
-      object internalSpec extends Specification
-      internalSpec.description must_== "internalSpec"
+      object mySpec extends Specification
+      mySpec.description must_== "mySpec"
     }
     "reference zero or more systems under test (sut)" in { 
       emptySpec.suts must beEmpty
@@ -23,28 +20,56 @@ object specificationSpec extends Specification {
       twoSuts(that.isOk, that.isOk).suts.size mustBe 2
     }
     "have zero or more examples, sorted by sut" in {
-      specWithoutExample.suts.flatMap{_.examples} must beEmpty
-      oneEx(that.isOk).suts.flatMap{_.examples}.size mustBe 1
-      twoSuts(that.isOk, that.isOk).suts.flatMap{_.examples}.size mustBe 2
+      twoSuts(that.isOk, that.isOk).pretty must_== """twoSuts
+                                                     |  This system under test should 
+                                                     |    have example 1 ok
+                                                     |  This other system under test should 
+                                                     |    have example 1 ok""".stripMargin
     }
+   "have no failures if it contains no assertion" in { 
+     oneEx(that.isOk).failures must beEmpty
+   } 
+   "have one failure if one example fails" in { 
+     oneEx(that.isKo).failures must beLike { case Seq(FailureException(_)) => ok } 
+   } 
+   "fail on the first example when having several failing examples" in { 
+     oneEx(that.isKoTwice).failures must beLike { case Seq(FailureException(msg)) => msg must beMatching("first failure")} 
+   } 
+   "raise one error if one example throws an exception" in { 
+     errorSpec.errors must beLike {case Seq(x: Throwable) => x.getMessage must_== "new Error"} 
+   } 
+   "provide the number of assertions" in { 
+     twoSuts(that.isOk, List(that.isOk, that.isOk)).suts.map {_.assertionsNb} must_== List(1, 2)
+     twoSuts(that.isOk, List(that.isOk, that.isOk)).assertionsNb mustBe 3
+   } 
+   "provide a 'fail' method adding a new failure to the current example" in {
+     object failMethodSpec extends oneEx(List(that.isOk, that.isKoWithTheFailMethod))
+     failMethodSpec.failures must beLike {case Seq(FailureException(msg)) => 
+                                                 msg must_== "failure with the fail method"} 
+   }
   }
+}
+object advancedFeatures extends SpecificationWithSamples {
   "A specification " can {
     "have a user-defined description" in {
-      oneEx(that.isOk).description = "This is a great spec"
-      oneEx(that.isOk).description must_== "This is a great spec"
+      val spec = oneEx(that.isOk) 
+      spec.description = "This is a great spec"
+      spec.description must_== "This is a great spec"
     }
-    "be composed of other specifications: 'mySpec isSpecifiedBy (s1, s2, s3)' " in {
+    "be composed of other specifications.\n" +
+    "The composite specification aggregates the systems under test of the other specs.\n" + 
+    "Use the isSpecifiedBy method to do so."  in {
        object compositeSpec extends Specification {
-         "A composite spec" isSpecifiedBy (oneEx(that.isOk), oneEx(that.isOk))
+         "A complex system" isSpecifiedBy (okSpec, koSpec)
        }
-       compositeSpec.description must_== "A composite spec is specified by"
+       compositeSpec.description must_== "A complex system is specified by"
        compositeSpec.suts.size mustBe 2
        compositeSpec.suts must beLike { case x::y::Nil => (x, y) == (oneEx(that.isOk).suts.head, 
-                                                                     oneEx(that.isOk).suts.head) }
+                                                                     oneEx(that.isKo).suts.head) }
     }
-  }
-  "A specification with one sut" can {
-    "share examples with another spec: 'use those examples' in otherExamples " in {
+    "share examples with another specficiation.\n" +
+    "Declare an example to be a collection of examples coming from another spec. " +
+    "The specified example will have the other examples as sub-examples" in {
       trait SharedExamples extends Specification {
         def sharedExamples = {
           "this is a new example" in { 1 mustBe 1 }
@@ -60,61 +85,27 @@ object specificationSpec extends Specification {
       }
     }
   }
-  "A specification" should {
-    "have a description corresponding to its unqualified class name, whatever the class name" in {
-       def classNames = for {
-         packageName <- elements("com", "scala")
-         className <- elements(packageName + "s", packageName + ".specs", packageName + ".other.normal")
-         name <- elements(className, className + "$inner", className + "$inner$", className + "$2", className + "$2$")
-       } yield name
+}
 
-       def property = (className : String) => specification.
-         createDescription(className) must (not(beMatching("\\$")) and 
-                                            not(beMatching("\\.")) and
-                                            not(beInt))
-       property must pass(classNames)
-    }
-    "have no failures it contains no assertion" in { 
-      oneEx(that.isOk).failures must beEmpty
-    } 
-    "have one failure if one example isKo" in { 
-      oneEx(that.isKo).failures must beLike {case Seq(FailureException(_)) => true} 
-    } 
-    "have only one failure for an example failing twice" in { 
-      oneEx(List(that.isKo, that.isKo)).failures.size mustBe 1 
-    } 
-    "have one error if one example throws an exception" in { 
-      errorSpec.errors must beLike {case Seq(x: Throwable) => x.getMessage must_== "new Error"} 
-    } 
-    "count the number of assertions" in { 
-      twoSuts(that.isOk, List(that.isOk, that.isOk)).suts must beLike {case Seq(sut1: Sut, sut2: Sut) => 
-                                                  (sut1.assertionsNb must_== 1) &&
-                                                  (sut2.assertionsNb must_== 2)} 
-      twoSuts(that.isOk, List(that.isOk, that.isOk)).assertionsNb mustBe 3
-    } 
-    "have a 'fail' method adding a new failure to the last example" in {
-      object failMethodSpec extends oneEx(List(that.isOk, that.isKoWithTheFailMethod))
-      failMethodSpec.failures must beLike {case Seq(FailureException(msg)) => 
-                                                  msg must_== "failure with the fail method"} 
-    }
-  }
-  
+trait SpecificationWithSamples extends Specification with Sugar {
   def isInt(s: String): Boolean = {try {s.toInt} catch {case _ => return false}; true}
-  def beInt = Matcher[String](s => (isInt(s), q(s) + " is an integer", q(s) + " is not an integer"))
+  def beInt = Matcher.make[String](s => (isInt(s), q(s) + " is an integer", q(s) + " is not an integer"))
  
   abstract class TestSpec extends Specification {
-    val ok = () => true mustBe true
+    val success = () => true mustBe true
     val failure1 = () => "ok" mustBe "first failure"
     val failure2 = () => "ok" mustBe "second failure"
     val failMethod = () => fail("failure with the fail method")
     val exception = () => throw new Error("new Error")
-    def assertions(behaviours: List[that.Value]) = behaviours map { case that.isOk => ok
+    def assertions(behaviours: List[that.Value]) = behaviours map { case that.isOk => success
                                       case that.isKo => failure1
-                                      case that.isKoTwice => failure2 
+                                      case that.isKoTwice => () => {failure1(); failure2()} 
                                       case that.isKoWithTheFailMethod => failMethod 
                                       case that.throwsAnException => exception }
   }
   object specification extends Specification
+  object okSpec extends oneEx(that.isOk)
+  object koSpec extends oneEx(that.isKo)
   object emptySpec extends TestSpec
   object errorSpec extends oneEx(that.throwsAnException)
   object specWithoutExample extends TestSpec {

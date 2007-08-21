@@ -1,8 +1,9 @@
 package scala.specs
 import scala.specs.integration._
+import scala.specs.matchers._
 
 object allSpecs extends JUnit3TestSuite(
-    assertSpec, 
+    matchersSpec, 
     specificationSpec, 
     consoleReporterSpec,  
     beforeAfterSpec, 
