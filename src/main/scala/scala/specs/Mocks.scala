@@ -22,14 +22,14 @@ trait Mocks {
   }
   var protocol = new Protocol
   var recordingMode = false
-  def expect[T](t: ProtocolType)(v: => T): T = {
+  def expect[T](t: ProtocolType)(v: => T): Protocol = {
     protocol.protocolType = t
     recordingMode = true
     val result = v
     recordingMode = false
-    result
+    protocol
   }
-  def expect[T](v: => T): T = expect[T](inAnyOrder)(v)
+  def expect[T](v: => T): Protocol = expect[T](inAnyOrder)(v)
   def record = {
     if (recordingMode)
       protocol.addExpectedCall(methodName)
@@ -60,5 +60,7 @@ trait Mocks {
     def unexpectedCallsFailures = unexpectedCalls.map(_.toString + " should not have been called")  
     def unmatchedCallsFailures = protocolType.failures(expectedCalls, expectedReceivedCalls)
     def expectedReceivedCalls = receivedCalls.remove(unexpectedCalls.contains(_))
+    def clear = { expectedCalls = Nil; receivedCalls = Nil }
+    def isSpecified = !(expectedCalls).isEmpty
   }
 }

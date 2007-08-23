@@ -5,7 +5,7 @@ import scala.collection.mutable._
 import scala.specs.integration._
 import scala.specs.specutils._
 
-abstract class Specification extends Matchers with SpecificationBuilder with Mocks {
+abstract class Specification extends Matchers with SpecificationBuilder {
   var description = createDescription(getClass.getName)
   def createDescription(s: String) = s.split("\\$").reverse.dropWhile(isInteger(_))(0).split("\\.").reverse(0)
   def usingBefore(beforeFunction: () => Unit) = { suts.last.before = Some(beforeFunction) } 
@@ -41,7 +41,7 @@ case class Sut(description: String) {
   def pretty(tab: String) = tab + description + " " + verb + " " + examples.foldLeft("") {_ + _.pretty(indent(tab))}
 }
 
-case class Example(description: String, parent: Sut) {
+case class Example(description: String, parent: Sut) extends Mocks with SpecificationBuilder with MockMatchers {
   var thisFailures = new Queue[FailureException]
   var thisErrors = new Queue[Throwable]
   var assertionsNb = 0
@@ -57,13 +57,18 @@ case class Example(description: String, parent: Sut) {
         return this 
       }
     }
-    try { test } catch { 
+    try {
+      test 
+      if (protocol.isSpecified) 
+        (new Assert[Protocol](protocol, this)) must beMet
+      } catch { 
       case f: FailureException => addFailure(f)
       case t: Throwable => addError(t)
     }
     try { parent.after.foreach {_.apply()} } catch {
       case t: Throwable => addError(t) 
     }
+    protocol.clear
     isInsideDefinition = false
     this
   }

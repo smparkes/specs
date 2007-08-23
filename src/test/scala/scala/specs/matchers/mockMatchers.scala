@@ -12,12 +12,11 @@ object mockMatchers extends MatchersSpecification {
         override def off = record 
       }
       val button = Button(mock)
-
       // by default, the calls can be made in any order
-      expect { 
-        mock.off 
-        mock.on 
-      }
+      val protocol = expect { 
+                       mock.off 
+                       mock.on 
+                     }
 
       assertion(protocol must beMet) must (failWithMatch("off\\(.*\\) should have been called") and 
                                            failWithMatch("on\\(.*\\) should have been called"))
@@ -26,7 +25,7 @@ object mockMatchers extends MatchersSpecification {
       assertion(protocol must beMet) must failWithMatch("off\\(.*\\) should have been called")
 
       button.push
-      protocol must beMet
+      // the protocol is always checked at the end of an example
     }
     "provide an 'expect inSequence' matcher checking if calls have been made to mock objects inSequence" in {
       val mock = new Light { 
@@ -34,12 +33,10 @@ object mockMatchers extends MatchersSpecification {
         override def off = record 
       }
       val button = Button(mock)
-
-      expect(inSequence) { 
-        mock.off 
-        mock.on 
-      }
-
+      val protocol = expect(inSequence) { 
+                       mock.off 
+                       mock.on 
+                     }
       button.push
       button.push
       assertion(protocol must beMet) must failWithMatch("Unmatched protocol. Received:\n  on\\(.*\\)\n  off\\(.*\\)")
@@ -47,22 +44,21 @@ object mockMatchers extends MatchersSpecification {
   }
 }
 object ButtonAndLight {
-case class Button(light: Light) {
-  var lightOn = false
-  def push = {
-    if (lightOn) light.off else light.on 
-    lightOn = !lightOn
+  case class Button(light: Light) {
+    var lightOn = false
+    def push = {
+      if (lightOn) light.off else light.on 
+      lightOn = !lightOn
+    }
   }
-}
-case class Light {
-   var state: LightState = Off
-   def on = state = On
-   def off = state = Off
-   def isOn = state == On
+  case class Light {
+    var state: LightState = Off
+    def on = state = On
+    def off = state = Off
+    def isOn = state == On
   }
   abstract sealed class LightState(s: String)
   case class On extends LightState("on")
   case class Off extends LightState("off")
-
 }
 
