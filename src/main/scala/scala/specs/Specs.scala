@@ -5,7 +5,7 @@ import scala.collection.mutable._
 import scala.specs.integration._
 import scala.specs.specutils._
 
-abstract class Specification extends Matchers with SpecificationBuilder {
+abstract class Specification extends Matchers with SpecificationBuilder with Mocks {
   var description = createDescription(getClass.getName)
   def createDescription(s: String) = s.split("\\$").reverse.dropWhile(isInteger(_))(0).split("\\.").reverse(0)
   def usingBefore(beforeFunction: () => Unit) = { suts.last.before = Some(beforeFunction) } 
@@ -67,6 +67,7 @@ case class Example(description: String, parent: Sut) {
     isInsideDefinition = false
     this
   }
+  
   def addError(t: Throwable) = thisErrors += t
   def addFailure(failure: FailureException) = thisFailures += failure
   def failures: Seq[FailureException] = thisFailures ++ subExamples.flatMap { _.thisFailures }
