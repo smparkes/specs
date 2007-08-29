@@ -18,11 +18,11 @@ object specificationUnit extends Specification {
         name <- elements(className, className + "$inner", className + "$inner$", className + "$2", className + "$2$")
       } yield name
 
-      def property = (className : String) => specification.
-        createDescription(className) must (not(beMatching("\\$")) and 
+      classNames must pass { name : String => 
+        specification.createDescription(name) must (not(beMatching("\\$")) and 
                                            not(beMatching("\\.")) and
                                            not(beInt))
-      property must pass(classNames)
+      }
    }
   }
   def isInt(s: String): Boolean = {try {s.toInt} catch {case _ => return false}; true}
