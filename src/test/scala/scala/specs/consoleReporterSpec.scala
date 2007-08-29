@@ -1,4 +1,4 @@
-package scala.specs
+package scala.specs;
 
 import scala.specs._
 import scala.specs.integration._

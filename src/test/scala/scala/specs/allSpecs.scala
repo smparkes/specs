@@ -9,4 +9,5 @@ object allSpecs extends JUnit3TestSuite(
     beforeAfterSpec, 
     specsFinderSpec,
     stackSpecification,
-    junit3TestSuiteSpec)
+    junit3TestSuiteSpec,
+    mockProtocols)

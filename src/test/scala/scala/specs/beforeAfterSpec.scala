@@ -6,9 +6,9 @@ object beforeAfterSuite extends JUnit3TestSuite(beforeAfterSpec)
 object beforeAfterSpec extends Specification {
   "A specification with before/after clauses" should {
     "have each example using the before method before being executed" in { 
-      beforeExample.execute
-      beforeExample.messages mustContain "before called 1"
-      beforeExample.messages mustContain "before called 2"
+      beforeEx.execute
+      beforeEx.messages mustContain "before called 1"
+      beforeEx.messages mustContain "before called 2"
     } 
     "not execute its test if the before method fails" in { 
       beforeExampleFailing.execute
@@ -23,7 +23,7 @@ trait beforeAfterTestSpec extends Specification with ConsoleReporter with MockOu
   def executeSpec
 }
 
-object beforeExample extends beforeAfterTestSpec {
+object beforeEx extends beforeAfterTestSpec {
   override def executeSpec = {
     "A specification" should {
       var beforeCalls = 0

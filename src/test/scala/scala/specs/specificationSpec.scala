@@ -65,7 +65,7 @@ object advancedFeatures extends SpecificationWithSamples {
        compositeSpec.description must_== "A complex system is specified by"
        compositeSpec.suts.size mustBe 2
        compositeSpec.suts must beLike { case x::y::Nil => (x, y) == (oneEx(that.isOk).suts.head, 
-                                                                     oneEx(that.isKo).suts.head) }
+                                                                     oneEx(that.isKo).suts.head); case _ => ko }
     }
     "share examples with another specficiation.\n" +
     "Declare an example to be a collection of examples coming from another spec. " +

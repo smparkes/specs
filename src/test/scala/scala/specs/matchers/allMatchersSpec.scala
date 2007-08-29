@@ -8,12 +8,11 @@ object matchersSpec extends Specification {
                              stringMatchers, 
                              iterableMatchers, 
                              mapMatchers,
-                             patternMatchers,
-                             mockMatchers)
+                             patternMatchers)
 }
 trait MatchersSpecification extends Specification with Sugar {
-  var reported: Example = new Example("this example serves as a stub to collect failure messages", new Sut(""))
-  def clearExample = { reported = new Example("", new Sut("")) }
+  var reported: Example = new Example("this example serves as a stub to collect failure messages", new Sut("", this))
+  def clearExample = { reported = new Example("", new Sut("", this)) }
   def failWith(message: String) = is_==(message)
   def failWithMatch(pattern: String) = beMatching(pattern)
   def assertion(value: => Any): String = {

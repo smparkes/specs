@@ -101,15 +101,54 @@ trait ScalaCheckMatchers extends AnyMatchers {
     })
   }
 }
-trait MockMatchers extends MatchersBase with Mocks {
+trait MockMatchers extends MatchersBase {
   def beMet = Matcher.make[Protocol](protocol =>
-       (protocol.failures.isEmpty, "all expectations are met", protocol.failures.mkString("\n"))
+       (protocol.failures.isEmpty, "all expectations are met", protocol.failures)
   )
 }
-trait MatchersBase {
+trait MatchersBase extends StringUtils {
   def matches[T <: String](a: String)(b: T) = Pattern.compile(a).matcher(b).find 
-  def q(a: Any)  = "'" + a.toString + "'"
   def isInteger(s: String): Boolean = {try {s.toInt} catch {case _ => return false}; true}
+}
+trait StringUtils {
+  def q(a: Any)  = if (a == null) "null" else "'" + a.toString + "'"
+  def indent(s: String) = s + "  "
+  implicit def stringToQuotable(s: String) = new Object {def quote = q(s)}
+}
+trait ListUtils {
+  def mix[T](x: T, l: List[T]): List[List[T]] = {
+    l match {
+      case Nil => List(List(x))
+      case y::Nil => List(x::l, l:::List(x))
+      case y::rest => List(x::l):::mix(x, rest).map((s: List[T]) => y::s)
+    }
+  }
+  def everyOrder[T](l: List[T]): List[List[T]] = {
+    l match {
+      case Nil => Nil
+      case x::Nil => List(l)
+      case x::rest => everyOrder(rest).flatMap {mix(x, _)}
+    }
+  }
+  class ExtendedList[T](l: List[T]) {
+    def removeFirst(f: T => Boolean): List[T] = {
+      l match {
+        case Nil => Nil
+        case x::rest if (f(x)) => rest
+        case x::rest if (!f(x)) => List(x):::rest.removeFirst(f)
+      }
+    }
+    def removeFirstSeq(sublist: List[T]): List[T] = {
+      l match {
+        case Nil => Nil
+        case list if (list.slice(0, sublist.size) == sublist) => list.slice(sublist.size, list.size).toList
+        case x::rest => x::rest.removeFirstSeq(sublist)
+      }
+    }
+  }
+  implicit def listToExtendedList[T <: Any](l: List[T]) = {
+    new ExtendedList(l)
+  }
 }
 trait Matchers extends AnyMatchers with 
                        LogicalMatchers with

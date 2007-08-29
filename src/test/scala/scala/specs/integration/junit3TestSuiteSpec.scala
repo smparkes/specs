@@ -45,11 +45,11 @@ object junit3TestSuiteSpec extends Specification {
 
 
 abstract class TestSpec(behaviours: List[that.Value]) extends Specification with ConsoleReporter with MockOutput {
-  val ok = () => true mustBe true
+  val succeeds = () => true mustBe true
   val failure1 = () => "ok" mustBe "first failure"
   val failure2 = () => "ok" mustBe "second failure"
   val exception = () => throw new Error("new Error")
-  def assertions = behaviours map { case that.succeeds => ok
+  def assertions = behaviours map { case that.succeeds => succeeds
                                     case that.fails => failure1
                                     case that.failsTwice => failure2 
                                     case that.throwsAnException => exception }

@@ -3,7 +3,6 @@ package scala.specs
 import scala.util._
 import scala.collection.mutable._
 import scala.specs.integration._
-import scala.specs.specutils._
 
 abstract class Specification extends Matchers with SpecificationBuilder {
   var description = createDescription(getClass.getName)
@@ -27,7 +26,7 @@ abstract class Specification extends Matchers with SpecificationBuilder {
   private def addSuts(others: Seq[Sut]) = suts = suts:::others.toList
 }
 
-case class Sut(description: String) {
+case class Sut(description: String, cycle: ExampleLifeCycle) extends StringUtils with ExampleLifeCycle {
   var verb = "should"
   var before: Option[() => Unit] = None
   var after: Option[() => Unit] = None
@@ -39,9 +38,19 @@ case class Sut(description: String) {
   def errors = examples.flatMap {_.errors}
   def assertionsNb = examples.foldLeft(0) {_ + _.assertionsNb}
   def pretty(tab: String) = tab + description + " " + verb + " " + examples.foldLeft("") {_ + _.pretty(indent(tab))}
+  override def beforeExample(ex: Example) = {
+    cycle.beforeExample(ex)
+    before.foreach {_.apply()}
+  }
+  override def beforeTest(ex: Example) = { cycle.beforeTest(ex) }
+  override def afterTest(ex: Example) = { cycle.afterTest(ex) }
+  override def afterExample(ex: Example) = { 
+    cycle.afterExample(ex)
+    after.foreach {_.apply()}
+  }
 }
 
-case class Example(description: String, parent: Sut) extends Mocks with SpecificationBuilder with MockMatchers {
+case class Example(description: String, cycle: ExampleLifeCycle) extends StringUtils {
   var thisFailures = new Queue[FailureException]
   var thisErrors = new Queue[Throwable]
   var assertionsNb = 0
@@ -50,7 +59,7 @@ case class Example(description: String, parent: Sut) extends Mocks with Specific
   def >> (test: => Any) = in(test)
   def in (test: => Any): Example = {
     isInsideDefinition = true
-    try { parent.before.foreach {_.apply()} } catch {
+    try { cycle.beforeExample(this) } catch {
       case t: Throwable => { 
         addError(t) 
         isInsideDefinition = false
@@ -58,17 +67,14 @@ case class Example(description: String, parent: Sut) extends Mocks with Specific
       }
     }
     try {
-      test 
-      if (protocol.isSpecified) 
-        (new Assert[Protocol](protocol, this)) must beMet
+      cycle.beforeTest(this)
+      test
+      cycle.afterTest(this)
       } catch { 
       case f: FailureException => addFailure(f)
       case t: Throwable => addError(t)
     }
-    try { parent.after.foreach {_.apply()} } catch {
-      case t: Throwable => addError(t) 
-    }
-    protocol.clear
+    try { cycle.afterExample(this) } catch { case t: Throwable => addError(t) }
     isInsideDefinition = false
     this
   }
@@ -138,14 +144,11 @@ class AssertIterableString(value: Iterable[String], example: Example) extends As
   def mustExistMatch(pattern: String) = must(existMatch(pattern))
   def mustNotExistMatch(pattern: String) = must(notExistMatch(pattern))
 }
-object specutils {
-  def indent(s: String) = s + "  "
-}
-trait SpecificationBuilder {
+trait SpecificationBuilder extends ExampleLifeCycle {
   var suts : List[Sut] = Nil
   protected[this] var lastExample : Example = _ 
   implicit def stringToExample(desc: String): Example = {
-    lastExample = new Example(desc, suts.last)
+    lastExample = new Example(desc, currentSut)
     currentExamplesList += lastExample
     lastExample
   }
@@ -155,7 +158,7 @@ trait SpecificationBuilder {
   }
   def currentSut = suts.last
   implicit def stringToSut(desc: String) = { 
-    suts = suts:::List(new Sut(desc))
+    suts = suts:::List(new Sut(desc, this))
     suts.last
   }
   implicit def toAssertDouble[A <: Double](value: => A) = {
@@ -185,4 +188,10 @@ trait SpecificationBuilder {
   implicit def toIterableAssert[I <: AnyRef](value: Iterable[I]) = {
     new AssertIterable[I](value, lastExample)
   }
+}
+trait ExampleLifeCycle {
+  def beforeExample(ex: Example) = {} 
+  def beforeTest(ex: Example)= {}
+  def afterTest(ex: Example) = {}
+  def afterExample(ex: Example) = {}
 }
