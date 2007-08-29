@@ -3,7 +3,7 @@ package scala.specs
 import scala.specs.integration._
 import scala.specs.Matcher._
 
-object specificationSuite extends JUnit3TestSuite(specificationSpec)
+object specificationSuite extends JUnit3(specificationSpec)
 object specificationSpec extends Specification with Sugar { 
   "A specification" isSpecifiedBy (basicFeatures, advancedFeatures)
 }

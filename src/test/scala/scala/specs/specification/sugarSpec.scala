@@ -1,7 +1,7 @@
 package scala.specs
 import scala.specs.integration._
 
-object sugarSuite extends JUnit3TestSuite(sugarSpec)
+object sugarSuite extends JUnit3(sugarSpec)
 object sugarSpec extends Specification with Sugar {
   "A sugar trait" should {
     "allow tuples to have List methods, like (1, 2, 3).tail // List(2, 3)" in {

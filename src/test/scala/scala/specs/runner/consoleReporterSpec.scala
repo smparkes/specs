@@ -7,7 +7,7 @@ import scala.collection.mutable._
 import scala.io.mock.MockOutput
 import junit.framework._
 
-object consoleReporterSuite extends JUnit3TestSuite(consoleReporterSpec)
+object consoleReporterSuite extends JUnit3(consoleReporterSpec)
 object consoleReporterSpec extends Specification with Sugar {
 
   "A console reporter" should {

@@ -21,7 +21,7 @@ abstract class Specification extends Matchers with SpecificationBuilder {
   }
   def isSpecifiedBy(specifications: Specification*) = {
     this.description += " is specified by"
-      addSuts(specifications.flatMap(_.suts))
+    addSuts(specifications.flatMap(_.suts))
   }
   private def addSuts(others: Seq[Sut]) = suts = suts:::others.toList
 }

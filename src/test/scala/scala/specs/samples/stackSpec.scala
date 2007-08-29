@@ -2,7 +2,7 @@ package scala.specs
 
 import scala.specs.integration._
 
-object stackSuite extends JUnit3TestSuite(stackSpecification)
+object stackSuite extends JUnit3(stackSpecification)
 object stackSpecification extends Specification with Sugar {
   "A stack" isSpecifiedBy (EmptyStackSpec, FullStackSpec, NotFullStackSpec)
 }

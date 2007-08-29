@@ -2,7 +2,7 @@ package scala.specs
 import scala.specs.integration._
 import scala.specs.Sugar._
 
-object mockerUnitSuite extends JUnit3TestSuite(mockerUnit)
+object mockerUnitSuite extends JUnit3(mockerUnit)
 object mockerUnit extends Specification with Sugar with ProtocolTypes {
   "A mocker" should {
     object mocker extends Mocker
@@ -55,7 +55,7 @@ object mockerUnit extends Specification with Sugar with ProtocolTypes {
     }
   }
 }
-object inAnyOrderUnitSuite extends JUnit3TestSuite(inAnyOrderUnit)
+object inAnyOrderUnitSuite extends JUnit3(inAnyOrderUnit)
 object inAnyOrderUnit extends Specification with ProtocolTypes {
   "A protocol type 'inAnyOrder'" should {
     val (e, e1, e2) = (ExpectedCall("m"), ExpectedCall("m1"), ExpectedCall("m2"))
@@ -81,7 +81,7 @@ object inAnyOrderUnit extends Specification with ProtocolTypes {
     }
   }
 }
-object inSequenceSuite extends JUnit3TestSuite(inSequenceUnit)
+object inSequenceSuite extends JUnit3(inSequenceUnit)
 object inSequenceUnit extends Specification with ProtocolTypes {
   "A protocol type 'inSequence'" should {
     val (e, e1, e2) = (ExpectedCall("m"), ExpectedCall("m1"), ExpectedCall("m2"))
@@ -97,7 +97,7 @@ object inSequenceUnit extends Specification with ProtocolTypes {
     }
   }
 }
-object numberOfMessagesSuite extends JUnit3TestSuite(numberOfMessagesUnit)
+object numberOfMessagesSuite extends JUnit3(numberOfMessagesUnit)
 object numberOfMessagesUnit extends Specification with ProtocolTypes {
   "A protocol type 'numberOfMessages'" should {
     val (e, e1, e2) = (ExpectedCall("m"), ExpectedCall("m1"), ExpectedCall("m2"))
@@ -116,64 +116,6 @@ object numberOfMessagesUnit extends Specification with ProtocolTypes {
     }
     "exactly 2 of m expects m, m" in {
       ProtocolDef(twoOf, List(e)).expects(List(r, r)) mustBe true
-    }
-  }
-}
-object listUtilsUnitSuite extends JUnit3TestSuite(listUtilsUnit)
-object listUtilsUnit extends Specification with Sugar with ListUtils {
-  "A removeFirst predicate function" should {
-    "remove nothing if the list is empty" in {
-      val l: List[String] = Nil
-      l.removeFirst(_ == "a") must_== Nil
-    }
-    "remove the first element if the list contains it" in {
-      val l: List[String] = List("a", "b", "c", "b")
-      l.removeFirst(_ == "b") must_== List("a", "c", "b")
-    }
-  }
-  "A removeFirstSeq with a list parameter function" should {
-    "remove nothing if the list is empty" in {
-      val l: List[String] = Nil
-      l.removeFirstSeq(List()) must_== Nil
-    }
-    "remove the first elemets if the list starts with the sublist" in {
-      val l: List[String] = List("a", "b", "c", "b", "c")
-      l.removeFirstSeq(List("a", "b")) must_== List("c", "b", "c")
-    }
-    "remove the first subsequence corresponding to the list parameter" in {
-      val l: List[String] = List("a", "b", "c", "b", "c")
-      l.removeFirstSeq(List("b", "c")) must_== List("a", "b", "c")
-    }
-  }
-  "A function returning every order of a list" should {
-    "return a list with one permutations for a list with one element" in {
-      val l = List("a")
-      everyOrder(l) must beLike { case List(List("a")) => ok }
-    }
-    "return a list of 2 permutations for a list with two elements" in {
-      val l = List("a", "b")
-      everyOrder(l) must beLike { case List(List("a", "b"), List("b", "a")) => ok }
-    }
-    "return a list of 6 permutations for a list with 3 elements" in {
-      val l = List("a", "b", "c")
-      everyOrder(l) must (contain(List("a", "b", "c")) and 
-                                     contain(List("c", "b", "a")) and
-                                     contain(List("c", "a", "b")) and
-                                     contain(List("b", "c", "a")) and
-                                     contain(List("b", "a", "c")) and
-                                     contain(List("a", "c", "b")))
-    }
-  }
-  "A function mixing an element with a list" should {
-    "create 2 couples with a list of one element" in {
-      val l = List("b")
-      mix("a", l) must beLike { case List(List("a", "b"), List("b", "a")) => ok }
-    }
-    "create 3 lists with a list of 2 elements" in {
-      val l = List("b", "c")
-      mix("a", l) must beLike { case List(List("a", "b", "c"), 
-                                                     List("b", "a", "c"),
-                                                     List("b", "c", "a") ) => ok }
     }
   }
 }

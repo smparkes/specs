@@ -2,6 +2,7 @@ package scala.specs
 import java.util.regex.Pattern
 import scala.collection.mutable.Stack
 import scala.specs.Sugar._
+import scala.util.ExtendedList._
 
 abstract sealed class ProtocolType {
   def failures(expected: List[SpecifiedCall], received: List[ReceivedCall]): String
@@ -52,7 +53,7 @@ trait ProtocolTypes {
       }
     }
   }
-  case object inAnyOrder extends ProtocolType with StringUtils with Sugar with ListUtils {
+  case object inAnyOrder extends ProtocolType with StringUtils with Sugar {
     def failures(expected: List[SpecifiedCall], received: List[ReceivedCall]): String = {
       if (consume(expected, received) == (Nil, Nil)) 
         ""

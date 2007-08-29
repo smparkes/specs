@@ -1,8 +1,8 @@
 package scala.specs.matchers
 import scala.specs.integration._
 
-
-object mockProtocolsSuite extends JUnit3TestSuite(mockProtocols) 
+object mocksSpec extends Specification { "Mocks" areSpecifiedBy (mockProtocols) }
+object mockProtocolsSuite extends JUnit3(mockProtocols) 
 object mockProtocols extends MatchersSpecification with ButtonAndLightMock {
   "Mock protocols" should { usingBefore { () => {clearExample; button.init()} }
     "provide an 'expect inAnyOrder' protocol checking if calls have been made to mock objects" in {

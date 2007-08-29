@@ -2,7 +2,7 @@ package scala.specs;
 import scala.io.mock.MockOutput
 import scala.specs.integration._
 
-object beforeAfterSuite extends JUnit3TestSuite(beforeAfterSpec) 
+object beforeAfterSuite extends JUnit3(beforeAfterSpec) 
 object beforeAfterSpec extends Specification {
   "A specification with before/after clauses" should {
     "have each example using the before method before being executed" in { 

@@ -3,7 +3,7 @@ import scala.io.mock.MockOutput
 import junit.framework._
 import scala.specs.integration.javaConversions._
 
-object junit3TestSuiteTestSuite extends JUnit3TestSuite(junit3TestSuiteSpec)
+object junit3TestSuiteTestSuite extends JUnit3(junit3TestSuiteSpec)
 object junit3TestSuiteSpec extends Specification {
   "A junit 3 test suite" should {
     "create a test suite containing tests suites for each specification " + 
@@ -40,7 +40,7 @@ object junit3TestSuiteSpec extends Specification {
     error.trace.split("\n")(0) must include(error.exceptionMessage)
     error.trace.split("\n")(1) must (beMatching("TestSpec") and beMatching("junit3TestSuiteSpec.scala:\\d"))
   }
-  def suite(behaviours: that.Value*) = new JUnit3TestSuite(new SpecWithOneExample(behaviours.toList))
+  def suite(behaviours: that.Value*) = new JUnit3(new SpecWithOneExample(behaviours.toList))
 }
 
 

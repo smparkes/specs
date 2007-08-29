@@ -1,8 +1,11 @@
 package scala.specs
 import scala.specs.integration._
 import scala.specs.matchers._
+import scala.specs.mock._
 
-object allSpecs extends JUnit3TestSuite(
+object allSpecsSuite extends JUnit3(allSpecs)
+object allSpecs extends Specification {
+    "The specifications for the specs project" areSpecifiedBy (
     matchersSpec, 
     specificationSpec, 
     consoleReporterSpec,  
@@ -10,4 +13,15 @@ object allSpecs extends JUnit3TestSuite(
     specsFinderSpec,
     stackSpecification,
     junit3TestSuiteSpec,
-    mockProtocols)
+    mocksSpec)
+}
+
+object allUnits extends Specification {
+  "The unit tests for the specs projects" areSpecifiedBy (
+      specificationUnit, 
+      protocolsUnit)
+}
+
+object all extends JUnit3(
+  allSpecs, 
+  allUnits)

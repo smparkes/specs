@@ -6,7 +6,7 @@ import scala.collection.mutable.Queue
 import scala.io.mock.MockOutput
 import scala.specs.integration._
 
-object specsRunnerSuite extends JUnit3TestSuite(specsRunnerSpec)
+object specsRunnerSuite extends JUnit3(specsRunnerSpec)
 object specsRunnerSpec extends Specification with TestRunner {
   "A specs runner" should {
     usingBefore { () => runner.messages.clear }

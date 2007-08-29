@@ -3,7 +3,7 @@ import scala.io.mock.MockFileSystem
 import scala.io.ConsoleOutput
 import scala.specs.integration._
 
-object specsFinderSuite extends JUnit3TestSuite(specsFinderSpec)
+object specsFinderSuite extends JUnit3(specsFinderSpec)
 object specsFinderSpec extends Specification with Init {
   
   "A specs finder" should {

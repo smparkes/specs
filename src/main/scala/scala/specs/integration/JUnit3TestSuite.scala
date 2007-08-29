@@ -8,7 +8,7 @@ abstract class EmptyJUnit3TestSuite extends TestSuite {
   def suites = for(t <- tests; if (t.isInstanceOf[EmptyJUnit3TestSuite])) yield t.asInstanceOf[EmptyJUnit3TestSuite]
   def testCases = for(t <- tests; if (t.isInstanceOf[JUnit3TestCase])) yield t.asInstanceOf[JUnit3TestCase]
 }
-class JUnit3TestSuite(specifications : Specification*) extends EmptyJUnit3TestSuite {
+class JUnit3(val specifications : Specification*) extends EmptyJUnit3TestSuite {
   if (specifications.size > 1)
     setName(this.getClass.getName.replaceAll("\\$", ""))
   else

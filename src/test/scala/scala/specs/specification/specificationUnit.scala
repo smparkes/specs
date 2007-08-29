@@ -7,7 +7,7 @@ import scala.util._
 import scala.collection.mutable._
 import scalacheck.Gen._
 
-object specificationUnitSuite extends JUnit3TestSuite(specificationUnit)
+object specificationUnitSuite extends JUnit3(specificationUnit)
 object specificationUnit extends Specification {
 
   "A specification" should {
