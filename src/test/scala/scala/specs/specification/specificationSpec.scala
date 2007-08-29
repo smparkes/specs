@@ -56,16 +56,13 @@ object advancedFeatures extends SpecificationWithSamples {
       spec.description = "This is a great spec"
       spec.description must_== "This is a great spec"
     }
-    "be composed of other specifications.\n" +
-    "The composite specification aggregates the systems under test of the other specs.\n" + 
-    "Use the isSpecifiedBy method to do so."  in {
+    "be composed of other specifications. The composite specification has subSpecifications.\n" + 
+    "Use the isSpecifiedBy method to do so [alias areSpecifiedBy]."  in {
        object compositeSpec extends Specification {
          "A complex system" isSpecifiedBy (okSpec, koSpec)
        }
        compositeSpec.description must_== "A complex system is specified by"
-       compositeSpec.suts.size mustBe 2
-       compositeSpec.suts must beLike { case x::y::Nil => (x, y) == (oneEx(that.isOk).suts.head, 
-                                                                     oneEx(that.isKo).suts.head); case _ => ko }
+       compositeSpec.subSpecifications must_== List(okSpec, koSpec)
     }
     "share examples with another specficiation.\n" +
     "Declare an example to be a collection of examples coming from another spec. " +

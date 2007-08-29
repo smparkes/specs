@@ -12,8 +12,9 @@ class JUnit3(val specifications : Specification*) extends EmptyJUnit3TestSuite {
   if (specifications.size > 1)
     setName(this.getClass.getName.replaceAll("\\$", ""))
   else
-    setName(specifications(0).getClass.getName.replaceAll("\\$", ""))
+    setName(specifications(0).description)
   specifications foreach { specification => 
+    specification.subSpecifications.foreach {s: Specification => addTest(new JUnit3(s))}
     if (specification.suts.size > 1) 
       addTest(new SpecificationTestSuite(specification)) 
     else  

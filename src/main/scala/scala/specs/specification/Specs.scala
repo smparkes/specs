@@ -17,11 +17,11 @@ abstract class Specification extends Matchers with SpecificationBuilder {
   implicit def compositeSpecification(d: String): Specification = { description = d; this }
   def areSpecifiedBy(specifications: Specification*) = {
     this.description += " are specified by"
-    addSuts(specifications.flatMap(_.suts))
+    subSpecifications = subSpecifications:::specifications.toList
   }
   def isSpecifiedBy(specifications: Specification*) = {
     this.description += " is specified by"
-    addSuts(specifications.flatMap(_.suts))
+    subSpecifications = subSpecifications:::specifications.toList
   }
   private def addSuts(others: Seq[Sut]) = suts = suts:::others.toList
 }
@@ -145,6 +145,7 @@ class AssertIterableString(value: Iterable[String], example: Example) extends As
   def mustNotExistMatch(pattern: String) = must(notExistMatch(pattern))
 }
 trait SpecificationBuilder extends ExampleLifeCycle {
+  var subSpecifications: List[Specification] = Nil
   var suts : List[Sut] = Nil
   protected[this] var lastExample : Example = _ 
   implicit def stringToExample(desc: String): Example = {

@@ -5,7 +5,7 @@ import scala.specs.mock._
 
 object allSpecsSuite extends JUnit3(allSpecs)
 object allSpecs extends Specification {
-    "The specifications for the specs project" areSpecifiedBy (
+    "The specifications" areSpecifiedBy (
     matchersSpec, 
     specificationSpec, 
     consoleReporterSpec,  
@@ -17,11 +17,12 @@ object allSpecs extends Specification {
 }
 
 object allUnits extends Specification {
-  "The unit tests for the specs projects" areSpecifiedBy (
+  "The unit tests" areSpecifiedBy (
       specificationUnit, 
       protocolsUnit)
 }
 
-object all extends JUnit3(
-  allSpecs, 
-  allUnits)
+object allSpecsAndUnits extends Specification {
+  "The specs and unit tests for the specs project" areSpecifiedBy (allSpecs, allUnits)
+}
+object all extends JUnit3(allSpecsAndUnits)
