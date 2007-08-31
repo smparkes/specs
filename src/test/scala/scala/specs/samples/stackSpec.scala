@@ -1,4 +1,4 @@
-package scala.specs
+package scala.specs.samples
 
 import scala.specs.integration._
 

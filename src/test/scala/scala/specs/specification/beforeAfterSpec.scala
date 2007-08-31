@@ -1,6 +1,8 @@
-package scala.specs;
+package scala.specs.specification
 import scala.io.mock.MockOutput
 import scala.specs.integration._
+import scala.specs._
+import scala.specs.runner._
 
 object beforeAfterSuite extends JUnit3(beforeAfterSpec) 
 object beforeAfterSpec extends Specification {

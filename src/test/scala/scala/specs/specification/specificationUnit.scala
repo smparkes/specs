@@ -1,11 +1,13 @@
 package scala.specs
 
 import scala.specs._
+import scala.specs.matcher._
 import scala.specs.Sugar._
 import scala.specs.integration._
 import scala.util._
 import scala.collection.mutable._
 import scalacheck.Gen._
+import scala.specs.matcher.MatcherUtils._
 
 object specificationUnitSuite extends JUnit3(specificationUnit)
 object specificationUnit extends Specification {

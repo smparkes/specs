@@ -1,7 +1,9 @@
 package scala.specs.integration
+
 import scala.io.mock.MockOutput
 import junit.framework._
 import scala.specs.integration.javaConversions._
+import scala.specs.runner._
 
 object junit3TestSuiteTestSuite extends JUnit3(junit3TestSuiteSpec)
 object junit3TestSuiteSpec extends Specification {

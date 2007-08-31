@@ -1,4 +1,4 @@
-package scala.specs
+package scala.specs.runner
 
 import scala.collection.mutable.Queue
 import scala.util.log.ConsoleLog

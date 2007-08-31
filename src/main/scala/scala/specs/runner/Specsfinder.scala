@@ -1,4 +1,5 @@
-package scala.specs;
+package scala.specs.runner
+
 import scala.io.FileSystem
 import java.util.regex._
 import scala.collection.mutable.Queue

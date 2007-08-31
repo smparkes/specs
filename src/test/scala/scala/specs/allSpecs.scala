@@ -1,7 +1,10 @@
 package scala.specs
 import scala.specs.integration._
-import scala.specs.matchers._
+import scala.specs.matcher._
 import scala.specs.mock._
+import scala.specs.runner._
+import scala.specs.specification._
+import scala.specs.samples._
 
 object allSpecsSuite extends JUnit3(allSpecs)
 object allSpecs extends Specification {

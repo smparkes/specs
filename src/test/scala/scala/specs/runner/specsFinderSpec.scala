@@ -1,4 +1,4 @@
-package scala.specs
+package scala.specs.runner
 import scala.io.mock.MockFileSystem
 import scala.io.ConsoleOutput
 import scala.specs.integration._

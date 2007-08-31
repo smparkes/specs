@@ -1,7 +1,10 @@
-package scala.specs.matchers
+package scala.specs.mock
 import scala.specs.integration._
+import scala.specs.mock._
+import scala.specs.matcher._
+import scala.specs.Sugar._
 
-object mocksSpec extends Specification { "Mocks" areSpecifiedBy (mockProtocols) }
+object mocksSpec extends Specification { "Mocks" areSpecifiedBy (mockProtocols, mockParameters) }
 object mockProtocolsSuite extends JUnit3(mockProtocols) 
 object mockProtocols extends MatchersSpecification with ButtonAndLightMock {
   "Mock protocols" should { usingBefore { () => {clearExample; button.init()} }
@@ -88,7 +91,7 @@ object mockProtocols extends MatchersSpecification with ButtonAndLightMock {
 }
 trait ButtonAndLightMock extends ButtonAndLight with Mocker {
   val mock = new Light { 
-    override def on = record 
+    override def on = record
     override def off = record
     override def destroy = record
   }

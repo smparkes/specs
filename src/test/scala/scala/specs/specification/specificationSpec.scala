@@ -1,10 +1,13 @@
 package scala.specs
 
 import scala.specs.integration._
-import scala.specs.Matcher._
+import scala.specs.matcher.Matcher._
+import scala.specs.matcher._
+import scala.specs.Sugar._
+import scala.specs.matcher.MatcherUtils._
 
 object specificationSuite extends JUnit3(specificationSpec)
-object specificationSpec extends Specification with Sugar { 
+object specificationSpec extends Specification { 
   "A specification" isSpecifiedBy (basicFeatures, advancedFeatures)
 }
 
@@ -84,7 +87,7 @@ object advancedFeatures extends SpecificationWithSamples {
   }
 }
 
-trait SpecificationWithSamples extends Specification with Sugar {
+trait SpecificationWithSamples extends Specification {
   def isInt(s: String): Boolean = {try {s.toInt} catch {case _ => return false}; true}
   def beInt = Matcher.make[String](s => (isInt(s), q(s) + " is an integer", q(s) + " is not an integer"))
  
@@ -140,9 +143,9 @@ trait SpecificationWithSamples extends Specification with Sugar {
       }
     }
   }
-  object that extends Enumeration {
-    val isKo, isOk, isKoTwice, isKoWithTheFailMethod, throwsAnException = Value
-  }
+}
+object that extends Enumeration {
+  val isKo, isOk, isKoTwice, isKoWithTheFailMethod, throwsAnException = Value
 }
 
 

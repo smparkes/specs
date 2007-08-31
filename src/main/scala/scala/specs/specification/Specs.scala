@@ -1,8 +1,12 @@
 package scala.specs
 
 import scala.util._
+import scala.specs.matcher._
 import scala.collection.mutable._
 import scala.specs.integration._
+import scala.specs.matcher.Matchers._
+import scala.specs.matcher.MatcherUtils._
+
 
 abstract class Specification extends Matchers with SpecificationBuilder {
   var description = createDescription(getClass.getName)
@@ -26,7 +30,7 @@ abstract class Specification extends Matchers with SpecificationBuilder {
   private def addSuts(others: Seq[Sut]) = suts = suts:::others.toList
 }
 
-case class Sut(description: String, cycle: ExampleLifeCycle) extends StringUtils with ExampleLifeCycle {
+case class Sut(description: String, cycle: ExampleLifeCycle) extends ExampleLifeCycle {
   var verb = "should"
   var before: Option[() => Unit] = None
   var after: Option[() => Unit] = None
@@ -50,7 +54,7 @@ case class Sut(description: String, cycle: ExampleLifeCycle) extends StringUtils
   }
 }
 
-case class Example(description: String, cycle: ExampleLifeCycle) extends StringUtils {
+case class Example(description: String, cycle: ExampleLifeCycle) {
   var thisFailures = new Queue[FailureException]
   var thisErrors = new Queue[Throwable]
   var assertionsNb = 0
@@ -81,13 +85,13 @@ case class Example(description: String, cycle: ExampleLifeCycle) extends StringU
   
   def addError(t: Throwable) = thisErrors += t
   def addFailure(failure: FailureException) = thisFailures += failure
-  def failures: Seq[FailureException] = thisFailures ++ subExamples.flatMap { _.thisFailures }
-  def errors = thisErrors ++ subExamples.flatMap {_.thisErrors}
+  def failures: Seq[FailureException] = thisFailures ++ subExamples.flatMap { _.failures }
+  def errors: Seq[Throwable] = thisErrors ++ subExamples.flatMap {_.errors}
   def pretty(tab: String) = tab + description + failures.foldLeft("") {_ + indent(tab) + _.message} + 
                                                       errors.foldLeft("") {_ + indent(tab) + _.getMessage}
 }
 
-class Assert[+T](value: => T, example: Example) extends Matchers {
+class Assert[+T](value: => T, example: Example) {
   example.assertionsNb += 1
   
   def must[S >: T](m: AbstractMatcher[S]): Boolean =  {

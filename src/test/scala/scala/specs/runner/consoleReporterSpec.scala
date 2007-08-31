@@ -1,4 +1,4 @@
-package scala.specs;
+package scala.specs.runner
 
 import scala.specs._
 import scala.specs.integration._
@@ -6,9 +6,11 @@ import scala.util._
 import scala.collection.mutable._
 import scala.io.mock.MockOutput
 import junit.framework._
+import scala.specs.Sugar._
+import scala.specs.matcher.MatcherUtils._
 
 object consoleReporterSuite extends JUnit3(consoleReporterSpec)
-object consoleReporterSpec extends Specification with Sugar {
+object consoleReporterSpec extends Specification {
 
   "A console reporter" should {
     "report the name of the specification: 'A specification should'" in { 

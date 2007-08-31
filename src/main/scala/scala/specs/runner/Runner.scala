@@ -1,4 +1,5 @@
-package scala.specs
+package scala.specs.runner
+
 import scala.util.log.ConsoleLog
 import scala.util.JavaCollectionsConversion
 

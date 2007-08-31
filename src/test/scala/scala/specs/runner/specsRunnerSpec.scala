@@ -1,4 +1,4 @@
-package scala.specs;
+package scala.specs.runner
 
 import scala.specs._
 import scala.util._

@@ -1,4 +1,4 @@
-package scala.specs;
+package scala.specs
 
 object Sugar extends Sugar
 trait Sugar {
