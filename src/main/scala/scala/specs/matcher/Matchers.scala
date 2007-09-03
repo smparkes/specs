@@ -42,11 +42,12 @@ class Matcher[T](val matcher: T => (Boolean, String, String)) extends AbstractMa
       else
         (result1._1 || result2._1, result1._2 + " and " + result2._2, result1._3 + " and " + result2._3) 
   })
+  def xor(m: Matcher[T]) : Matcher[T] = (this and m.not) or (this.not and m)
   def not = make[T]((a: T) => {
     val result = matcher(a)
     (!result._1, result._3, result._2)
   })
-  
+  override def toString = matcher.toString
 }
 object Matcher {
   def make[T](m: T => (Boolean, String, String)) = new Matcher[T](m)
