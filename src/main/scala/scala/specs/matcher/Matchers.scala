@@ -4,7 +4,10 @@ import scala.specs._
 import scala.specs.specification._
 import scala.specs.matcher.Matcher._
 
-object Matchers extends Matchers
+/**
+ * <p>The <code>Matchers</code> trait provides all existing Matchers to the 
+ * <code>Specification</code> trait</p> 
+ */
 trait Matchers extends AnyMatchers with 
                        LogicalMatchers with
                        StringMatchers with
@@ -15,11 +18,13 @@ trait Matchers extends AnyMatchers with
                        PatternMatchers with 
                        MockMatchers
                        
+/**
+ * <p>The <code>AbstractMatcher</code> class is used by the Spec.must method.
+ * This class can be subclassed and provide an appropriate <code>apply</code>
+ * method that will check a value <code>a</code></p> 
+ */
 abstract class AbstractMatcher[T] {
   def apply(a: T): (Boolean, String, String)
-  def and(m: Matcher[T]): Matcher[T]
-  def or(m: Matcher[T]): Matcher[T]
-  def not: Matcher[T]
 }
 
 /**
@@ -33,33 +38,70 @@ abstract class AbstractMatcher[T] {
  *   
  */
 class Matcher[T](val matcher: T => (Boolean, String, String)) extends AbstractMatcher[T] {
-  def apply(a: T) = matcher(a) 
+   /**
+    *  Applying the matcher means executing the embedded <code>matcher</code> function to yield a result
+    */ 
+   def apply(a: T) = matcher(a) 
+
+  /**
+   * This case class and the associated implicit definition is only here to add more meaningful names to
+   * the tuple components in the following operators 
+   */  
+  case class MatcherResult(success: Boolean, okMessage: String, koMessage: String)
+  implicit def toMatcherResult(t: (Boolean, String, String)): MatcherResult = MatcherResult(t._1, t._2, t._3)  
+  
+  /**
+   *  The <code>and</code> operator allow to combine to matchers through a logical and.
+   *  <code>m1 and m2</code> can successfully match a value <code>a</code> only if m1 succeeds 
+   *  and m2 succeeds also
+   */   
   def and(m: Matcher[T]): Matcher[T] = make[T]((a: T) => {
-      val result1 = this(a)
-      if (!result1._1)
-        (false, result1._2, result1._3)
+      val r1 = this(a)
+      if (!r1.success)
+        (false, r1.okMessage, r1.koMessage)
       else {
-        val result2 = m(a) 
-        (result2._1, result1._2 + " and " + result2._2, result1._2 + " but " + result2._3) 
+        val r2 = m(a) 
+        (r2.success, r1.okMessage + " and " + r2.okMessage, r1.okMessage + " but " + r2.koMessage) 
       }
   })
+
+  /**
+   *  The <code>or</code> operator allow to combine to matchers through a logical or.
+   *  <code>m1 or m2</code> can successfully match a value <code>a</code> if m1 succeeds 
+   *  or m2 succeeds
+   */   
   def or(m: Matcher[T]) : Matcher[T] = make[T]((a: T) => {
-    val result1 = this(a)
-    val result2 = m(a) 
-      if (!result1._1)
-        (result2._1, result2._2, result1._3 + " and " + result2._3) 
-      else if (!result2._1)
-        (result1._1, result1._2, result1._3 + " and " + result2._3)
+    val r1 = this(a)
+    val r2 = m(a) 
+      if (!r1.success)
+        (r2.success, r2.okMessage, r1.koMessage + " and " + r2.koMessage) 
+      else if (!r2.success)
+        (r1.success, r1.okMessage, r1.koMessage + " and " + r2.koMessage)
       else
-        (result1._1 || result2._1, result1._2 + " and " + result2._2, result1._3 + " and " + result2._3) 
+        (r1.success || r2.success, r1.okMessage + " and " + r2.okMessage, r1.koMessage + " and " + r2.koMessage) 
   })
+
+  /**
+   *  The <code>xor</code> operator allow to combine to matchers through a logical xor.
+   *  <code>m1 xor m2</code> can successfully match a value <code>a</code> if m1 succeeds 
+   *  and m2 fails, or if m1 fails and m2 succeeds
+   */   
   def xor(m: Matcher[T]) : Matcher[T] = (this and m.not) or (this.not and m)
+
+  /**
+   *  The <code>not</code> operator allow to combine to matchers through a logical not.
+   *  <code>m1.not</code> returns a matcher failing if m1 succeeds, and succeeding if m1 fails
+   */   
   def not = make[T]((a: T) => {
     val result = matcher(a)
-    (!result._1, result._3, result._2)
+    (!result.success, result.koMessage, result.okMessage)
   })
   override def toString = matcher.toString
 }
+
+/**
+ * The <code>Matcher</code> object provides a factory method to create Matcher objects
+ */  
 object Matcher {
   def make[T](m: T => (Boolean, String, String)) = new Matcher[T](m)
 }

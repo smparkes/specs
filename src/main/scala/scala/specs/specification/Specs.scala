@@ -4,7 +4,6 @@ import scala.util._
 import scala.specs.matcher._
 import scala.collection.mutable._
 import scala.specs.integration._
-import scala.specs.matcher.Matchers._
 import scala.specs.matcher.MatcherUtils._
 
 
@@ -91,7 +90,7 @@ case class Example(description: String, cycle: ExampleLifeCycle) {
                                                       errors.foldLeft("") {_ + indent(tab) + _.getMessage}
 }
 
-class Assert[+T](value: => T, example: Example) {
+class Assert[+T](value: => T, example: Example) extends Matchers {
   example.assertionsNb += 1
   
   def must[S >: T](m: AbstractMatcher[S]): Boolean =  {
