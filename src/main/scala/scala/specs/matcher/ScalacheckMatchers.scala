@@ -6,7 +6,7 @@ import scalacheck.Prop._
 import scalacheck.Test._
 import scala.collection.immutable.HashMap
 
-trait ScalaCheckMatchers extends AnyMatchers {
+trait ScalaCheckMatchers {
   val (minSize, maxSize, maxDiscarded, minTestsOk, verbose) = ('minSize, 'maxSize, 'maxDiscarded, 'minTestsOk, 'verbose)
   def print(p: (Symbol, Int)*): Map[Symbol, Int] = setParams(p)(verbose) = 1
   def set(p: (Symbol, Int)*): Map[Symbol, Int] = setParams(p)

@@ -1,7 +1,7 @@
 package scala.specs.matcher;
 import scala.specs.matcher.Matcher._
 
-trait NumericMatchers extends AnyMatchers {
+trait NumericMatchers {
   def beStrictlyLessThan[S <% Double](n: S) = make[S]((x: S) => (x < n, x + " is strictly less than " + n, x + " is not strictly less than " + n))
   def beStrictlyGreaterThan[S <% Double](n: S) = make[S]((x: S) => (x > n, x + " is strictly greater than " + n, x + " is not strictly greater than " + n))
   def beLessThan[S <% Double](n: S) = make[S]((x: S) => (x <= n, x + " is less than " + n, x + " is not less than " + n))

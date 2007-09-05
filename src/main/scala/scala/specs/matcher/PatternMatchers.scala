@@ -2,7 +2,7 @@ package scala.specs.matcher
 
 import scala.specs.matcher.Matcher._
 
-trait PatternMatchers extends AnyMatchers {
+trait PatternMatchers {
   def beLike(a: => (Any => Boolean)) = { 
     make[Any]((v: Any) => ( try { testCase(v)(a).get } catch { case e: scala.MatchError => false }, v + " matches the given pattern", v + " doesn't match the expected pattern"))
   }

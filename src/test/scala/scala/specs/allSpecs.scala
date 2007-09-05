@@ -22,6 +22,7 @@ object allSpecs extends Specification {
 object allUnits extends Specification {
   "The unit tests" areSpecifiedBy (
       specificationUnit, 
+      allMatchersUnit, 
       protocolsUnit)
 }
 
