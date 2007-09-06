@@ -8,6 +8,7 @@ import scala.collection.immutable.HashMap
 
 trait ScalaCheckMatchers {
   val (minSize, maxSize, maxDiscarded, minTestsOk, verbose) = ('minSize, 'maxSize, 'maxDiscarded, 'minTestsOk, 'verbose)
+  def print: Map[Symbol, Int] = setParams(List())(verbose) = 1
   def print(p: (Symbol, Int)*): Map[Symbol, Int] = setParams(p)(verbose) = 1
   def set(p: (Symbol, Int)*): Map[Symbol, Int] = setParams(p)
   def setParams(p: Seq[(Symbol, Int)]): Map[Symbol, Int] = {
@@ -15,7 +16,7 @@ trait ScalaCheckMatchers {
     for ((s, i) <- p) params = params + s->i
     params.withDefault(defaultParameters(_))
   }
-  implicit def defaultParameters: Map[Symbol, Int] = Map(minTestsOk->0, maxDiscarded->100, minSize->0, maxSize->500, verbose->0) 
+  implicit def defaultParameters: Map[Symbol, Int] = Map(minTestsOk->100, maxDiscarded->100, minSize->0, maxSize->500, verbose->0) 
   def pass[T](g: Gen[T])(implicit p: Map[Symbol, Int]) = make[T => Boolean]((f: T => Boolean) => checkPropertyWithParameters(g)(f)(p))
   def pass[T](f: T => Boolean)(implicit p: Map[Symbol, Int]) = make[Gen[T]]((g: Gen[T]) => checkPropertyWithParameters(g)(f)(p))
 
