@@ -5,7 +5,7 @@ import scala.specs.matcher._
 import scala.collection.mutable._
 import scala.specs.integration._
 import scala.specs.matcher.MatcherUtils._
-
+import scala.specs.SpecUtils._
 
 abstract class Specification extends Matchers with SpecificationBuilder {
   var description = createDescription(getClass.getName)
@@ -190,7 +190,7 @@ trait SpecificationBuilder extends ExampleLifeCycle {
     new AssertIterableString(value, lastExample)
   }
   implicit def toIterableAssert[I <: AnyRef](value: Iterable[I]) = {
-    new AssertIterable[I](value, lastExample)
+      new AssertIterable[I](value, lastExample)
   }
 }
 trait ExampleLifeCycle {
@@ -198,4 +198,7 @@ trait ExampleLifeCycle {
   def beforeTest(ex: Example)= {}
   def afterTest(ex: Example) = {}
   def afterExample(ex: Example) = {}
+}
+object SpecUtils {
+  def indent(s: String) = s + "  "
 }
