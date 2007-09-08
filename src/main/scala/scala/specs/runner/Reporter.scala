@@ -45,7 +45,6 @@ trait OutputReporter extends Reporter with Output {
   }
 }
 
-trait ConsoleReporter extends OutputReporter {
+trait ConsoleReporter extends OutputReporter with ConsoleOutput {
   val timer = new SimpleTimer
-  override def println(msg: String) = { Console.println(msg) }
 }

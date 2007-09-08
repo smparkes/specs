@@ -28,7 +28,9 @@ object specificationUnit extends Specification {
    }
   }
   def isInt(s: String): Boolean = {try {s.toInt} catch {case _ => return false}; true}
-  def beInt = Matcher.make[String](s => (isInt(s), q(s) + " is an integer", q(s) + " is not an integer"))
+  def beInt = new Matcher[String](){
+    def apply(s: => String) = (isInt(s), q(s) + " is an integer", q(s) + " is not an integer")
+  }
  
   object specification extends Specification
 }

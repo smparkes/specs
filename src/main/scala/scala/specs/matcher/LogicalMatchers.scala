@@ -1,5 +1,4 @@
 package scala.specs.matcher
-import scala.specs.matcher.Matcher._
 import scala.specs.matcher.MatcherUtils._
 
 /**
@@ -18,7 +17,7 @@ trait LogicalMatchers {
    */   
   def verifyAll[T](ms: Iterable[Matcher[T]]): Matcher[T] = {
     ms match {
-      case Nil => make[T]((a: T) => (true, "no matchers", "no matchers"))
+      case Nil => new Matcher[T](){ def apply(a: => T) = (true, "no matchers", "no matchers") }
       case m::Nil => m
       case m::rest => m.and(verifyAll(rest))
     }
@@ -34,7 +33,7 @@ trait LogicalMatchers {
    */   
   def verifyAny[T](ms: Iterable[Matcher[T]]): Matcher[T] = {
     ms match {
-      case Nil => make[T]((a: T) => (false, "no matchers", "no matchers"))
+      case Nil => new Matcher[T](){ def apply(a: => T) = (false, "no matchers", "no matchers") }
       case m::Nil => m
       case m1::m2::Nil => m1.or(m2)
       case m::rest => m.or(verifyAny(rest))

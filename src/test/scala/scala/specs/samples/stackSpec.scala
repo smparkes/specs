@@ -20,12 +20,13 @@ trait NonEmptyStackSpec extends Specification {
       stack.top mustBe lastItemAdded
       stack.top mustBe lastItemAdded
     }
-    "return the top item when sent #pop" in {
-      stack.pop mustBe lastItemAdded
-    }
     "remove the top item when sent #pop" in {
       stack.pop mustBe lastItemAdded
-      stack.pop mustNotBe lastItemAdded
+      if (!stack.isEmpty)
+        stack.top mustNotBe lastItemAdded
+    }
+    "return the top item when sent #pop" in {
+      stack.pop mustBe lastItemAdded
     }
   }
 }
@@ -36,7 +37,7 @@ object FullStackSpec extends NonEmptyStackSpec {
     usingBefore {() => createStack }
     "behave like a non-empty stack" in nonEmptyStackExamples 
     "complain when sent #push" in {
-      stack.push(11) mustThrow new Error("full stack")
+      stack.push(11) must throwA(new Error)
     }
   }
 }
@@ -55,10 +56,10 @@ object EmptyStackSpec extends Specification {
   def stack = new LimitedStack(10)
   "An empty stack" should {
     "complain when sent #top" in {
-      {stack.top; ()} mustThrow new NoSuchElementException()
+      {stack.top; ()} must throwA(new NoSuchElementException)
     }
     "complain when sent #pop" in {
-      {stack.pop; ()} mustThrow new NoSuchElementException()
+      {stack.pop; ()} must throwA(new NoSuchElementException)
     }
   }
 }

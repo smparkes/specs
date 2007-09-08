@@ -1,7 +1,6 @@
 package scala.specs
 
 import scala.specs.integration._
-import scala.specs.matcher.Matcher._
 import scala.specs.matcher._
 import scala.specs.Sugar._
 import scala.specs.matcher.MatcherUtils._
@@ -88,8 +87,6 @@ object advancedFeatures extends SpecificationWithSamples {
 }
 
 trait SpecificationWithSamples extends Specification {
-  def isInt(s: String): Boolean = {try {s.toInt} catch {case _ => return false}; true}
-  def beInt = Matcher.make[String](s => (isInt(s), q(s) + " is an integer", q(s) + " is not an integer"))
  
   abstract class TestSpec extends Specification {
     val success = () => true mustBe true

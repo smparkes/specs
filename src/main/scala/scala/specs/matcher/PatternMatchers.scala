@@ -1,5 +1,4 @@
 package scala.specs.matcher
-import scala.specs.matcher.Matcher._
 import scala.specs.matcher.MatcherUtils._
 
 /**
@@ -18,7 +17,8 @@ trait PatternMatchers {
    * The <code>Sugar</code> object can be used to get shorter expression by having the <code>ok</code> alias for <code>true</code>:
    *   List(1, 2) must beLike { case x::y::Nil => ok }
    */  
-  def beLike(pattern: => (Any => Boolean)) = make[Any]( value => ( 
+  def beLike(pattern: => (Any => Boolean)) = new Matcher[Any](){
+     def apply(value: => Any) = ( 
       try {
         if (value == null)
           false
@@ -26,29 +26,34 @@ trait PatternMatchers {
           Some(value).map(pattern).get 
       } catch { case e: scala.MatchError => false }, 
       q(value) + " matches the given pattern", 
-      q(value) + " doesn't match the expected pattern"))
+      q(value) + " doesn't match the expected pattern")
+  }
   
   /**
    * Matches if the value 'v' is None
    */
-  def beNone[T] = make[Option[T]](value => ( 
+  def beNone[T] = new Matcher[Option[T]](){
+     def apply(value: => Option[T]) = ( 
       value match { 
         case None => true
         case _ => false 
       }, 
       q(value) + " is None", 
-      q(value) + " is not None"))
+      q(value) + " is not None")
+  }
 
   /**
    * Matches if the value 'v' is Some(x)
    */
-  def beSome[T] = new CaseMatcher[T](value => ( 
-     value match {
-        case Some(x) => true 
-        case _ => false
-      },
-      q(value) + " is Some(x)", 
-      q(value) + " is not Some(x)"))
+  def beSome[T] = new CaseMatcher[T](){
+     def someApply(value: => Option[T]) = ( 
+       value match {
+          case Some(x) => true 
+          case _ => false
+        },
+        q(value) + " is Some(x)", 
+        q(value) + " is not Some(x)")
+   }
 
   /**
    * Alias for beSome[Any]
@@ -60,18 +65,19 @@ trait PatternMatchers {
    * The CaseMatcher class allow to verify expressions such as:
    * Some(x) must beSome[String].which(_.startWith("abc"))
    */
-  class CaseMatcher[T](m: Option[T] => (Boolean, String, String)) extends Matcher[Option[T]](m) {
+  abstract class CaseMatcher[T] extends Matcher[Option[T]] {
     private var whichFunction: Option[T => Boolean] = None
     def which(g: T => Boolean) = {
       whichFunction = Some(g) 
       this
     }
-    override def apply(a: Option[T]) = 
+    def someApply(value: => Option[T]): (Boolean, String, String)
+    override def apply(a: => Option[T]) = 
       if (whichFunction == Some(null))
         (false, "the 'which' property is a not a null function", "the 'which' property is a null function")
       else
         whichFunction match {
-          case None => m(a)
+          case None => someApply(a)
           case Some(g) => ( a match {
                           case Some(x) => g(x) 
                           case _ => false
@@ -81,3 +87,4 @@ trait PatternMatchers {
     }
   }
 }
+object PatternMatchers extends PatternMatchers

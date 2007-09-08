@@ -75,7 +75,7 @@ case class Example(description: String, cycle: ExampleLifeCycle) {
       cycle.afterTest(this)
       } catch { 
       case f: FailureException => addFailure(f)
-      case t: Throwable => addError(t)
+      case t: Throwable => {t.printStackTrace; addError(t)}
     }
     try { cycle.afterExample(this) } catch { case t: Throwable => addError(t) }
     isInsideDefinition = false
@@ -93,10 +93,10 @@ case class Example(description: String, cycle: ExampleLifeCycle) {
 class Assert[+T](value: => T, example: Example) extends Matchers {
   example.assertionsNb += 1
   
-  def must[S >: T](m: AbstractMatcher[S]): Boolean =  {
-    val (result, _, koMessage) = m(value) 
+  def must[S >: T](m: => AbstractMatcher[S]): Boolean =  {
+    val (result, _, koMessage) = m.apply(value) 
     result match {
-      case false => throwFailure(koMessage)
+      case false => throwFailure(this, koMessage)
       case _ => true
     }
   }
@@ -110,22 +110,6 @@ class Assert[+T](value: => T, example: Example) extends Matchers {
   def must_!=[S >: T](otherValue: S) = must(is_!=(otherValue))
   def must_==[S >: T](otherValue: S) = must(is_==(otherValue))
   def mustEqual[S >: T](otherValue: S) = must(is_==(otherValue))
-
-  def mustThrow[E <: Throwable](errorType: E): Unit = {
-    try { value } 
-    catch {
-      case x => if (errorType.getClass.isAssignableFrom(x.getClass)) 
-                  return 
-                else
-                  { throwFailure(errorType + " should have been thrown. Got: " + x); return }
-    }
-    throwFailure(errorType + " should have been thrown")
-  }
-  def throwFailure[S >: T](failureMessage: String) = {
-    val failure = FailureException(failureMessage) 
-    failure.setStackTrace((failure.getStackTrace.dropWhile {x: StackTraceElement => matches("Assert")(x.toString)}).toArray)
-    throw failure
-  }
 }
 case class FailureException(message: String) extends RuntimeException(message)
 
