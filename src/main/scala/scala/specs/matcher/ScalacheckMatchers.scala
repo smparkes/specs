@@ -1,18 +1,19 @@
 package scala.specs.matcher
 import scalacheck._
-import scalacheck.Gen._
-import scalacheck.Prop._
-import scalacheck.Test._
+import scalacheck.Gen
+import scalacheck.Prop
+import scalacheck.Test
 import scala.collection.immutable.HashMap
 import scala.io.ConsoleOutput
 import scala.specs.matcher.ScalacheckParameters._
 import scala.specs.matcher.MatcherUtils._
+import scala.specs.Sugar._
 
 /**
  * The <code>ScalacheckMatchers</code> trait provides matchers which allow to 
  * assess properties multiple times with generated data
  */
-trait ScalacheckMatchers extends ConsoleOutput {
+trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
    /**
     * Default parameters. Use Scalacheck default values and don't print to the console
     */
@@ -51,7 +52,7 @@ trait ScalacheckMatchers extends ConsoleOutput {
   def checkProperty[T](g: Gen[T])(f: T => Boolean)(params: Test.Params, verbose: Boolean) = {
      // the 'real' scalacheck property states that the function must return true
      // for each generated value
-     val prop = forAll(g)(a => { if (f(a)) proved else falsified })
+     val prop = forAll(g)(a => { if (f(a)) Prop.proved else Prop.falsified })
 
      // will print the result of each test if verbose = true
      def printResult(result: Option[Prop.Result], succeeded: Int, discarded: Int): Unit = {
@@ -75,13 +76,22 @@ trait ScalacheckMatchers extends ConsoleOutput {
      // depending on the result, return the appropriate success status and messages
      // the failure message indicates a counter-example to the property
      stats match {
-       case Stats(PropException(List((msg, _)), FailureException(ex)), tries, _) => 
+     case Test.Stats(Test.Failed(List((msg, _))), tries, _) => 
+         (false, "The property passed without any counter-example after "+tries+" tries", "A counter-example is '"+msg.toString+"'") 
+       case Test.Stats(Test.PropException(List((msg, _)), FailureException(ex)), tries, _) => 
          (false, "The property passed without any counter-example after "+tries+" tries", "A counter-example is '"+msg.toString+"': " + ex) 
-       case Stats(_, tries, _) => 
+       case Test.Stats(_, tries, _) => 
          (true, "The property passed without any counter-example after "+tries+" tries", "A counter-example was found") 
      }
    }
   
+}
+/**
+ * This trait is used to facilitate testing by mocking Scalacheck functionalities
+ */
+trait ScalacheckFunctions {
+  def check(params: Test.Params, prop: Prop, printResult: (Option[Prop.Result], Int, Int) => Unit) = Test.check(params, prop, printResult)
+  def forAll[A,P](g: Gen[A])(f: A => Prop): Prop = Prop.forAll(g)(f)
 }
 /**
  * This trait provides generation parameters to use with the <code>ScalacheckMatchers</code>

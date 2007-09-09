@@ -7,7 +7,7 @@ import scala.specs.integration._
 object mockParametersSuite extends JUnit3(mockParameters) 
 object mockParameters extends MatchersSpecification with MovieGuardMock {
   "Mock parameters" should { usingBefore { () => {clearExample} }
-    "provide a recordAndReturns method allowing to specify a stubbed return value: def mockedMethod = recordAndReturns(true)" in {
+    "provide a recordAndReturn method allowing to specify a stubbed return value: def mockedMethod = recordAndReturn(true)" in {
       alwaysOkGuard
       expect(atLeastOneOf) {
         mock.okForAge(20, Movie(18)); 
@@ -16,7 +16,7 @@ object mockParameters extends MatchersSpecification with MovieGuardMock {
       alwaysOkGuard.canWatch(Watcher(20), Movie(18)) mustBe true
       alwaysOkGuard.canWatch(Watcher(16), Movie(18)) mustBe true
     }
-    "provide a recordAndReturns method allowing to specify a stubbed returned function: def mockedMethod = recordAndReturns(f)" in {
+    "provide a recordAndReturn method allowing to specify a stubbed returned function: def mockedMethod = recordAndReturn(f)" in {
       val inversedGuard = guardWith((a: Int, m: Movie) => !(new MovieRater().okForAge(a, m)))
       expect(atLeastOneOf) {
         mock.okForAge(20, Movie(18)); 

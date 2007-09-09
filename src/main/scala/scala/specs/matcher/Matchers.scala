@@ -15,7 +15,8 @@ trait Matchers extends AnyMatchers with
                        NumericMatchers with
                        ScalacheckMatchers with
                        PatternMatchers with 
-                       MockMatchers
+                       MockMatchers with 
+                       MatcherResult
                        
 /**
  * <p>The <code>AbstractMatcher</code> class is used by the Spec.must method.
@@ -36,13 +37,7 @@ abstract class AbstractMatcher[T] {
  * <code>not</code> operator is used, the ok message is used as a ko message</p>
  *   
  */
-abstract class Matcher[T] extends AbstractMatcher[T] {
-  /**
-   * This case class and the associated implicit definition is only here to add more meaningful names to
-   * the tuple components in the following operators 
-   */  
-  case class MatcherResult(success: Boolean, okMessage: String, koMessage: String)
-  implicit def toMatcherResult(t: (Boolean, String, String)): MatcherResult = MatcherResult(t._1, t._2, t._3)  
+abstract class Matcher[T] extends AbstractMatcher[T] with MatcherResult {
   
   /**
    *  The <code>and</code> operator allow to combine to matchers through a logical and.
@@ -100,4 +95,12 @@ abstract class Matcher[T] extends AbstractMatcher[T] {
       (!result.success, result.koMessage, result.okMessage)
   }}
  }
+}
+trait MatcherResult {
+  /**
+   * This case class and the associated implicit definition is only here to add more meaningful names to
+   * the tuple components in the following operators 
+   */  
+  case class MatcherResult(success: Boolean, okMessage: String, koMessage: String)
+  implicit def toMatcherResult(t: (Boolean, String, String)): MatcherResult = MatcherResult(t._1, t._2, t._3)  
 }

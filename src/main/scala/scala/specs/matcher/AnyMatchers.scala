@@ -83,6 +83,8 @@ trait AnyMatchers {
   /**
    * Matches if value is throwing an exception which is assignable from errorType.getClass
    * Otherwise rethrow any other exception
+   * Usage: value must throwA(new ExceptionType)
+   * Advanced usage: value must throwA(new ExceptionType).like {case ExceptionType(m) => m.startsWith("bad")}
    */   
   def throwException[E <: Throwable](exception: E) = new Matcher[Any](){
      def apply(value: => Any) = { 
@@ -131,12 +133,12 @@ trait AnyMatchers {
     catch { case e => return Some(e) }
     return None
   }
-  def throwFailure(e: Throwable, failureMessage: String) = {
+  protected def throwFailure(e: Throwable, failureMessage: String) = {
     val failure = FailureException(failureMessage) 
     failure.setStackTrace((e.getStackTrace.dropWhile {x: StackTraceElement => matches("AnyMatchers")(x.toString)}).toArray)
     throw failure
   }
-  def throwFailure(origin: Object, failureMessage: String) = {
+  protected def throwFailure(origin: Object, failureMessage: String) = {
     val failure = FailureException(failureMessage) 
     failure.setStackTrace((failure.getStackTrace.drop(1).dropWhile {x: StackTraceElement => matches(origin.getClass.getName.split("\\.").last)(x.toString)}).toArray)
     throw failure

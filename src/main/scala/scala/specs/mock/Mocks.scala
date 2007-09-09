@@ -1,5 +1,6 @@
 package scala.specs.mock
 import scala.specs.matcher._
+import scala.specs.Sugar._
 import scala.collection.mutable.Stack
 import java.util.regex.Pattern
 
@@ -52,7 +53,9 @@ case class ProtocolDef(val protocolType: ProtocolType, var expectedCalls: List[S
   def unexpectedCallsFailures(rs: List[ReceivedCall]) = unexpectedCalls(rs).map(_.toString + " should not have been called")  
   def unmatchedCallsFailures(rs: List[ReceivedCall]) = protocolType.failures(expectedCalls, expectedReceivedCalls(rs))
   def expectedReceivedCalls(rs: List[ReceivedCall]) = rs.remove(unexpectedCalls(rs).contains(_))
-  def unexpectedCalls(rs: List[ReceivedCall]) = protocolType.unexpectedCalls(expectedCalls, rs)
+  def unexpectedCalls(rs: List[ReceivedCall]) = {
+    protocolType.unexpectedCalls(expectedCalls, rs)
+  }
   override def expected = protocolType.expectedDefs(expectedCalls)
   override def expects(received: List[ReceivedCall]) = protocolType.failures(expectedCalls, received).isEmpty
   override def consume(received: List[ReceivedCall]) = protocolType.consume(expectedCalls, received)._2
@@ -61,7 +64,7 @@ case class ProtocolDef(val protocolType: ProtocolType, var expectedCalls: List[S
 trait Mocker extends ProtocolTypes with ExampleLifeCycle with MockMatchers {
   val protocol = new Protocol
   private var expectingMode = 0
-  def expect(v: => Any): Protocol = expect(inAnyOrder)(v)
+  def expect(v: => Any): Protocol = expect(atLeast)(v)
   def expect(t: ProtocolType)(v: => Any): Protocol = {
     if (expectingMode == 0) protocol.clear
     expectingMode += 1
@@ -96,8 +99,11 @@ trait Mocker extends ProtocolTypes with ExampleLifeCycle with MockMatchers {
   override def afterTest(ex: Example) = {
     if (protocol.isSpecified) 
       (new Assert[Protocol](protocol, ex)) must beMet
+    protocol.clear
   }
-  override def afterExample(ex: Example) = {}
+  override def afterExample(ex: Example) = {
+    protocol.clear
+  }
   implicit def protocolTypeToProtocolDef(t: ProtocolType)(v: => Any) = {
     expect(t)(v)
   }

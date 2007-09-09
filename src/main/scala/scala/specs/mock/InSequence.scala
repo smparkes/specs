@@ -1,7 +1,8 @@
 package scala.specs.mock
 import scala.specs.Sugar._
 
-case object inSequence extends ProtocolType {
+case object inSequence extends inSequence
+trait inSequence extends ProtocolType {
     def failures(expected: List[SpecifiedCall], received: List[ReceivedCall]): String = {
       if (consume(expected, received) == (Nil, Nil))
         ""

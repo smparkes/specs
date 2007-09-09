@@ -1,7 +1,9 @@
 package scala.specs.mock
 import scala.util.ExtendedList._
+import scala.specs.Sugar._
 
-case object inAnyOrder extends ProtocolType {
+case object inAnyOrder extends inAnyOrder
+trait inAnyOrder extends ProtocolType {
     def failures(expected: List[SpecifiedCall], received: List[ReceivedCall]): String = {
       if (consume(expected, received) == (Nil, Nil)) 
         ""
@@ -25,9 +27,9 @@ case object inAnyOrder extends ProtocolType {
       }
     }
     def findShortestExpectedSequence(exp: List[SpecifiedCall], rec: List[ReceivedCall]) = {
-      prefixes(rec).span(rs => !exp.exists(s => s expects rs))._2 match {
-        case Nil => Nil
-        case x::rest => x
+      prefixes(rec).sort((l1, l2) => l1.size < l2.size).find(rs => exp.exists(s => s expects rs)) match {
+        case None => Nil
+        case Some(x) => x
       }
     }
 

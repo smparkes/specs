@@ -26,7 +26,7 @@ abstract class ProtocolType {
     l match {
       case Nil => Nil
       case x::Nil => x::Nil
-      case x::rest => List(x):::(prefixes(rest).map(x::_))
+      case rest => rest.flatMap(x => List(x):::(prefixes(rest.remove(_==x)).map(x::_)))
     }
   }
 }
