@@ -1,5 +1,6 @@
 package scala.specs.mock
 import scala.specs.Sugar._
+import scala.util.ExtendedList._
 
 case object inSequence extends inSequence
 trait inSequence extends ProtocolType {
@@ -16,9 +17,9 @@ trait inSequence extends ProtocolType {
       (expected, received) match {
         case (Nil, Nil) => (Nil, Nil)
         case (e::rest, rec) => {
-          inAnyOrder.consume(List(e), rec) match {
-            case (Nil, recRest) => consume(rest, recRest)
-            case _ => (expected, received)
+          orderedPrefixes(rec).find(rs => e expects rs) match {
+            case None => (expected, received)
+            case Some(rs) => consume(rest, rec.removeFirstSeq(rs))
           }
         }
       }

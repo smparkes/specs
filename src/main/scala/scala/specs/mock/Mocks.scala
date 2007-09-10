@@ -7,7 +7,7 @@ import java.util.regex.Pattern
 class Protocol extends ProtocolTypes {
   var receivedCalls: List[ReceivedCall] = Nil
   private var protocolDefs: Stack[ProtocolDef] = new Stack
-  def expect(v:  => Any): ProtocolDef = expect(inAnyOrder)(v)
+  def expect(v:  => Any): ProtocolDef = expect(atLeast)(v)
   def expect(t: ProtocolType)(v: => Any) = {
     protocolDefs.push(new ProtocolDef(t, Nil))
     v

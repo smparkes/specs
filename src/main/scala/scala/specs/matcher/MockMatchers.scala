@@ -5,4 +5,7 @@ trait MockMatchers {
   def beMet = new Matcher[Protocol](){
     def apply(protocol: => Protocol) = (protocol.failures.isEmpty, "all expectations are met", protocol.failures)
   }
+  def any[T]: T = {
+     null.asInstanceOf[T]
+  }
 }

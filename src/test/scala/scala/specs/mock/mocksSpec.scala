@@ -10,7 +10,7 @@ object mockProtocols extends MatchersSpecification with ButtonAndLightMock {
   "Mock protocols" should { usingBefore { () => {clearExample; button.init()} }
     "provide an 'expect inAnyOrder' protocol checking if calls have been made to mock objects" in {
       // by default, the calls can be made in any order
-      val protocol = expect { mock.on; mock.off }
+      val protocol = expect(inAnyOrder) { mock.on; mock.off }
       assertion(protocol must beMet) must (failWithMatch("Expected in any order \\[on\\(.*\\); off\\(.*\\)\\]"))
 
       button.push

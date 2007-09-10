@@ -26,7 +26,14 @@ abstract class ProtocolType {
     l match {
       case Nil => Nil
       case x::Nil => x::Nil
-      case rest => rest.flatMap(x => List(x):::(prefixes(rest.remove(_==x)).map(x::_)))
+      case rest => rest.flatMap(x => List(x):::(prefixes(rest.removeFirst(_==x)).map(x::_)))
+    }
+  }
+  def orderedPrefixes[T](l: List[T]): List[List[T]] = {
+    l match {
+      case Nil => Nil
+      case x::Nil => x::Nil
+      case x::rest => List(x):::(prefixes(rest).map(x::_))
     }
   }
 }

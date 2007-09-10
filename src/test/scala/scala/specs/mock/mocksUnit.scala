@@ -62,7 +62,7 @@ object inAnyOrderUnit extends Specification with ProtocolTypes {
     val (e, e1, e2) = (ExpectedCall("m"), ExpectedCall("m1"), ExpectedCall("m2"))
     val (r, r1, r2) = (ReceivedCall("m"), ReceivedCall("m1"), ReceivedCall("m2"))
     val exactly2Calls = new ProtocolDef(twoOf, List(e))
-    "consume nothing if exp=m and rec=nil" in {
+   "consume nothing if exp=m and rec=nil" in {
       inAnyOrder.consume((e), ()) must_== (List(e), Nil)
     }
     "consume all if exp=m and rec=m" in {

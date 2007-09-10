@@ -2,7 +2,9 @@ package scala.specs.matcher
 import scalacheck._
 import scalacheck.Gen
 import scalacheck.Prop
+import scalacheck.Prop._
 import scalacheck.Test
+import scalacheck.Test._
 import scala.collection.immutable.HashMap
 import scala.io.ConsoleOutput
 import scala.specs.matcher.ScalacheckParameters._
@@ -20,40 +22,50 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
    implicit def defaultParameters = new Parameters(ScalacheckParameters.setParams(Nil))
 		
    /**
-    * Matches ok if the <code>property T => Boolean</code> returns <code>true</code> for any generated value
-    * Usage: <code>properties must pass(generated_values)</code>
+    * Matches ok if the <code>function T => Boolean</code> returns <code>true</code> for any generated value
+    * Usage: <code>function must pass(generated_values)</code>
     * params are the given by the implicit default parameters of Scalacheck
     */
    def pass[T](g: Gen[T])(implicit params: Parameters) = new Matcher[T => Boolean](){
-      def apply(f: => (T => Boolean)) = checkPropertyWithParameters(g)(f)(params)
+      def apply(f: => (T => Boolean)) = checkFunction(g)(f)(params)
     }
 
    /**
-    * Matches ok if the <code>property T => Boolean</code> returns <code>true</code> for any generated value
-    * Usage: <code>generated_values must pass(property)</code>
+    * Matches ok if the <code>function T => Boolean</code> returns <code>true</code> for any generated value
+    * Usage: <code>generated_values must pass(function)</code>
     */
    def pass[T](f: T => Boolean)(implicit params: Parameters) = new Matcher[Gen[T]](){
-      def apply(g: => Gen[T]) = checkPropertyWithParameters(g)(f)(params)
+      def apply(g: => Gen[T]) = checkFunction(g)(f)(params)
    }
 
+   /**
+    * Matches ok if the <code>property</code> is proved for any generated value
+    * Usage: <code>generated_values must pass(property)</code>
+    */
+   def pass[T](prop: Prop)(implicit params: Parameters) = new Matcher[Gen[T]](){
+     def apply(g: => Gen[T]) = checkProperty(forAll(g)(a => prop))(params)
+   }
+
+   def checkFunction[T](g: Gen[T])(f: T => Boolean)(p: Parameters) = {
+      // create a scalacheck property which states that the function must return true
+      // for each generated value
+      val prop = forAll(g)(a => if (f(a)) proved else falsified)
+      checkProperty(prop)(p)
+   }
    /**
     * checks if the property is true for each generated value, and with the specified
     * generation parameters <code>p</code>. <code>p</code> is transformed into a scalacheck parameters
     * and indicates if the generation should be verbose or not 
     */
-   def checkPropertyWithParameters[T](g: Gen[T])(f: T => Boolean)(p: Parameters) = {
-     checkProperty[T](g)(f)(Test.Params(p(minTestsOk), p(maxDiscarded), p(minSize), p(maxSize), StdRand), p.verbose)
+   def checkProperty(prop: Prop)(p: Parameters) = {
+     checkScalacheckProperty(prop)(Test.Params(p(minTestsOk), p(maxDiscarded), p(minSize), p(maxSize), StdRand), p.verbose)
    }
-
+    
   /**
    * checks if the property is true for each generated value, and with the specified
    * scalacheck parameters. If verbose is true, then print the results on the console
    */
-  def checkProperty[T](g: Gen[T])(f: T => Boolean)(params: Test.Params, verbose: Boolean) = {
-     // the 'real' scalacheck property states that the function must return true
-     // for each generated value
-     val prop = forAll(g)(a => { if (f(a)) Prop.proved else Prop.falsified })
-
+  def checkScalacheckProperty(prop: Prop)(params: Test.Params, verbose: Boolean) = {
      // will print the result of each test if verbose = true
      def printResult(result: Option[Prop.Result], succeeded: Int, discarded: Int): Unit = {
 			 if (!verbose) return
@@ -75,13 +87,18 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
 
      // depending on the result, return the appropriate success status and messages
      // the failure message indicates a counter-example to the property
+     def afterNTries(n: Int) = "after " + (if (n <= 1) n + " try" else n + " tries")
+     def noCounterExample(n: Int) = "The property passed without any counter-example " + afterNTries(n)
      stats match {
-     case Test.Stats(Test.Failed(List((msg, _))), tries, _) => 
-         (false, "The property passed without any counter-example after "+tries+" tries", "A counter-example is '"+msg.toString+"'") 
-       case Test.Stats(Test.PropException(List((msg, _)), FailureException(ex)), tries, _) => 
-         (false, "The property passed without any counter-example after "+tries+" tries", "A counter-example is '"+msg.toString+"': " + ex) 
-       case Test.Stats(_, tries, _) => 
-         (true, "The property passed without any counter-example after "+tries+" tries", "A counter-example was found") 
+       case Test.Stats(Passed(), n, _)          => (true,  noCounterExample(n: Int), "A counter-example was found " + afterNTries(n)) 
+       case s@Test.Stats(GenException(e), n, _) => (false, noCounterExample(n: Int), s.pretty) 
+       case s@Test.Stats(Exhausted(), n, _)     => (false, noCounterExample(n: Int), s.pretty) 
+       case Test.Stats(Failed(List((msg, _))), n, _) => 
+         (false, noCounterExample(n: Int), "A counter-example is '"+msg+"' (" + afterNTries(n)+")") 
+       case Test.Stats(PropException(List((msg, _)), FailureException(ex)), n, _) => 
+         (false, noCounterExample(n: Int), "A counter-example is '"+msg+"': " + ex + " ("+afterNTries(n)+")") 
+       case s@Test.Stats(PropException(List((msg, _)), ex), n, _) => 
+         (false, noCounterExample(n: Int), s.pretty) 
      }
    }
   

@@ -26,10 +26,10 @@ trait inAnyOrder extends ProtocolType {
         }
       }
     }
-    def findShortestExpectedSequence(exp: List[SpecifiedCall], rec: List[ReceivedCall]) = {
+    def findShortestExpectedSequence(exp: List[SpecifiedCall], rec: List[ReceivedCall]): List[ReceivedCall]= {
       prefixes(rec).sort((l1, l2) => l1.size < l2.size).find(rs => exp.exists(s => s expects rs)) match {
-        case None => Nil
         case Some(x) => x
+        case None => Nil
       }
     }
 
