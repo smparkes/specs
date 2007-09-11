@@ -66,12 +66,12 @@ trait AnyMatchers {
   /**
    * Alias of notBeEmpty
    */   
-  def isNotEmpty = notBeEmpty 
+  def isNotEmpty[S <: Any {def isEmpty: Boolean}] = notBeEmpty[S] 
 
   /**
    * Alias of beEmpty
    */   
-  def isEmpty = beEmpty
+  def isEmpty[S <: Any {def isEmpty: Boolean}] = beEmpty[S]
 
   /**
    * Matches if the function f returns true

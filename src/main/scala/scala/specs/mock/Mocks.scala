@@ -4,6 +4,9 @@ import scala.specs.Sugar._
 import scala.collection.mutable.Stack
 import java.util.regex.Pattern
 
+/**
+ * This class
+ */
 class Protocol extends ProtocolTypes {
   var receivedCalls: List[ReceivedCall] = Nil
   private var protocolDefs: Stack[ProtocolDef] = new Stack
@@ -49,9 +52,15 @@ case class ReceivedCall(val method: String) {
 case class ProtocolDef(val protocolType: ProtocolType, var expectedCalls: List[SpecifiedCall]) extends SpecifiedCall with ProtocolTypes {
   def expect(m: String) = expectedCalls = expectedCalls:::List(ExpectedCall(m))
   def expect(p: ProtocolDef) = expectedCalls = expectedCalls:::List(p)
-  def failures(rs: List[ReceivedCall]): String = (unexpectedCallsFailures(rs):::List(unmatchedCallsFailures(rs))).mkString("\n")
+  def failures(rs: List[ReceivedCall]): String = {
+    (unmatchedCallsFailures(rs) match {
+      case Some(unmatched) => unexpectedCallsFailures(rs):::List(unmatched)
+      case None => unexpectedCallsFailures(rs)
+    }).mkString("\n")
+  }
   def unexpectedCallsFailures(rs: List[ReceivedCall]) = unexpectedCalls(rs).map(_.toString + " should not have been called")  
   def unmatchedCallsFailures(rs: List[ReceivedCall]) = protocolType.failures(expectedCalls, expectedReceivedCalls(rs))
+  
   def expectedReceivedCalls(rs: List[ReceivedCall]) = rs.remove(unexpectedCalls(rs).contains(_))
   def unexpectedCalls(rs: List[ReceivedCall]) = {
     protocolType.unexpectedCalls(expectedCalls, rs)

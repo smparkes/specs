@@ -144,7 +144,7 @@ trait ScalacheckParameters {
    *            property(v) mustBe ok 
    *        }(print(minTestsOk->15, maxDiscarded->20)) 
    */  
-  case class print(p: (Symbol, Int)*) extends Parameters(setParams(p)) {
+  case class display(p: (Symbol, Int)*) extends Parameters(setParams(p)) {
     override def verbose = true
   }
 
@@ -160,9 +160,9 @@ trait ScalacheckParameters {
    * Those parameters will print the result on the console and use the default settings
    * Usage: generated_values must pass { v =>
    *            property(v) mustBe ok 
-   *        }(print) 
+   *        }(display) 
    */  
-  val print = new Parameters(setParams(Nil)) {override def verbose = true}
+  val display = new Parameters(setParams(Nil)) {override def verbose = true}
     
   /**
    * This function transform the varargs parameters into a Map with default values

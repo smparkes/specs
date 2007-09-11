@@ -68,12 +68,14 @@ abstract class Matcher[T] extends AbstractMatcher[T] with MatcherResult {
     def apply(a: =>T) = {
     val r1 = outer(a)
     val r2 = m(a) 
-      if (!r1.success)
-        (r2.success, r2.okMessage, r1.koMessage + " and " + r2.koMessage) 
-      else if (!r2.success)
-        (r1.success, r1.okMessage, r1.koMessage + " and " + r2.koMessage)
+      if (!r1.success && !r2.success)
+        (false, r1.okMessage + " and " + r2.okMessage, r1.koMessage + " and " + r2.koMessage) 
+      else if (r1.success && !r2.success)
+        (true, r1.okMessage + " but " + r2.koMessage, r1.koMessage + " and " + r2.koMessage)
+      else if (!r1.success && r2.success)
+        (true, r2.okMessage + " but " + r1.koMessage, r1.koMessage + " and " + r2.koMessage)
       else
-        (r1.success || r2.success, r1.okMessage + " and " + r2.okMessage, r1.koMessage + " and " + r2.koMessage) 
+        (true, r1.okMessage + " and " + r2.okMessage, r1.koMessage + " and " + r2.koMessage) 
   }}}
 
   /**
@@ -93,8 +95,20 @@ abstract class Matcher[T] extends AbstractMatcher[T] with MatcherResult {
     def apply(a: => T) = {
       val result = outer(a)
       (!result.success, result.koMessage, result.okMessage)
-  }}
- }
+    }}
+  }
+
+  /**
+   *  The <code>when</code> operator returns a matcher which will be ok only if a condition is true
+   */   
+  def when(condition : => Boolean) = { 
+    val outer = this;
+    new Matcher[T]() {
+     def apply(a: => T) = {
+          val result = outer(a)
+          (if (condition) result.success else true, result.okMessage, result.koMessage)
+      }}
+  }
 }
 trait MatcherResult {
   /**

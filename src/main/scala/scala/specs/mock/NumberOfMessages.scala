@@ -1,10 +1,10 @@
 package scala.specs.mock;
 
 class NumberOfMessages(c: CallConstraint) extends ProtocolType {
-  def failures(expected: List[SpecifiedCall], received: List[ReceivedCall]): String = {
+  def failures(expected: List[SpecifiedCall], received: List[ReceivedCall]): Option[String] = {
     consume(expected, received) match {
-      case (Nil, Nil) => ""
-      case _ => "Expected " + expectedDefs(expected) + ". " + messages(received)
+      case (Nil, Nil) => None
+      case _ => Some("Expected " + expectedDefs(expected) + ". " + messages(received))
     }
   }
   def expectedDefs(expected: List[SpecifiedCall]) = {

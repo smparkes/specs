@@ -4,11 +4,11 @@ import scala.specs.Sugar._
 
 case object inAnyOrder extends inAnyOrder
 trait inAnyOrder extends ProtocolType {
-    def failures(expected: List[SpecifiedCall], received: List[ReceivedCall]): String = {
+    def failures(expected: List[SpecifiedCall], received: List[ReceivedCall]): Option[String] = {
       if (consume(expected, received) == (Nil, Nil)) 
-        ""
+        None
       else
-        "Expected " + expectedDefs(expected) + ". " + messages(received)
+        Some("Expected " + expectedDefs(expected) + ". " + messages(received))
     }
     def expectedDefs(expected: List[SpecifiedCall]) = {
       "in any order " + bracket(expected.map(_.expected).mkString("; "))
@@ -27,7 +27,7 @@ trait inAnyOrder extends ProtocolType {
       }
     }
     def findShortestExpectedSequence(exp: List[SpecifiedCall], rec: List[ReceivedCall]): List[ReceivedCall]= {
-      prefixes(rec).sort((l1, l2) => l1.size < l2.size).find(rs => exp.exists(s => s expects rs)) match {
+      rec.sublists.sort((l1, l2) => l1.size < l2.size).find(rs => exp.exists(s => s expects rs)) match {
         case Some(x) => x
         case None => Nil
       }

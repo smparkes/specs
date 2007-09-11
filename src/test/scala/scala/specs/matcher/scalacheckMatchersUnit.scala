@@ -10,22 +10,22 @@ import scala.io._
 object scalacheckMatchersSuite extends JUnit3(scalacheckMatchersUnit)
 object scalacheckMatchersUnit extends MatchersSpecification with ScalacheckMock {
   "The ScalacheckParameters object" should {
-    "provide a 'print' value which is verbose" in {
-       print.verbose mustBe true
+    "provide a 'display' value which is verbose" in {
+       display.verbose mustBe true
     }
-    "provide a 'print' value which has default values for Scalacheck parameters" in {
-      defaultValues foreach {print(_) mustNotBe null}
+    "provide a 'display' value which has default values for Scalacheck parameters" in {
+      defaultValues foreach {display(_) mustNotBe null}
     }
-    "provide a 'print' case class which can take parameters overriding the default values" in {
-      print(minTestsOk->10)(minTestsOk) mustBe 10
-      print(minTestsOk->10)(maxDiscarded) mustBe defaultValues(maxDiscarded)
+    "provide a 'display' case class which can take parameters overriding the default values" in {
+      display(minTestsOk->10)(minTestsOk) mustBe 10
+      display(minTestsOk->10)(maxDiscarded) mustBe defaultValues(maxDiscarded)
     }
-    "provide a 'print' case class which throws an exception in case of null values" in {
-      print(null) must throwA(new RuntimeException)
+    "provide a 'display' case class which throws an exception in case of null values" in {
+      display(null) must throwA(new RuntimeException)
     }
-    "provide a 'print' case class which is resilient to a value with a null key" in {
+    "provide a 'display' case class which is resilient to a value with a null key" in {
       val s: Symbol = null
-      print(s -> 10) must throwA(new RuntimeException)
+      display(s -> 10) must throwA(new RuntimeException)
     }
     "provide a 'set' case class which can take parameters overriding the default values" in {
       set(minTestsOk->10)(minTestsOk) mustBe 10

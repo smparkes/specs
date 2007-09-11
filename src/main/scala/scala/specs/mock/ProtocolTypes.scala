@@ -5,14 +5,23 @@ import scala.specs.matcher._
 import scala.util.ExtendedList._
 import scala.specs.matcher.MatcherUtils._
 
+/**
+ * The <code>ProtocolType</class> specifies if a sequence of <code>ReceivedCall</code> can match
+ * a sequence of <code>SpecifiedCall</code>
+ */
 abstract class ProtocolType {
-  def failures(expected: List[SpecifiedCall], received: List[ReceivedCall]): String
+
+  /**
+   * returns a string specifying if some expected calls have not been met
+   * return None otherwise
+   */
+  def failures(expected: List[SpecifiedCall], received: List[ReceivedCall]): Option[String]
+  def expectedDefs(expected: List[SpecifiedCall]): String
   def failedProtocol(received: List[ReceivedCall]) = "Failed protocol. " + messages(received)
   def messages(received: List[ReceivedCall]) = { 
     "Received" + (if (received.isEmpty) " none" else 
                      ":" + received.map {"\n  " + _.toString}.mkString(""))
   }
-  def expectedDefs(expected: List[SpecifiedCall]): String
   def bracket(s: String) = "[" + s + "]"
   def unexpectedCalls(expected: List[SpecifiedCall], received: List[ReceivedCall]) = {
     consume(expected, received) match {
@@ -22,20 +31,6 @@ abstract class ProtocolType {
     }      
   }
   def consume(expected: List[SpecifiedCall], received: List[ReceivedCall]): (List[SpecifiedCall], List[ReceivedCall])
-  def prefixes[T](l: List[T]): List[List[T]] = {
-    l match {
-      case Nil => Nil
-      case x::Nil => x::Nil
-      case rest => rest.flatMap(x => List(x):::(prefixes(rest.removeFirst(_==x)).map(x::_)))
-    }
-  }
-  def orderedPrefixes[T](l: List[T]): List[List[T]] = {
-    l match {
-      case Nil => Nil
-      case x::Nil => x::Nil
-      case x::rest => List(x):::(prefixes(rest).map(x::_))
-    }
-  }
 }
 
 trait ProtocolTypes {
