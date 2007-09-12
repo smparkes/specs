@@ -42,8 +42,7 @@ abstract class ProtocolType {
    * for example "in any order m1; m2" or "in sequence m1; m2; m3"
    */
   def expectedDefs(expected: List[SpecifiedCall]): String = {
-     def bracket(s: String) = "[" + s + "]"
-     constraints + (if (!constraints.isEmpty) " " else "") + bracket(expected.mkString("; "))
+     constraints + (if (!constraints.isEmpty) " " else "") + expected.mkString("[", "; ", "]")
   }
 
   /**
