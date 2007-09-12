@@ -30,7 +30,7 @@ object mockerUnit extends Specification with Sugar with ProtocolTypes {
     }
     "have a failure when not receiving an expected call" in {
       val mock = new Object { def method = mocker.record }
-      val protocol = mocker.expect { mock.method }
+      val protocol = mocker.expect(inAnyOrder) { mock.method }
 
       protocol.failures must beMatching("Expected in any order .*. Received none")
     }

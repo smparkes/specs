@@ -38,12 +38,10 @@ class Protocol extends ProtocolTypes {
 }
 abstract class SpecifiedCall {
   def expects(received: List[ReceivedCall]): Boolean
-  def consume(received: List[ReceivedCall]): List[ReceivedCall]
   def toString: String
 }
 case class ExpectedCall(val method: String) extends SpecifiedCall {
-  override def consume(received: List[ReceivedCall]) = received.dropWhile(method == _.method)
-  override def expects(received: List[ReceivedCall]) = received.exists(method == _.method)
+  override def expects(received: List[ReceivedCall]) = received.size == 1 && received(0).method == method
   override def toString = method
 }
 case class ReceivedCall(val method: String) {
@@ -58,7 +56,6 @@ case class ProtocolDef(val protocolType: ProtocolType, var expectedCalls: List[S
 
   override def toString = protocolType.expectedDefs(expectedCalls)
   override def expects(received: List[ReceivedCall]) = protocolType.failures(expectedCalls, received).isEmpty
-  override def consume(received: List[ReceivedCall]) = protocolType.consume(expectedCalls, received)._2
 }
 
 trait Mocker extends ProtocolTypes with ExampleLifeCycle with MockMatchers {

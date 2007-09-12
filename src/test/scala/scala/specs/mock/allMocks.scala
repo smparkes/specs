@@ -7,6 +7,7 @@ object mocksUnit extends JUnit3(
 object protocolsUnit extends Specification {
   "Mocks protocols" areSpecifiedBy (inAnyOrderUnit,
                                     inSequenceUnit,
-                                    numberOfMessagesUnit)
+                                    numberOfMessagesUnit,
+                                    mockerUnit)
 }
 
