@@ -69,6 +69,11 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
      // will print the result of each test if verbose = true
      def printResult(result: Option[Prop.Result], succeeded: Int, discarded: Int): Unit = {
 			 if (!verbose) return
+       result match {
+         case None => ()
+         case Some(r) => printf("\rTested: {0}", r.args) 
+       }
+       
        if (discarded == 0) 
          printf("\rPassed {0} tests", succeeded)
        else 

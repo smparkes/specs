@@ -18,16 +18,14 @@ trait AnyMatchers {
   /**
    * Matches if (a == b)
    */   
-  def is_==[T](a: T) = new Matcher[T](){ 
-     def apply(b: =>T) = ((a == b), q(b) + " is equal to " + q(a), q(b) + " is not equal to " + q(a))
+  def is_==(a: Any) = new Matcher[Any](){ 
+     def apply(b: =>Any) = ((a == b), q(b) + " is equal to " + q(a), q(b) + " is not equal to " + q(a))
    }
 
   /**
    * Alias of is_==
    */   
-  def be_==[T](a: T) = new Matcher[T](){ 
-    def apply(b: =>T) = ((a == b), q(b) + " is equal to " + q(a), q(b) + " is not equal to " + q(a))
-  }
+  def be_==(a: Any) = is_==(a)
 
   /**
    * Matches if (a neq b)

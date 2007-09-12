@@ -43,8 +43,10 @@ object inAnyOrderUnit extends Specification with TestData {
     "consume all expected calls if the received calls are a the superset of the expected calls" in {
       val moreReceivedCalls = receivedSizeIs(_ > _)
       moreReceivedCalls must pass { t: (List[ExpectedCall], List[ReceivedCall]) => val (expected, received) = t
-        inAnyOrder.consume(expected, received)._2 must ((notBeEmpty).when(!received.isEmpty) or 
-                                                        (beEmpty).when(received.isEmpty)) 
+        val consumed = inAnyOrder.consume(expected, received)
+        consumed._1 must (beEmpty.when(!received.isEmpty)) 
+        consumed._2 must ((notBeEmpty).when(!received.isEmpty) and 
+                          (beEmpty).when(received.isEmpty)) 
       }(set(maxSize->5))
     }
   }

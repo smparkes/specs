@@ -93,7 +93,7 @@ case class Example(description: String, cycle: ExampleLifeCycle) {
 class Assert[+T](value: => T, example: Example) extends Matchers {
   example.assertionsNb += 1
   
-  def must[S >: T](m: => AbstractMatcher[S]): Boolean =  {
+  def must[S >: T](m: => Matcher[S]): Boolean =  {
     val (result, _, koMessage) = m.apply(value) 
     result match {
       case false => throwFailure(this, koMessage)
@@ -103,13 +103,13 @@ class Assert[+T](value: => T, example: Example) extends Matchers {
   def verify(f: T => Boolean) = must(function(f))
   def verifies(function: T => Boolean) = verify(function)
 
-  def mustBe[S >: T](otherValue: S) = must(be(otherValue)) 
-  def mustNotBe[S >: T](otherValue: S) = must(notEq(otherValue)) 
-  def mustEq[S >: T](otherValue: S) = must(be(otherValue))
-  def mustNotEq[S >: T](otherValue: S) = mustNotBe(otherValue)
-  def must_!=[S >: T](otherValue: S) = must(is_!=(otherValue))
-  def must_==[S >: T](otherValue: S) = must(is_==(otherValue))
-  def mustEqual[S >: T](otherValue: S) = must(is_==(otherValue))
+  def mustBe(otherValue: Any) = must(be(otherValue)) 
+  def mustNotBe(otherValue: Any) = must(notEq(otherValue)) 
+  def mustEq(otherValue: Any) = must(be(otherValue))
+  def mustNotEq(otherValue: Any) = mustNotBe(otherValue)
+  def must_!=(otherValue: Any) = must(is_!=(otherValue))
+  def must_==(otherValue: Any) = must(is_==(otherValue))
+  def mustEqual(otherValue: Any) = must(is_==(otherValue))
 }
 case class FailureException(message: String) extends RuntimeException(message)
 
