@@ -12,25 +12,47 @@ import scala.specs.matcher.MatcherUtils._
 abstract class ProtocolType {
 
   /**
-   * returns a string specifying if some expected calls have not been met
-   * return None otherwise
+   * A string describing the constraints of this protocol type
+   * it must be implemented by subclasses to provide a meaningful name to describe the protocol
+   * in error messages
    */
-  def failures(expected: List[SpecifiedCall], received: List[ReceivedCall]): Option[String]
-  def expectedDefs(expected: List[SpecifiedCall]): String
-  def failedProtocol(received: List[ReceivedCall]) = "Failed protocol. " + messages(received)
-  def messages(received: List[ReceivedCall]) = { 
+  def constraints: String
+
+  /**
+   * Consumes the expected messages with the actual received ones
+   * If the expected messages are not all consumed, there will be a failure message
+   */
+  def consume(expected: List[SpecifiedCall], received: List[ReceivedCall]): (List[SpecifiedCall], List[ReceivedCall])
+  
+  /**
+   * returns error messages specifying if some expected calls have not been met
+   * or if some unexpected calls happened
+   * return "" otherwise
+   */
+   def failures(expected: List[SpecifiedCall], received: List[ReceivedCall]): String = {
+     consume(expected, received) match {
+       case (Nil, Nil) => ""
+       case (Nil, unconsumed) => unconsumed.map(_.toString + " should not have been called").mkString("\n")
+       case _ => "Expected " + expectedDefs(expected) + ". " + receivedMessages(received)
+     }
+   }
+
+  /**
+   * returns a user message specifying the protocol constraints on the expected calls:
+   * for example "in any order m1; m2" or "in sequence m1; m2; m3"
+   */
+  def expectedDefs(expected: List[SpecifiedCall]): String = {
+     def bracket(s: String) = "[" + s + "]"
+     constraints + (if (!constraints.isEmpty) " " else "") + bracket(expected.mkString("; "))
+  }
+
+  /**
+   * returns a user message with the list of received messages
+   */
+  def receivedMessages(received: List[ReceivedCall]) = { 
     "Received" + (if (received.isEmpty) " none" else 
                      ":" + received.map {"\n  " + _.toString}.mkString(""))
   }
-  def bracket(s: String) = "[" + s + "]"
-  def unexpectedCalls(expected: List[SpecifiedCall], received: List[ReceivedCall]) = {
-    consume(expected, received) match {
-      case (Nil, Nil) => Nil
-      case (_, unconsumed) => unconsumed
-      case _ => Nil
-    }      
-  }
-  def consume(expected: List[SpecifiedCall], received: List[ReceivedCall]): (List[SpecifiedCall], List[ReceivedCall])
 }
 
 trait ProtocolTypes {
@@ -58,13 +80,13 @@ trait ProtocolTypes {
   }
   case class exactlyN(n: Int) extends CallConstraint {
     def verifies(size: Int) = size == n
-    def expectation: String = n + " of: "
+    def expectation: String = n + " of:"
   }
   case class atLeastN(n: Int) extends CallConstraint {
     def verifies(size: Int) = size >= n
-    def expectation: String = "at least " + n + " of: "
+    def expectation: String = "at least " + n + " of:"
   }
   case class atMostN(n: Int) extends CallConstraint {
     def verifies(size: Int) = size <= n
-    def expectation: String = "at most " + n + " of: "
+    def expectation: String = "at most " + n + " of:"
   }

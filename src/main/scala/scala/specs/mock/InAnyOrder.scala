@@ -3,16 +3,14 @@ import scala.util.ExtendedList._
 import scala.specs.Sugar._
 
 case object inAnyOrder extends inAnyOrder
+
+/**
+ * The <code>inAnyOrder</code> protocol type will try to consume expected calls
+ * in any order. It will not consume unexpected calls
+ */
 trait inAnyOrder extends ProtocolType {
-    def failures(expected: List[SpecifiedCall], received: List[ReceivedCall]): Option[String] = {
-      if (consume(expected, received) == (Nil, Nil)) 
-        None
-      else
-        Some("Expected " + expectedDefs(expected) + ". " + messages(received))
-    }
-    def expectedDefs(expected: List[SpecifiedCall]) = {
-      "in any order " + bracket(expected.map(_.expected).mkString("; "))
-    }
+    def constraints = "in any order"
+
     def consume(expected: List[SpecifiedCall], received: List[ReceivedCall]): (List[SpecifiedCall], List[ReceivedCall]) = {
       (expected, received) match {
         case (Nil, Nil) => (Nil, Nil)

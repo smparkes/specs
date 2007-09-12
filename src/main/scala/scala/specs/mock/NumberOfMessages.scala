@@ -1,16 +1,12 @@
 package scala.specs.mock;
 
+/**
+ * The <code>NumberOfMessages</code> protocol type will try to consume expected calls
+ * at least, at most or exactly a given number of times
+ */
 class NumberOfMessages(c: CallConstraint) extends ProtocolType {
-  def failures(expected: List[SpecifiedCall], received: List[ReceivedCall]): Option[String] = {
-    consume(expected, received) match {
-      case (Nil, Nil) => None
-      case _ => Some("Expected " + expectedDefs(expected) + ". " + messages(received))
-    }
-  }
-  def expectedDefs(expected: List[SpecifiedCall]) = {
-    c.expectation + bracket(expected.map(_.expected).mkString("; "))
-  }
-  override def unexpectedCalls(expected: List[SpecifiedCall], received: List[ReceivedCall]) = Nil
+  def constraints = c.expectation
+
   def consume(expected: List[SpecifiedCall], received: List[ReceivedCall]) = {
     consume(expected, received, 1) match {
       case Some(n) if (c.verifies(n)) => (Nil, Nil)

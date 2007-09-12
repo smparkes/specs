@@ -21,7 +21,7 @@ object mockProtocols extends MatchersSpecification with ButtonAndLightMock {
     "provide an 'expect inSequence' protocol checking if calls have been made to mock objects inSequence" in {
       var protocol = expect(inSequence) { mock.off; mock.on }
       2.times {i => button.push}
-      assertion(protocol must beMet) must failWithMatch("Failed protocol. Received:\n  on\\(.*\\)\n  off\\(.*\\)")
+      assertion(protocol must beMet) must failWithMatch("Expected \\[off\\(.*\\); on\\(.*\\)\\]. Received:\n  on\\(.*\\)\n  off\\(.*\\)")
 
       protocol = expect(inSequence) { mock.on; mock.off }
       2.times {i => button.push}
