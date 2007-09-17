@@ -27,7 +27,7 @@ object junit3TestSuiteSpec extends Specification {
   "report a failure with a stacktrace pointing to the assertion causing it in the executed specification" in {
     val result = new TestResult
     suite(that.fails).run(result)
-    result.failures verifies {_.hasMoreElements}
+    result.failures verifies(_.hasMoreElements)
     val failure = result.failures.nextElement.asInstanceOf[TestFailure] 
     failure.exceptionMessage must_== "'ok' is not the same as 'first failure'"
     failure.trace.split("\n")(0) must include(failure.exceptionMessage)  
@@ -36,7 +36,7 @@ object junit3TestSuiteSpec extends Specification {
   "report an error with a stacktrace indicating the location of the error in the specification" in {
     val result = new TestResult
     suite(that.throwsAnException).run(result)
-    result.errors verifies {_.hasMoreElements}
+    result.errors verifies(_.hasMoreElements)
     val error = result.errors.nextElement.asInstanceOf[TestFailure] 
     error.exceptionMessage must_== "new Error"
     error.trace.split("\n")(0) must include(error.exceptionMessage)

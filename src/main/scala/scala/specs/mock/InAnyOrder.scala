@@ -2,33 +2,26 @@ package scala.specs.mock
 import scala.util.ExtendedList._
 import scala.specs.Sugar._
 
-case object inAnyOrder extends inAnyOrder
+case object inAnyOrder extends inAnyOrder(exactlyN(1))
 
 /**
  * The <code>inAnyOrder</code> protocol type will try to consume expected calls
  * in any order. It will not consume unexpected calls
  */
-trait inAnyOrder extends ProtocolType {
-    def constraints = "in any order"
-
-    def consume(expected: List[SpecifiedCall], received: List[ReceivedCall]): (List[SpecifiedCall], List[ReceivedCall]) = {
-      (expected, received) match {
-        case (Nil, Nil) => (Nil, Nil)
-        case (x::Nil, Nil) => (x::Nil, Nil)
-        case (Nil, x::Nil) => (Nil, x::Nil)
-        case (exp, rec) => {
-          findShortestExpectedSequence(exp, rec) match {
-            case Nil => (exp, rec)
-            case y => consume(exp.removeFirst(_.expects(y)), rec.removeFirstSeq(y))
-          }
-        }
-      }
+class inAnyOrder(val repetition: CallConstraint) extends ProtocolType(repetition) {
+  def constraints = {
+    repetition match{
+      case exactlyN(n) if (n == 1) => "in any order" 
+      case _ => repetition.expectation
     }
-    def findShortestExpectedSequence(exp: List[SpecifiedCall], rec: List[ReceivedCall]): List[ReceivedCall]= {
-      rec.sublists.sort((l1, l2) => l1.size < l2.size).find(rs => exp.exists(s => s expects rs)) match {
-        case Some(x) => x
-        case None => Nil
-      }
-    }
-
   }
+  def consume(exp: List[SpecifiedCall], rec: List[ReceivedCall]) = {
+    exp.foreach(_.repetition = repetition)
+    var n = 0
+    do {    
+      exp foreach (_.consume(rec))
+      n = n + 1
+    } while (!repetition.verifies(n))
+    (exp, rec)
+  }
+}

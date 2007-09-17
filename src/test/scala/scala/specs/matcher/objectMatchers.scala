@@ -36,7 +36,6 @@ object objectMatchersSpec extends MatchersSpecification {
     }
     "provide a 'verifies' matcher checking if an object verifies a property: 'name' verifies {_.size == 4} [alias: verify]" in {
       List() verifies { _.isEmpty }
-      List() verify { _.isEmpty }
       assertion(List("1") verifies { _.isEmpty }) must failWith("List(1) doesn't verify the expected property")
     }
 

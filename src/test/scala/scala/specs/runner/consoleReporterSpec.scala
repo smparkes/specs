@@ -41,7 +41,7 @@ object consoleReporterSpec extends Specification {
       specWithTwoExamples(that.isKo) must existMatch("2 assertions")
     } 
     "display the failure message next to the corresponding example" in { 
-      specWithTwoExamples(that.isKo, that.isOk) verifies (messages =>
+      specWithTwoExamples(that.isKo, that.isOk) verifies(messages =>
             messages.findIndexOf(matches("first failure")) ==
             messages.findIndexOf(matches("example 2.1 ok")) + 1)
     } 

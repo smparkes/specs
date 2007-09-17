@@ -54,8 +54,8 @@ trait IterableMatchers {
   def haveSameElementsAs[T](l: Iterable[T]) = new Matcher[Iterable[T]](){
     def apply(iterable: => Iterable[T]) = (
         l.sameElementsAs(iterable),
-        q(l) + " has the same elements as " + q(iterable), 
-        q(l) + " hasn't the same elements as " + q(iterable))
+        q(l.toDeepString) + " has the same elements as " + q(iterable.toDeepString), 
+        q(l.toDeepString) + " hasn't the same elements as " + q(iterable.toDeepString))
   }
 
 }

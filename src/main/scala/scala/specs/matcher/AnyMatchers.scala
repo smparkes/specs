@@ -74,7 +74,7 @@ trait AnyMatchers {
   /**
    * Matches if the function f returns true
    */   
-  def function[T](f: T => Boolean) = new Matcher[T](){
+  def verify[T](f: T => Boolean): Matcher[T] = new Matcher[T](){
      def apply(x: => T) = (f(x), x + " verifies the property", x + " doesn't verify the expected property")
   }
   

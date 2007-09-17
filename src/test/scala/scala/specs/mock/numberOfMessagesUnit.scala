@@ -2,26 +2,45 @@ package scala.specs.mock;
 import scala.specs.integration._
 import scala.specs.Sugar._
 import scala.specs.mock._
+import scalacheck.Gen._
+import scala.util.ExtendedList._
+import scala.specs.matcher.ScalacheckParameters._
 
 object numberOfMessagesSuite extends JUnit3(numberOfMessagesUnit)
-object numberOfMessagesUnit extends Specification with ProtocolTypes {
-  "A protocol type 'numberOfMessages'" should {
-    val (e, e1, e2) = (ExpectedCall("m"), ExpectedCall("m1"), ExpectedCall("m2"))
-    val (r, r1, r2) = (ReceivedCall("m"), ReceivedCall("m1"), ReceivedCall("m2"))
-    "exactly 1: consume nothing if exp=m and rec=nil" in {
-      new NumberOfMessages(exactlyN(1)).consume((e), ()) must_== (List(e), Nil)
-    }
-    "exactly 1: consume all if exp=m and rec=m" in {
-      new NumberOfMessages(exactlyN(1)).consume((e), (r)) must_== (Nil, Nil)
-    }
+object numberOfMessagesUnit extends Specification with TestData {
+  "A protocol type 'numberOfMessages'" should { usingBefore {() => clearCalls }
     "exactly 2: consume all if exp=m and rec=m, m" in {
-      new NumberOfMessages(exactlyN(2)).consume(List(e), List(r, r)) must_== (Nil, Nil)
+      new inAnyOrder(exactlyN(2)).consume((e), List(r, rprime)) must verify { t:Result => val (exp, rec) = t
+        exp.forall(_.passes) && rec.forall(_.consumed) 
+      }
     }
-    "exactly 2: consume nothing if exp=m and rec=m" in {
-      new NumberOfMessages(exactlyN(2)).consume(List(e), List(r)) must_== (List(e), List(r))
+    "exactly 2: not pass the expected call if exp=m and rec=m, but consume the received call" in {
+      new inAnyOrder(exactlyN(2)).consume(List(e), List(r)) must_== (List(e), List(r))
+      new inAnyOrder(exactlyN(2)).consume((e), List(r)) must verify { t:Result => val (exp, rec) = t
+        exp.forall(!_.passes) && rec.forall(_.consumed) 
+      }
     }
-    "exactly 2 of m expects m, m" in {
-      ProtocolDef(twoOf, List(e)).expects(List(r, r)) mustBe true
+  }
+  "An exactly(N) protocol type" should {
+    val exactly2 = new inAnyOrder(exactlyN(2))
+    "not pass expected calls at all if there are less calls than expected" in {
+      val lessReceivedCalls = receivedSizeIs(_ < _)
+      lessReceivedCalls must pass { t: (List[ExpectedCall], List[ReceivedCall]) => val (expected, received) = t
+        exactly2.consume(expected, received)
+        expected.forall(_.passes) must be(false).unless(expected.isEmpty || received.isEmpty)
+      }(set(maxSize->5))
+    }
+    "consume all expected and received calls if it is a multiple of the expected calls" in {
+      sameCalls must pass { t: (List[ExpectedCall], List[ReceivedCall]) => val (expected, received) = t
+        exactly2.consume(expected, received:::(received.map((r: ReceivedCall)=>ReceivedCall(r.method))))
+        expected.forall(_.passes) must be(true).unless(expected.isEmpty || received.isEmpty)
+      }(set(maxSize->5))
+    }
+    "not pass the expected calls if the received calls are not an exact multiple of the expected calls" in {
+      sameCalls must pass { t: (List[ExpectedCall], List[ReceivedCall]) => val (expected, same) = t
+        exactly2.consume(expected, same:::same:::same)
+        expected.forall(_.passes) must be(false).unless(expected.isEmpty || same.isEmpty)
+      }(set(maxSize->5))
     }
   }
 }

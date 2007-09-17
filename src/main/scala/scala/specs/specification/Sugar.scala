@@ -39,7 +39,7 @@ trait Sugar {
   case class RangeInt(n: Int) { def times[T](f: (Int) => T)  = for (i <- 1 to n) f(i) }
   implicit def integerToRange(n: Int): RangeInt = new RangeInt(n)
   implicit def anyPrintable[T](a: T) = {
-    new Object { def println = Console.println(a) }
+    new Object { def println = Console.println(a); def pln = Console.println(a) }
   }
 
 }

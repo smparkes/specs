@@ -9,7 +9,7 @@ import scala.specs.matcher.MatcherUtils._
  * The <code>ProtocolType</class> specifies if a sequence of <code>ReceivedCall</code> can match
  * a sequence of <code>SpecifiedCall</code>
  */
-abstract class ProtocolType {
+abstract class ProtocolType(repetition: CallConstraint) {
 
   /**
    * A string describing the constraints of this protocol type
@@ -29,12 +29,13 @@ abstract class ProtocolType {
    * or if some unexpected calls happened
    * return "" otherwise
    */
-   def failures(expected: List[SpecifiedCall], received: List[ReceivedCall]): String = {
-     consume(expected, received) match {
-       case (Nil, Nil) => ""
-       case (Nil, unconsumed) => unconsumed.map(_.toString + " should not have been called").mkString("\n")
-       case _ => "Expected " + expectedDefs(expected) + ". " + receivedMessages(received)
-     }
+   def failures(expected: List[SpecifiedCall], received: List[ReceivedCall], exclusive: Boolean): String = {
+     consume(expected, received)
+     if (expected.forall(_.passes) && ((exclusive && received.forall(_.consumed)) ||
+                                      !exclusive))   
+       ""
+     else 
+       "Expected " + expectedDefs(expected) + ". " + receivedMessages(received)
    }
 
   /**
@@ -55,15 +56,20 @@ abstract class ProtocolType {
 }
 
 trait ProtocolTypes {
-  object oneOf extends NumberOfMessages(exactlyN(1))
-  object twoOf extends NumberOfMessages(exactlyN(2))
-  object threeOf extends NumberOfMessages(exactlyN(3))
-  object anyOf extends NumberOfMessages(atLeastN(0))
-  object atLeastOneOf extends NumberOfMessages(atLeastN(1))
-  object atMostOneOf extends NumberOfMessages(atMostN(1))
-  case class atLeastNOf(n: Int) extends NumberOfMessages(atLeastN(n))
-  case class exactlyNOf(n: Int) extends NumberOfMessages(exactlyN(n))
-  case class atMostNOf(n: Int) extends NumberOfMessages(atMostN(n))
+  
+  sealed case class Exclusivity(isExclusive: Boolean)
+  val exclusively = Exclusivity(true)
+  val nonExclusively  = Exclusivity(false)
+
+  object oneOf extends inAnyOrder(exactlyN(1))
+  object twoOf extends inAnyOrder(exactlyN(2))
+  object threeOf extends inAnyOrder(exactlyN(3))
+  object anyOf extends inAnyOrder(atLeastN(0))
+  object atLeastOneOf extends inAnyOrder(atLeastN(1))
+  object atMostOneOf extends inAnyOrder(atMostN(1))
+  case class atLeastNOf(n: Int) extends inAnyOrder(atLeastN(n))
+  case class exactlyNOf(n: Int) extends inAnyOrder(exactlyN(n))
+  case class atMostNOf(n: Int) extends inAnyOrder(atMostN(n))
 
   implicit def intToProtocolTypeBuilder(i: Int) = {
     new Object {
@@ -76,6 +82,7 @@ trait ProtocolTypes {
   abstract sealed class CallConstraint { 
     def verifies(size: Int): Boolean
     def expectation: String
+    def stop(n: Int): Boolean = verifies(n)
   }
   case class exactlyN(n: Int) extends CallConstraint {
     def verifies(size: Int) = size == n
@@ -84,6 +91,7 @@ trait ProtocolTypes {
   case class atLeastN(n: Int) extends CallConstraint {
     def verifies(size: Int) = size >= n
     def expectation: String = "at least " + n + " of:"
+    override def stop(n: Int): Boolean = false
   }
   case class atMostN(n: Int) extends CallConstraint {
     def verifies(size: Int) = size <= n

@@ -8,9 +8,9 @@ object mocksSpec extends Specification { "Mocks" areSpecifiedBy (mockProtocols, 
 object mockProtocolsSuite extends JUnit3(mockProtocols) 
 object mockProtocols extends MatchersSpecification with ButtonAndLightMock {
   "Mock protocols" should { usingBefore { () => {clearExample; button.init()} }
-    "provide an 'expect inAnyOrder' protocol checking if calls have been made to mock objects" in {
+   "provide an 'expect inAnyOrder' protocol checking if calls have been made to mock objects" in {
       // by default, the calls can be made in any order
-      val protocol = expect(inAnyOrder) { mock.on; mock.off }
+      val protocol = expect(inAnyOrder){mock.on; mock.off}
       assertion(protocol must beMet) must (failWithMatch("Expected in any order \\[on\\(.*\\); off\\(.*\\)\\]"))
 
       button.push
@@ -18,58 +18,72 @@ object mockProtocols extends MatchersSpecification with ButtonAndLightMock {
 
       button.push  // the protocol is always checked at the end of an example
     }
-    "provide an 'expect inSequence' protocol checking if calls have been made to mock objects inSequence" in {
+   "provide an 'expect inAnyOrder' protocol which is, by default, discarding unexpected messages" in {
+     val protocol = expect(inAnyOrder){mock.on; mock.off}
+     3.times {i => button.push}
+   }
+   "provide an 'expect exclusively' argument checking if more calls have been made" in {
+      // by default, the calls can be made in any order
+      val protocol = expect(inAnyOrder, exclusively) { mock.on; mock.off}
+      assertion(protocol must beMet) must (failWithMatch("Expected in any order \\[on\\(.*\\); off\\(.*\\)\\]"))
+
+      3.times {i=> button.push}
+      assertion(protocol must beMet) must failWithMatch("Expected in any order \\[on\\(.*\\); off\\(.*\\)\\]")
+
+      protocol.clear
+    }
+   "provide an 'expect anyOf' protocol authorizing any of a set of calls to be made" in {
+     var protocol = expect(anyOf) { mock.destroy }
+     button.pound
+   }
+   "provide an 'expect oneOf' protocol checking if one call exactly has been made" in {
+     var protocol = expect(oneOf) { mock.on; mock.off }
+     assertion(protocol must beMet) must failWithMatch("Expected in any order \\[on\\(.*\\); off\\(.*\\)\\]. Received none")
+
+     protocol = expect(oneOf) { mock.on; mock.off }
+     3.times {i => button.push}
+     assertion(protocol must beMet) must failWithMatch("Expected in any order \\[on\\(.*\\); off\\(.*\\)\\]. Received:\n  on\\(.*\\)\n  off\\(.*\\)\n  on\\(.*\\)")
+
+     button.init()
+     protocol = expect(oneOf) { mock.on; mock.off }
+     2.times {i => button.push}
+   }
+   "provide an 'expect n.of' protocol checking if exactly n calls have been made" in {
+     var protocol = expect(2.of) { mock.on; mock.off }
+     assertion(protocol must beMet) must failWithMatch("Expected 2 of: \\[on\\(.*\\); off\\(.*\\)\\]. Received none")
+
+     protocol = expect(2.of) { mock.on; mock.off }
+     4.times {i => button.push}
+   }
+   "provide an 'expect atLeastOneOf' protocol checking if at least one call has been made" in {
+     var protocol = expect(atLeastOneOf) { mock.on; mock.off }
+     assertion(protocol must beMet) must failWithMatch("Expected at least 1 of: \\[on\\(.*\\); off\\(.*\\)\\]. Received none")
+
+     protocol = expect(atLeastOneOf) { mock.on; mock.off }
+     2.times {i => button.push}
+   }
+   "provide an 'expect atMostOneOf' protocol checking if at most one call has been made" in {
+     var protocol = expect(atMostOneOf) { mock.on; mock.off }
+     4.times {i => button.push}
+     assertion(protocol must beMet) must failWithMatch("Expected at most 1 of: \\[on\\(.*\\); off\\(.*\\)\\]. Received:\n  on\\(.*\\)\n  off\\(.*\\)")
+
+     protocol = expect(atMostOneOf) { mock.on; mock.off }
+     2.times {i => button.push}
+   }
+   "provide an 'expect at least n of' protocol checking if exactly n calls have been made" in {
+     var protocol = expect(3.atLeastOf) { mock.on; mock.off }
+     assertion(protocol must beMet) must failWithMatch("Expected at least 3 of: \\[on\\(.*\\); off\\(.*\\)\\]. Received none")
+
+     protocol = expect(2.atLeastOf) { mock.on; mock.off }
+     5.times {i => button.push}
+   }
+   "provide an 'expect inSequence' protocol checking if calls have been made to mock objects inSequence" in {
       var protocol = expect(inSequence) { mock.off; mock.on }
       2.times {i => button.push}
-      assertion(protocol must beMet) must failWithMatch("Expected \\[off\\(.*\\); on\\(.*\\)\\]. Received:\n  on\\(.*\\)\n  off\\(.*\\)")
+      assertion(protocol must beMet) must failWithMatch("Expected in sequence \\[off\\(.*\\); on\\(.*\\)\\]. Received:\n  on\\(.*\\)\n  off\\(.*\\)")
 
       protocol = expect(inSequence) { mock.on; mock.off }
       2.times {i => button.push}
-    }
-    "provide an 'expect anyOf' protocol authorizing any of a set of calls to be made" in {
-      var protocol = expect(anyOf) { mock.destroy }
-      button.pound
-    }
-    "provide an 'expect oneOf' protocol checking if one call exactly has been made" in {
-      var protocol = expect(oneOf) { mock.on; mock.off }
-      assertion(protocol must beMet) must failWithMatch("Expected 1 of: \\[on\\(.*\\); off\\(.*\\)\\]. Received none")
-
-      protocol = expect(oneOf) { mock.on; mock.off }
-      3.times {i => button.push}
-      assertion(protocol must beMet) must failWithMatch("Expected 1 of: \\[on\\(.*\\); off\\(.*\\)\\]. Received:\n  on\\(.*\\)\n  off\\(.*\\)\n  on\\(.*\\)")
-
-      button.init()
-      protocol = expect(oneOf) { mock.on; mock.off }
-      2.times {i => button.push}
-    }
-    "provide an 'expect atLeastOneOf' protocol checking if at least one call has been made" in {
-      var protocol = expect(atLeastOneOf) { mock.on; mock.off }
-      assertion(protocol must beMet) must failWithMatch("Expected at least 1 of: \\[on\\(.*\\); off\\(.*\\)\\]. Received none")
-
-      protocol = expect(atLeastOneOf) { mock.on; mock.off }
-      2.times {i => button.push}
-    }
-    "provide an 'expect atMostOneOf' protocol checking if at most one call has been made" in {
-      var protocol = expect(atMostOneOf) { mock.on; mock.off }
-      4.times {i => button.push}
-      assertion(protocol must beMet) must failWithMatch("Expected at most 1 of: \\[on\\(.*\\); off\\(.*\\)\\]. Received:\n  on\\(.*\\)\n  off\\(.*\\)")
-
-      protocol = expect(atMostOneOf) { mock.on; mock.off }
-      2.times {i => button.push}
-    }
-    "provide an 'expect n.of' protocol checking if exactly n calls have been made" in {
-      var protocol = expect(2.of) { mock.on; mock.off }
-      assertion(protocol must beMet) must failWithMatch("Expected 2 of: \\[on\\(.*\\); off\\(.*\\)\\]. Received none")
-
-      protocol = expect(2.of) { mock.on; mock.off }
-      4.times {i => button.push}
-    }
-    "provide an 'expect at least n of' protocol checking if exactly n calls have been made" in {
-      var protocol = expect(3.atLeastOf) { mock.on; mock.off }
-      assertion(protocol must beMet) must failWithMatch("Expected at least 3 of: \\[on\\(.*\\); off\\(.*\\)\\]. Received none")
-
-      protocol = expect(2.atLeastOf) { mock.on; mock.off }
-      6.times {i => button.push}
     }
   }
   "Mock protocols" can { usingBefore { () => {clearExample; button.init()} }
@@ -78,15 +92,16 @@ object mockProtocols extends MatchersSpecification with ButtonAndLightMock {
         1.of {mock.on; mock.off; mock.on} 
         1.of {mock.off} 
       }
-      assertion(protocol must beMet) must failWithMatch(".*Expected in any order \\[1 of: \\[on\\(.*\\); off\\(.*\\); on\\(.*\\)]; 1 of: \\[off\\(.*\\)\\]\\]. Received none")
+      assertion(protocol must beMet) must failWithMatch(".*Expected in any order \\[in any order \\[on\\(.*\\); off\\(.*\\); on\\(.*\\)]; in any order \\[off\\(.*\\)\\]\\]. Received none")
 
       2.times {i => button.push}
-      assertion(protocol must beMet) must failWithMatch(".*Expected in any order \\[1 of: \\[on\\(.*\\); off\\(.*\\); on\\(.*\\)\\]; 1 of: \\[off\\(.*\\)\\]\\]. Received.*")
+      assertion(protocol must beMet) must failWithMatch(".*Expected in any order \\[in any order \\[on\\(.*\\); off\\(.*\\); on\\(.*\\)\\]; in any order \\[off\\(.*\\)\\]\\]. Received.*")
       
       protocol.clear
       button.init()
       2.times {i => button.push}
     }
+ 
   }
 }
 trait ButtonAndLightMock extends ButtonAndLight with Mocker {

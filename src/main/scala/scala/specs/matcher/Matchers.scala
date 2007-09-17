@@ -109,6 +109,10 @@ abstract class Matcher[T] extends AbstractMatcher[T] with MatcherResult {
           (if (condition) result.success else true, result.okMessage, result.koMessage)
       }}
   }
+   /**
+    *  The <code>unless</code> operator returns a matcher which will be ok only if a condition is false
+    */   
+   def unless(condition : => Boolean) = when(!condition) 
 }
 trait MatcherResult {
   /**

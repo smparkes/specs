@@ -100,8 +100,8 @@ class Assert[+T](value: => T, example: Example) extends Matchers {
       case _ => true
     }
   }
-  def verify(f: T => Boolean) = must(function(f))
-  def verifies(function: T => Boolean) = verify(function)
+  def mustVerify[S >: T](f: S => Boolean): Boolean = must[S](verify(f))
+  def verifies(f: T => Boolean) = mustVerify(f)
 
   def mustBe(otherValue: Any) = must(be(otherValue)) 
   def mustNotBe(otherValue: Any) = must(notEq(otherValue)) 

@@ -3,7 +3,10 @@ import scala.specs.mock._
 
 trait MockMatchers {
   def beMet = new Matcher[Protocol](){
-    def apply(protocol: => Protocol) = (protocol.failures.isEmpty, "all expectations are met", protocol.failures)
+    def apply(protocol: => Protocol) = {
+      val failures = protocol.failures
+      (failures.isEmpty, "all expectations are met", failures)
+    }
   }
   def any[T]: T = {
      null.asInstanceOf[T]
