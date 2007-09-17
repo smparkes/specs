@@ -1,9 +1,19 @@
 package scala.specs
 
 object Sugar extends Sugar
+
+/**
+ * Synctactic sugar for specifications. Since it makes heavy uses of implicit definitions,
+ * the name reminds that it must be used with caution
+ */
 trait Sugar {
+  
+  /** alias for the value true. Allows to write <code> myObject.status mustBe ok </code>*/
   val ok = true
+  
+  /** alias for the value false. Allows to write <code> myObject.status mustBe ko </code>*/
   val ko = false
+
   /**
     This allows the following declarations:
     val list0 = ()
@@ -36,10 +46,25 @@ trait Sugar {
   implicit def productToList18[T](t: Product18[T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T]) = List(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18)
   implicit def productToList19[T](t: Product19[T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T]) = List(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18, t._19)
 
-  case class RangeInt(n: Int) { def times[T](f: (Int) => T)  = for (i <- 1 to n) f(i) }
+  /** 
+   * This implicit definition allows to write short loops, ruby-style:
+   * <code> 3.times { i => doThis() } </code>. 
+   * Warning: an integer variable i must be declared otherwise there will be a runtime exception
+   */
   implicit def integerToRange(n: Int): RangeInt = new RangeInt(n)
+  case class RangeInt(n: Int) { 
+    def times[T](f: (Int) => T)  = for (i <- 1 to n) f(i) 
+  }
+  
+  /** 
+   * This implicit definition allows to print any object to the console with:
+   * <code> myObject.pln </code> or <code> myObject.println </code>  
+   */
   implicit def anyPrintable[T](a: T) = {
-    new Object { def println = Console.println(a); def pln = Console.println(a) }
+    new Object { 
+      def println = Console.println(a)
+      def pln = Console.println(a) 
+    }
   }
 
 }
