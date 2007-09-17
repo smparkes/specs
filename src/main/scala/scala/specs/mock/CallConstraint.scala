@@ -25,11 +25,19 @@ case class exactlyN(n: Int) extends CallConstraint {
   def verifies(size: Int) = size == n
   def expectation: String = n + " of:"
 }
+
+/**
+ * This class expects at least n received calls matching a specified call 
+ */
 case class atLeastN(n: Int) extends CallConstraint {
   def verifies(size: Int) = size >= n
   def expectation: String = "at least " + n + " of:"
   override def stop(n: Int): Boolean = false
 }
+
+/**
+ * This class expects at most n received calls matching a specified call 
+ */
 case class atMostN(n: Int) extends CallConstraint {
   def verifies(size: Int) = size <= n
   def expectation: String = "at most " + n + " of:"
