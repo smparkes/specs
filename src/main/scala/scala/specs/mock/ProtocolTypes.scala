@@ -25,8 +25,8 @@ abstract class ProtocolType(repetition: CallConstraint) {
   def consume(expected: List[SpecifiedCall], received: List[ReceivedCall]): (List[SpecifiedCall], List[ReceivedCall])
   
   /**
-   * returns error messages specifying if some expected calls have not been met
-   * or if some unexpected calls happened
+   * returns error messages specifying if some expected calls have not been met.
+   * If exclusive is true, then return also an error message when unexpected calls occured
    * return "" otherwise
    */
    def failures(expected: List[SpecifiedCall], received: List[ReceivedCall], exclusive: Boolean): String = {
@@ -53,47 +53,48 @@ abstract class ProtocolType(repetition: CallConstraint) {
     "Received" + (if (received.isEmpty) " none" else 
                      ":" + received.map {"\n  " + _.toString}.mkString(""))
   }
+  
+  override def equals(other: Any): Boolean = {
+    if (!other.isInstanceOf[inAnyOrder]) 
+      false
+    else
+      other.asInstanceOf[inAnyOrder].repetition == repetition
+  }
 }
 
+sealed case class Exclusivity(isExclusive: Boolean)
+object exclusively extends Exclusivity(true)
+object nonExclusively extends Exclusivity(false)
+case class atLeastNOf(n: Int) extends inAnyOrder(atLeastN(n))
+case class exactlyNOf(n: Int) extends inAnyOrder(exactlyN(n))
+case class atMostNOf(n: Int) extends inAnyOrder(atMostN(n))
+
+/**
+ * This trait adds some frequent protocol types and some
+ * syntactic sugar to be able to specify such protocol types
+ * anyOf = inAnyOrder(exactlyN(0))
+ * oneOf = inAnyOrder(exactlyN(1))
+ * 2.of = inAnyOrder(exactlyN(2))
+ * 3.atLeastOf = inAnyOrder(exactlyN(3))
+ * 3.inSequenceAtMostOf = inAnyOrder(exactlyN(3))
+ */
 trait ProtocolTypes {
-  
-  sealed case class Exclusivity(isExclusive: Boolean)
-  val exclusively = Exclusivity(true)
-  val nonExclusively  = Exclusivity(false)
-
-  object oneOf extends inAnyOrder(exactlyN(1))
-  object twoOf extends inAnyOrder(exactlyN(2))
-  object threeOf extends inAnyOrder(exactlyN(3))
-  object anyOf extends inAnyOrder(atLeastN(0))
-  object atLeastOneOf extends inAnyOrder(atLeastN(1))
-  object atMostOneOf extends inAnyOrder(atMostN(1))
-  case class atLeastNOf(n: Int) extends inAnyOrder(atLeastN(n))
-  case class exactlyNOf(n: Int) extends inAnyOrder(exactlyN(n))
-  case class atMostNOf(n: Int) extends inAnyOrder(atMostN(n))
-
+  def oneOf = new inAnyOrder(exactlyN(1))
+  def twoOf = new inAnyOrder(exactlyN(2))
+  def threeOf = new inAnyOrder(exactlyN(3))
+  def anyOf = new inAnyOrder(atLeastN(0))
+  def atLeastOneOf = new inAnyOrder(atLeastN(1))
+  def atMostOneOf = new inAnyOrder(atMostN(1))
   implicit def intToProtocolTypeBuilder(i: Int) = {
+    
     new Object {
       def of = exactlyNOf(i)
       def atLeastOf = atLeastNOf(i)
       def atMostOf = atMostNOf(i)
+      def inSequenceOf = new inSequence(exactlyN(i))
+      def inSequenceAtLeastOf = new inSequence(atLeastN(i))
+      def inSequenceAtMostOf = new inSequence(atMostN(i))
     }
   }
 }
-  abstract sealed class CallConstraint { 
-    def verifies(size: Int): Boolean
-    def expectation: String
-    def stop(n: Int): Boolean = verifies(n)
-  }
-  case class exactlyN(n: Int) extends CallConstraint {
-    def verifies(size: Int) = size == n
-    def expectation: String = n + " of:"
-  }
-  case class atLeastN(n: Int) extends CallConstraint {
-    def verifies(size: Int) = size >= n
-    def expectation: String = "at least " + n + " of:"
-    override def stop(n: Int): Boolean = false
-  }
-  case class atMostN(n: Int) extends CallConstraint {
-    def verifies(size: Int) = size <= n
-    def expectation: String = "at most " + n + " of:"
-  }
+

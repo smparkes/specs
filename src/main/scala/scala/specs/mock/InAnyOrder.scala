@@ -6,15 +6,30 @@ case object inAnyOrder extends inAnyOrder(exactlyN(1))
 
 /**
  * The <code>inAnyOrder</code> protocol type will try to consume expected calls
- * in any order. It will not consume unexpected calls
+ * in any order. It will not consume unexpected calls.
+ * It accepts a <code>repetition</code> parameter specifying how many expected calls are supposed to happen:
+ * -exactlyN(2): exactly 2 times
+ * -atLeast(2): at least 2 times
+ * -atMost(2): at most 2 times
  */
 class inAnyOrder(val repetition: CallConstraint) extends ProtocolType(repetition) {
-  def constraints = {
+   /**
+    * returns a String specifying the constraints of this protocol.
+    * If it is exactly one, returns "in any order"
+    */
+   def constraints = {
     repetition match{
       case exactlyN(n) if (n == 1) => "in any order" 
       case _ => repetition.expectation
     }
   }
+  /**
+   * Tries to match expected calls with received calls in any order
+   * until the <code>repetition</code> parameter is satisfied
+   * Before doing so, it sets the repetition number on expected calls, so that they
+   * know when to stop matching received calls (especially for atLeast and atMost constraints).
+   * Returns the list of expected calls and the list of received calls
+   */
   def consume(exp: List[SpecifiedCall], rec: List[ReceivedCall]) = {
     exp.foreach(_.repetition = repetition)
     var n = 0

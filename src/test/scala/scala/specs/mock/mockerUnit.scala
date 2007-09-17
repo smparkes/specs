@@ -18,8 +18,8 @@ object mockerUnit extends Specification with Sugar with ProtocolTypes {
       val protocol = mocker.expect { mock.method }
       
       protocol verifies(_.isSpecified)
-      protocol.protocolDef mustNotBe null
-      protocol.protocolDef.expectedCalls must beLike { case List(ExpectedCall(_)) => ok }
+      protocol.definition mustNotBe null
+      protocol.definition.expectedCalls must beLike { case List(ExpectedCall(_)) => ok }
     }
     "add a new received call when receiving calls" in {
       val mock = new Object { def method = mocker.record }
@@ -41,7 +41,7 @@ object mockerUnit extends Specification with Sugar with ProtocolTypes {
         mocker.expect { mock.b } 
         mock.c
       }
-      protocol.protocolDef must beLike { case ProtocolDef(inAnyOrder, List(ExpectedCall(_), 
+      protocol.definition must beLike { case ProtocolDef(inAnyOrder, List(ExpectedCall(_), 
                                                                            ProtocolDef(_, _),
                                                                            ExpectedCall(_))) => ok }
     }
@@ -51,8 +51,8 @@ object mockerUnit extends Specification with Sugar with ProtocolTypes {
         mocker.expect(oneOf) { mock.a } 
         mocker.expect(twoOf) { mock.b } 
       }
-      protocol.protocolDef must beLike { case ProtocolDef(inAnyOrder, List(ProtocolDef(x, _),
-                                                                           ProtocolDef(y, _))) => (x, y) == (oneOf, twoOf) }
+      protocol.definition must beLike { case ProtocolDef(inAnyOrder, List(ProtocolDef(x, _),
+                                                                          ProtocolDef(y, _))) => (x, y) == (oneOf, twoOf) }
     }
   }
 }

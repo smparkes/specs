@@ -65,7 +65,7 @@ trait TestData extends ProtocolTypes {
   type Result = (List[SpecifiedCall], List[ReceivedCall])
   val methods = List("m1", "m1", "m2", "m3")
   def clearCalls = {
-    (e, e1, e2).foreach(_.callNumbers = 0)
+    (e, e1, e2).foreach(_.callsNumber = 0)
     (r, r1, r2).foreach(_.consumedBy = None)
   }
   def sameCalls = for (expected <- listOf(elements(methods: _*)))
