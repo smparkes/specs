@@ -39,5 +39,5 @@ trait ScalacheckExamples extends Specification {
   val isTrue = ((x: Boolean) => true)
   val isFalse = ((x: Boolean) => false)
   val identityAssert = ((x: Boolean) => x mustBe true)
-  val exceptionProperty = ((x: Boolean) => {throw new Exception; x})
+  val exceptionProperty = ((x: Boolean) => {throw new Exception})
 }

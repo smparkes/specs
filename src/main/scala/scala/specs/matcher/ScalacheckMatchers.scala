@@ -10,6 +10,7 @@ import scala.io.ConsoleOutput
 import scala.specs.matcher.ScalacheckParameters._
 import scala.specs.matcher.MatcherUtils._
 import scala.specs.Sugar._
+import scala.specs.specification._
 
 /**
  * The <code>ScalacheckMatchers</code> trait provides matchers which allow to 

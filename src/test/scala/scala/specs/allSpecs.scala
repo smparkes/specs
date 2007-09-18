@@ -29,4 +29,5 @@ object allUnits extends Specification {
 object allSpecsAndUnits extends Specification {
   "The specs and unit tests for the specs project" areSpecifiedBy (allSpecs, allUnits)
 }
+object allRunner extends ConsoleRunner(allSpecsAndUnits)
 object all extends JUnit3(allSpecsAndUnits)

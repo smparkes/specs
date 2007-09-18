@@ -1,7 +1,9 @@
 package scala.specs.matcher
 import scala.specs.matcher.MatcherUtils._
 import scala.specs.matcher.PatternMatchers._
+import scala.specs.specification._
 
+object AnyMatchers extends AnyMatchers
 /**
  * The <code>AnyMatchers</code> trait provides matchers which are applicable to any scala Reference or Value
  */
@@ -117,28 +119,47 @@ trait AnyMatchers {
     }
   }
     
+  /**
+   * returns an Option with the expected exception if it satisfies function <code>f</code>
+   * Rethrow the exception otherwise
+   */   
   private def isThrown[E <: Throwable](value: => Any, expected: E, f: (Throwable => Boolean)) = { 
     getException(value) match {
       case None => None
       case Some(e)  => if (f(e))
                          Some(e)
                        else
-                         { throwFailure(e, expected + " should have been thrown. Got: " + e); None}
+                         throwFailure(e, expected + " should have been thrown. Got: " + e)
     }
   }
+  /** evaluates a value and return any exception that is thrown */
   private def getException[E <: Throwable](value: => Any): Option[Throwable] = {
     try { value } 
     catch { case e => return Some(e) }
     return None
   }
-  protected def throwFailure(e: Throwable, failureMessage: String) = {
+
+  /**
+   * creates a FailureException corresponding to a thrown exception.
+   * Set the stacktrace of the Failure exception so that it starts with the code line where the original exception
+   * was thrown
+   */
+  def throwFailure(e: Throwable, failureMessage: String) = {
     val failure = FailureException(failureMessage) 
     failure.setStackTrace((e.getStackTrace.dropWhile {x: StackTraceElement => matches("AnyMatchers")(x.toString)}).toArray)
     throw failure
   }
-  protected def throwFailure(origin: Object, failureMessage: String) = {
-    val failure = FailureException(failureMessage) 
-    failure.setStackTrace((failure.getStackTrace.drop(1).dropWhile {x: StackTraceElement => matches(origin.getClass.getName.split("\\.").last)(x.toString)}).toArray)
+
+  /**
+   * creates a FailureException corresponding to a thrown exception.
+   * Set the stacktrace of the Failure exception so that:
+   * -it drops 2 lines corresponding to place where the failure exception was created
+   * -drop the lines corresponding to the object having created the exception (an Assert object)
+   *  in order to start the stacktrace where the failure happened
+   */
+  def throwFailure(origin: Object, failureMessage: String) = {
+    val failure = FailureException(failureMessage)
+    failure.setStackTrace((failure.getStackTrace.drop(2).dropWhile {x: StackTraceElement => matches(origin.getClass.getName.split("\\.").last)(x.toString)}).toArray)
     throw failure
   }
 

@@ -1,7 +1,7 @@
 package scala.specs.mock
 import scala.specs.matcher._
 import java.util.regex.Pattern
-
+import scala.specs.specification._
 /**
  * This trait allows to define mocked method and to specify how they can be called
  * It is used in 3 steps: 

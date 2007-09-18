@@ -3,6 +3,7 @@ package scala.specs.matcher
 import scala.specs._
 import scala.specs.specification._
 
+object Matchers extends Matchers
 /**
  * <p>The <code>Matchers</code> trait provides all existing Matchers to the 
  * <code>Specification</code> trait</p> 

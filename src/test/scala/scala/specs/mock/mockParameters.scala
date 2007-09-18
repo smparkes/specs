@@ -41,7 +41,7 @@ object mockParameters extends MatchersSpecification with MovieGuardMock {
       }
       // don't register negative movies numbers to the rater!
       assertion(checkedGuard.guard(Movie(-18))) must failWith("-18.0 is not greater than 0")
-      checkedGuard.guard(Movie(18)) mustBe ()
+      checkedGuard.guard(Movie(18)) // must not fail
     }
   }
 }

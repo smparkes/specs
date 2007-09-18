@@ -6,6 +6,7 @@ import scala.specs.matcher.ScalacheckParameters._
 import scalacheck._
 import scala.specs.mock._
 import scala.io._
+import scala.specs.specification._
 
 object scalacheckMatchersSuite extends JUnit3(scalacheckMatchersUnit)
 object scalacheckMatchersUnit extends MatchersSpecification with ScalacheckMock {

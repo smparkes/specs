@@ -1,9 +1,9 @@
 package scala.specs
-
 import scala.specs.integration._
 import scala.specs.matcher._
 import scala.specs.Sugar._
 import scala.specs.matcher.MatcherUtils._
+import scala.specs.specification._
 
 object specificationSuite extends JUnit3(specificationSpec)
 object specificationSpec extends Specification { 

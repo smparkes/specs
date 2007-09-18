@@ -1,6 +1,6 @@
 package scala.specs.integration
 import scala.specs.integration.javaConversions._
-
+import scala.specs.specification._
 import junit.framework._
 
 abstract class EmptyJUnit3TestSuite extends TestSuite { 

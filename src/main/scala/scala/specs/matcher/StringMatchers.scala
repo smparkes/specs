@@ -22,7 +22,7 @@ trait StringMatchers {
    * Matches if (b.indexOf(a) >= 0)
    */   
   def include[T <: String](a: String) = new Matcher[T](){ 
-     def apply(b: => T) = (a != null && b != null && b.indexOf(a) >= 0, q(b) + " includes " + q(a), q(b) + " doesn't include " + q(a)) 
+    def apply(b: => T) = (a != null && b != null && b.indexOf(a) >= 0, q(b) + " includes " + q(a), q(b) + " doesn't include " + q(a)) 
   }
 
   /**

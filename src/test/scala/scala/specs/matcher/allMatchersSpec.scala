@@ -2,6 +2,7 @@ package scala.specs.matcher
 import scala.collection.mutable.Queue
 import scala.specs.integration._
 import scala.specs.Sugar._
+import scala.specs.specification._
 
 object matchersTestSuite extends JUnit3(matchersSpec) 
 object matchersSpec extends Specification {

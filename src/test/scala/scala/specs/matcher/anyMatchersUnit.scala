@@ -2,6 +2,7 @@ package scala.specs.matcher
 import scala.specs._
 import scala.specs.integration._
 import scala.specs.Sugar._
+import scala.specs.specification._
 
 object anyMatchersSuite extends JUnit3(anyMatchersUnit)
 object anyMatchersUnit extends MatchersSpecification {
