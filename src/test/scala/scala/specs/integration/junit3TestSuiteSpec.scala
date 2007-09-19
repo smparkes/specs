@@ -5,6 +5,7 @@ import junit.framework._
 import scala.specs.integration.javaConversions._
 import scala.specs.runner._
 
+object junit3TestSuiteRunner extends ConsoleRunner(junit3TestSuiteSpec)
 object junit3TestSuiteTestSuite extends JUnit3(junit3TestSuiteSpec)
 object junit3TestSuiteSpec extends Specification {
   "A junit 3 test suite" should {
@@ -71,7 +72,6 @@ class SpecWithTwoExamples(behaviour: List[(that.Value)]) extends TestSpec(behavi
       "have example 2.1 ok" in { assertions.head.apply}
       "have example 2.2 ok" in { assertions.last.apply }
     }
-    report(this.suts)
     messages
   }   
 }

@@ -53,10 +53,10 @@ object basicFeatures extends SpecificationWithSamples {
 }
 object advancedFeatures extends SpecificationWithSamples {
   "A specification " can {
-    "have a user-defined description" in {
+    "have a user-defined name" in {
       val spec = oneEx(that.isOk) 
-      spec.description = "This is a great spec"
-      spec.description must_== "This is a great spec"
+      spec.name = "This is a great spec"
+      spec.name must_== "This is a great spec"
     }
     "be composed of other specifications. The composite specification has subSpecifications.\n" + 
     "Use the isSpecifiedBy method to do so [alias areSpecifiedBy]."  in {
@@ -93,7 +93,7 @@ trait SpecificationWithSamples extends Specification {
     val failure1 = () => "ok" mustBe "first failure"
     val failure2 = () => "ok" mustBe "second failure"
     val failMethod = () => fail("failure with the fail method")
-    val exception = () => throw new Error("new Error")
+    val exception = () => error("new Error")
     def assertions(behaviours: List[that.Value]) = behaviours map { case that.isOk => success
                                       case that.isKo => failure1
                                       case that.isKoTwice => () => {failure1(); failure2()} 

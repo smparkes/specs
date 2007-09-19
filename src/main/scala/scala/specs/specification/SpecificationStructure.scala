@@ -40,6 +40,9 @@ trait SpecificationStructure extends ExampleLifeCycle with AssertFactory {
   /** description of the specification */ 
   var description = createDescription(getClass.getName)
 
+  /** name of the specification */ 
+  var name = createDescription(getClass.getName)
+
   /**
    * returns a description from the class name, taking the last name which doesn't contain a $ or a number.
    * For example: com.pack1.MyClass$1$ will:
@@ -56,13 +59,13 @@ trait SpecificationStructure extends ExampleLifeCycle with AssertFactory {
 
   /** this declares that a specification is composed of other specifications */ 
   def isSpecifiedBy(specifications: Specification*) = {
-    this.description += " is specified by"
+    this.description = this.name + " is specified by"
     subSpecifications = subSpecifications:::specifications.toList
   }
 
   /** alias for isSpecifiedBy */ 
   def areSpecifiedBy(specifications: Specification*) = {
-    this.description += " are specified by"
+    this.description = this.name + " are specified by"
     subSpecifications = subSpecifications:::specifications.toList
   }
 
@@ -70,7 +73,7 @@ trait SpecificationStructure extends ExampleLifeCycle with AssertFactory {
    * implicit definition allowing to declare a composition inside the current specification:  
    * <code>"A complex specification".isSpecifiedBy(spec1, spec2)</code>
    */
-  implicit def declare(d: String): SpecificationStructure = { description = d; this }
+  implicit def declare(d: String): SpecificationStructure = { name = d; this }
   
   /** list of systems under test */ 
   var suts : List[Sut] = Nil

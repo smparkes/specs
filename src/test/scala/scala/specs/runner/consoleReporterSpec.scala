@@ -14,10 +14,10 @@ object consoleReporterSpec extends Specification {
 
   "A console reporter" should {
     "report the name of the specification: 'A specification should'" in { 
-      specWithOneExample(that.isOk) mustContain "A specification should"
+      specWithOneExample(that.isOk) must containMatch("A specification should")
     }
     "report the specification examples: '-have example 1 ok'" in { 
-      specWithOneExample(that.isOk) mustContain "- have example 1 ok"
+      specWithOneExample(that.isOk) must containMatch("have example 1 ok")
     }
     "display '0 failure' if there is no assertion" in { 
       specWithOneExample(that.isOk) must existMatch("0 failure")
@@ -77,7 +77,7 @@ class SpecWithOneExample(behaviours: List[(that.Value)]) extends TestSpec {
         assertions(behaviours) foreach {_.apply}
       }
     }
-    report(this.suts)
+    reportSpec(this)
     messages
   }   
 }
@@ -88,7 +88,7 @@ class SpecWithTwoExamples(behaviours: List[(that.Value)]) extends TestSpec {
       "have example 2.1 ok" in { assertions(behaviours).head.apply}
       "have example 2.2 ok" in { assertions(behaviours).last.apply }
     }
-    report(this.suts)
+    reportSpec(this)
     messages
   }   
 }

@@ -4,6 +4,7 @@ import scala.specs.integration._
 import scala.specs._
 import scala.specs.runner._
 
+object beforeAfterRunner extends ConsoleRunner(beforeAfterSpec) 
 object beforeAfterSuite extends JUnit3(beforeAfterSpec) 
 object beforeAfterSpec extends Specification {
   "A specification with before/after clauses" should {
@@ -21,7 +22,7 @@ object beforeAfterSpec extends Specification {
 }
 
 trait beforeAfterTestSpec extends Specification with ConsoleReporter with MockOutput {
-  def execute= { suts = Nil; executeSpec; report(suts) }
+  def execute = { suts = Nil; executeSpec }
   def executeSpec
 }
 
@@ -33,14 +34,16 @@ object beforeEx extends beforeAfterTestSpec {
       "have example 1 ok" in { true }
       "have example 2 ok" in { true }
     }
+    reportSpec(this)
   }   
 }
 object beforeExampleFailing extends beforeAfterTestSpec {
   override def executeSpec = {
     "A specification" should {
       var beforeCalls = 0
-      usingBefore { () => throw new Error("before error") }
+      usingBefore { () => error("before error") }
       "have example 1 ok" in { Console.println("tested") }
     }
+    reportSpec(this)
   }   
 }

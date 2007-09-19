@@ -4,7 +4,7 @@ import scala.util.log.ConsoleLog
 import scala.util.JavaCollectionsConversion
 
 class ConsoleRunner(specifications: Specification*) extends ConsoleReporter {
-  def main(args: Array[String]) = report(specifications.flatMap {_.suts })
+  def main(args: Array[String]) = report(specifications)
 }
 
 trait SpecsFileRunner extends ConsoleRunner with SpecsFinder {
