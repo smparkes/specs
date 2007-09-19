@@ -3,7 +3,7 @@ package scala.specs
 import scala.specs._
 import scala.specs.matcher._
 import scala.specs.Sugar._
-import scala.specs.integration._
+import scala.specs.runner._
 import scala.util._
 import scala.collection.mutable._
 import scalacheck.Gen._

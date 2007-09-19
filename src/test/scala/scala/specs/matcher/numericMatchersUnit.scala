@@ -1,6 +1,6 @@
 package scala.specs.matcher
 import scala.specs._
-import scala.specs.integration._
+import scala.specs.runner._
 import scalacheck.Gen._
 
 object numericMatchersSuite extends JUnit3(numericMatchersUnit)

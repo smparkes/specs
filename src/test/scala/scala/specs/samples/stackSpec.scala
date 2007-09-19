@@ -1,6 +1,6 @@
 package scala.specs.samples
 
-import scala.specs.integration._
+import scala.specs.runner._
 
 object stackSuite extends JUnit3(stackSpecification)
 object stackSpecification extends Specification with Sugar {

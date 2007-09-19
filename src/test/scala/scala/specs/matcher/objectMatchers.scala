@@ -1,6 +1,6 @@
 package scala.specs.matcher
 import scala.collection.mutable.Queue
-import scala.specs.integration._
+import scala.specs.runner._
 import scala.specs.Sugar._
 
 object objectMatchersTestSuite extends JUnit3(objectMatchersSpec) 

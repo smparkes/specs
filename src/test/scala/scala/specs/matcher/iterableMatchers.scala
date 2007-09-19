@@ -1,5 +1,5 @@
 package scala.specs.matcher
-import scala.specs.integration._
+import scala.specs.runner._
 import scala.specs._
 
 object iterableTestSuite extends JUnit3(iterableMatchersSpec) 

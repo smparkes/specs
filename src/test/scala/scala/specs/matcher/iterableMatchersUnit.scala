@@ -1,6 +1,6 @@
 package scala.specs.matcher
 import scala.specs._
-import scala.specs.integration._
+import scala.specs.runner._
 
 object iterableMatchersSuite extends JUnit3(iterableMatchersUnit)
 object iterableMatchersUnit extends MatchersSpecification {

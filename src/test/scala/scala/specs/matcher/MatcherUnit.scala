@@ -5,7 +5,7 @@ import scalacheck._
 import scalacheck._
 import scala.specs._
 import scala.specs.matcher._
-import scala.specs.integration._
+import scala.specs.runner._
 import scala.specs.Sugar._
 import scala.specs.matcher.ScalacheckParameters._
 

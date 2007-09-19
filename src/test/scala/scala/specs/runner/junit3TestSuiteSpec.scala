@@ -1,8 +1,7 @@
-package scala.specs.integration
+package scala.specs.runner
 
 import scala.io.mock.MockOutput
-import junit.framework._
-import scala.specs.integration.javaConversions._
+import scala.specs.runner.javaConversions._
 import scala.specs.runner._
 
 object junit3TestSuiteRunner extends ConsoleRunner(junit3TestSuiteSpec)
@@ -46,36 +45,4 @@ object junit3TestSuiteSpec extends Specification {
   def suite(behaviours: that.Value*) = new JUnit3(new SpecWithOneExample(behaviours.toList))
 }
 
-
-abstract class TestSpec(behaviours: List[that.Value]) extends Specification with ConsoleReporter with MockOutput {
-  val succeeds = () => true mustBe true
-  val failure1 = () => "ok" mustBe "first failure"
-  val failure2 = () => "ok" mustBe "second failure"
-  val exception = () => throw new Error("new Error")
-  def assertions = behaviours map { case that.succeeds => succeeds
-                                    case that.fails => failure1
-                                    case that.failsTwice => failure2 
-                                    case that.throwsAnException => exception }
-}
-
-class SpecWithOneExample(behaviour: List[(that.Value)]) extends TestSpec(behaviour) {
-    "A specification" should {
-      "have example 1 ok" in {
-        assertions foreach {_.apply}
-      }
-    }
-}
-
-class SpecWithTwoExamples(behaviour: List[(that.Value)]) extends TestSpec(behaviour) {
-  def run = {
-    "A specification" should {
-      "have example 2.1 ok" in { assertions.head.apply}
-      "have example 2.2 ok" in { assertions.last.apply }
-    }
-    messages
-  }   
-}
-object that extends Enumeration {
-  val fails, succeeds, failsTwice, throwsAnException = Value
-}
 

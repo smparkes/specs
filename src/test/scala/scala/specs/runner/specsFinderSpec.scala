@@ -1,7 +1,7 @@
 package scala.specs.runner
 import scala.io.mock.MockFileSystem
 import scala.io.ConsoleOutput
-import scala.specs.integration._
+import scala.specs.runner._
 
 object specsFinderSuite extends JUnit3(specsFinderSpec)
 object specsFinderSpec extends Specification with Init {

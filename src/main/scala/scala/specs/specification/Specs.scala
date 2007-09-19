@@ -2,7 +2,7 @@ package scala.specs
 import scala.util._
 import scala.specs.matcher._
 import scala.collection.mutable._
-import scala.specs.integration._
+import scala.specs.runner._
 import scala.specs.matcher.MatcherUtils._
 import scala.specs.SpecUtils._
 import scala.specs.specification._

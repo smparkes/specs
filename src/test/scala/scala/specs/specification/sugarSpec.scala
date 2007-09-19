@@ -1,5 +1,5 @@
 package scala.specs
-import scala.specs.integration._
+import scala.specs.runner._
 
 object sugarSuite extends JUnit3(sugarSpec)
 object sugarSpec extends Specification with Sugar {

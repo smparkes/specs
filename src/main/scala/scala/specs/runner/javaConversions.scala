@@ -1,4 +1,4 @@
-package scala.specs.integration
+package scala.specs.runner
 
 object javaConversions {
   implicit def enumerationToList(e: java.util.Enumeration): List[Object] = {

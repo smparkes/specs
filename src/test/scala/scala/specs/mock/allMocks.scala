@@ -1,5 +1,5 @@
 package scala.specs.mock
-import scala.specs.integration._
+import scala.specs.runner._
 
 
 object mocksUnit extends JUnit3(

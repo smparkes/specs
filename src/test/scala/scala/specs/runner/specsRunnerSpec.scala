@@ -4,7 +4,7 @@ import scala.specs._
 import scala.util._
 import scala.collection.mutable.Queue
 import scala.io.mock.MockOutput
-import scala.specs.integration._
+import scala.specs.runner._
 
 object specsRunnerSuite extends JUnit3(specsRunnerSpec)
 object specsRunnerSpec extends Specification with TestRunner {

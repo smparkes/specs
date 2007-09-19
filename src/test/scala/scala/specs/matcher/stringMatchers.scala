@@ -1,5 +1,5 @@
 package scala.specs.matcher
-import scala.specs.integration._
+import scala.specs.runner._
 
 object stringMatchersSpecSuite extends JUnit3(stringMatchersSpec) 
 object stringMatchersSpec extends MatchersSpecification {

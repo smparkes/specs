@@ -1,7 +1,7 @@
 package scala.specs.runner
 
 import scala.specs._
-import scala.specs.integration._
+import scala.specs.runner._
 import scala.util._
 import scala.collection.mutable._
 import scala.io.mock.MockOutput

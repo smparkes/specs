@@ -1,6 +1,6 @@
 package scala.specs.matcher
 import scala.specs.specification
-import scala.specs.integration._
+import scala.specs.runner._
 import scala.specs.Sugar._
 
 object patternMatchersSpecSuite extends JUnit3(patternMatchersSpec) 

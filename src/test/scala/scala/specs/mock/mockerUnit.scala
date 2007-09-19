@@ -1,5 +1,5 @@
 package scala.specs.mock
-import scala.specs.integration._
+import scala.specs.runner._
 import scala.specs.Sugar._
 import scala.specs.mock._
 

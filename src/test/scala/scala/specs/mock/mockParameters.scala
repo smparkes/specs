@@ -2,7 +2,7 @@ package scala.specs.mock
 import scala.specs._
 import scala.specs.Sugar._
 import scala.specs.matcher._
-import scala.specs.integration._
+import scala.specs.runner._
 
 object mockParametersSuite extends JUnit3(mockParameters) 
 object mockParameters extends MatchersSpecification with MovieGuardMock {
