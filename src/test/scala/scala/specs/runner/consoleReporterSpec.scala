@@ -63,8 +63,11 @@ abstract class TestSpec extends Specification with ConsoleReporter with MockOutp
   val failure2 = () => "ok" mustBe "second failure"
   val failMethod = () => fail("failure with the fail method")
   val exception = () => throw new Error("new Error")
-  def assertions(behaviours: List[that.Value]) = behaviours map { case that.isOk => success
+  def assertions(behaviours: List[that.Value]) = behaviours map { 
+                                    case that.succeeds => success
+                                    case that.isOk => success
                                     case that.isKo => failure1
+                                    case that.fails => failure1
                                     case that.isKoTwice => () => {failure1(); failure2()} 
                                     case that.isKoWithTheFailMethod => failMethod 
                                     case that.throwsAnException => exception }
@@ -93,6 +96,6 @@ class SpecWithTwoExamples(behaviours: List[(that.Value)]) extends TestSpec {
   }   
 }
 object that extends Enumeration {
-  val isKo, isOk, isKoTwice, isKoWithTheFailMethod, throwsAnException = Value
+  val isKo, fails, isOk, succeeds, isKoTwice, isKoWithTheFailMethod, throwsAnException = Value
 }
 

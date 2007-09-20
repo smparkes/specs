@@ -3,6 +3,7 @@ package scala.specs.runner
 import scala.io.mock.MockOutput
 import scala.specs.runner.javaConversions._
 import scala.specs.runner._
+import junit.framework._
 
 object junit3TestSuiteRunner extends ConsoleRunner(junit3TestSuiteSpec)
 object junit3TestSuiteTestSuite extends JUnit3(junit3TestSuiteSpec)
