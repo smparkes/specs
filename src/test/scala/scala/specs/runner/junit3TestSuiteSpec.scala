@@ -11,8 +11,8 @@ object junit3TestSuiteSpec extends Specification {
   "A junit 3 test suite" should {
     "create a test suite containing tests suites for each specification " + 
     "in its constructor and a test case for each example" in {
-      suite(that.succeeds).getName must beMatching("SpecWithOneExample")
-      suite(that.succeeds).suites match {
+      suite(that.isOk).getName must beMatching("SimpleSpec")
+      suite(that.isOk).suites match {
         case List() => fail("there should be a test suite")
         case ts::List() => {
           ts.getName mustMatch "A specification"
@@ -26,12 +26,12 @@ object junit3TestSuiteSpec extends Specification {
     }
     "report a failure with a stacktrace pointing to the assertion causing it in the executed specification" in {
       val result = new TestResult
-      suite(that.fails).run(result)
+      suite(that.isKo).run(result)
       result.failures verifies(_.hasMoreElements)
       val failure = result.failures.nextElement.asInstanceOf[TestFailure] 
       failure.exceptionMessage must_== "'ok' is not the same as 'first failure'"
       failure.trace.split("\n")(0) must include(failure.exceptionMessage)  
-      failure.trace.split("\n")(1) must (beMatching("TestSpec") and beMatching("junit3TestSuiteSpec.scala:\\d")) 
+      failure.trace.split("\n")(1) must (beMatching("TestSpec") and beMatching("consoleReporterSpec.scala:\\d")) 
     }
     "report an error with a stacktrace indicating the location of the error in the specification" in {
       val result = new TestResult
@@ -40,10 +40,17 @@ object junit3TestSuiteSpec extends Specification {
       val error = result.errors.nextElement.asInstanceOf[TestFailure] 
       error.exceptionMessage must_== "new Error"
       error.trace.split("\n")(0) must include(error.exceptionMessage)
-      error.trace.split("\n")(1) must (beMatching("TestSpec") and beMatching("junit3TestSuiteSpec.scala:\\d"))
+      error.trace.split("\n")(1) must (beMatching("TestSpec") and beMatching("consoleReporterSpec.scala:\\d"))
     }
   }
-  def suite(behaviours: that.Value*) = new JUnit3(new SpecWithOneExample(behaviours.toList))
+  def suite(behaviours: that.Value*) = new JUnit3(new SimpleSpec(behaviours.toList))
 }
 
+class SimpleSpec(behaviours: List[(that.Value)]) extends TestSpec {
+  "A specification" should {
+    "have example 1 ok" in {
+      assertions(behaviours) foreach {_.apply}
+    }
+  }   
+}
 

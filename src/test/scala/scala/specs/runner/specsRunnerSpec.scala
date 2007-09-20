@@ -12,11 +12,11 @@ object specsRunnerSpec extends Specification with TestRunner {
     usingBefore { () => runner.messages.clear }
     
     "execute a specification contained in a file" in { 
-      runWith("scala.specs.sampleSpec1")
+      runWith("scala.specs.samples.sampleSpec1")
       messages mustExistMatch "example"
     }
     "execute 2 specifications contained in a directory" in { 
-      runWith("scala.specs.sampleSpec1", "scala.specs.sampleSpec2")
+      runWith("scala.specs.samples.sampleSpec1", "scala.specs.samples.sampleSpec2")
       messages mustExistMatch "specification1"
       messages mustExistMatch "specification2"
     }
@@ -24,17 +24,17 @@ object specsRunnerSpec extends Specification with TestRunner {
 }
 
 trait MockSpecsFinder extends SpecsFinder {
-  var paths: List[String] = _ 
-  override def specificationNames(filesPath: String) = paths
+  var classNames: List[String] = Nil
+  override def specificationNames(filesPath: String, pattern: String) = classNames
 }
 trait TestRunner {
-  object runner extends SpecsFileRunner with ConsoleReporter with MockSpecsFinder with MockOutput
-  def runWith(paths: String*) = {
-    runner.paths = paths.toList 
-    runner.runSpecs("real path doesn't mind here")
+  object runner extends SpecsFileRunner("", ".*") with ConsoleReporter with MockSpecsFinder with MockOutput
+  def runWith(classNames: String*) = {
+    runner.classNames = classNames.toList 
+    runner.report(Nil)
   }
   def messages = runner.messages
 }
- 
+object AllSpecsFileRunner extends SpecsFileRunner("./src/test/scala/scala/specs", "([^a].)*Spec") 
 
 

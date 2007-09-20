@@ -6,15 +6,16 @@ import scala.collection.mutable.Queue
 
 trait SpecsFinder extends FileSystem {
 
-  def specificationNames(path: String) : List[String] = {
+  def specificationNames(path: String, pattern: String) : List[String] = {
     var result = new Queue[String]
-    filePaths(path).foreach { collectSpecifications(result, _) }
+    filePaths(path).foreach { collectSpecifications(result, _, pattern) }
     result.toList
   }
   
-  def collectSpecifications(result: Queue[String], filePath: String) = {
-    val pattern = "\\s*object\\s*(.+)\\s*extends\\s*Specification.*"
-    val m = Pattern.compile(pattern).matcher(readFile(filePath))
+  def collectSpecifications(result: Queue[String], filePath: String, pattern: String): Unit = {
+    if (!filePath.endsWith(".scala")) return    
+    val specPattern = "\\s*object\\s*(" + pattern + ")\\s*extends\\s*.*Spec.*\\s*\\{"
+    val m = Pattern.compile(specPattern).matcher(readFile(filePath))
     while (m.find)
       result += (packageName(filePath) + "." + m.group(1).trim)
   }
