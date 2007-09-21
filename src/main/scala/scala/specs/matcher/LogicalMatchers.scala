@@ -7,13 +7,14 @@ import scala.specs.matcher.MatcherUtils._
 trait LogicalMatchers {
 
   /**
-   * returns matchers.not
+   * @param m a matcher 
+   * @return m.not
    */   
   def not[T](m: Matcher[T]) = m.not
 
   /**
-   * returns a Matcher which combines all matchers with a logical 'and'
-   * returns a 'true' matcher (always true) if the list is empty
+   * @return a Matcher which combines all matchers with a logical 'and'
+   * @return a 'true' matcher (always true) if the list is empty
    */   
   def verifyAll[T](ms: Iterable[Matcher[T]]): Matcher[T] = {
     ms match {
@@ -28,8 +29,8 @@ trait LogicalMatchers {
   def verifyAll[T](ms: Matcher[T]*): Matcher[T] = verifyAll(ms.toList)
 
   /**
-   * returns a Matcher which combines all matchers with a logical 'or'
-   * returns a 'false' matcher (always false) if the list is empty
+   * @return a Matcher which combines all matchers with a logical 'or'
+   * @return a 'false' matcher (always false) if the list is empty
    */   
   def verifyAny[T](ms: Iterable[Matcher[T]]): Matcher[T] = {
     ms match {

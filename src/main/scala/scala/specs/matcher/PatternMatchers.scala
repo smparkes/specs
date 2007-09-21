@@ -8,14 +8,15 @@ import scala.specs.matcher.MatcherUtils._
 trait PatternMatchers {
   
   /**
-   * Matches if the value 'v' is like the pattern { case expression => boolean_result }
+   * Matches if the value 'v' is like the pattern { case expression => boolean_result }<br>
    * Uses the fact that we can use the following syntax to map Options:
-   *   myOption.map { case expression => boolean result }
-   * In that case,  <code>{ case expression => boolean_result }</code> = pattern, is a function <code>Any => Boolean</code>
+   *  </code> myOption.map { case expression => boolean result }<code><br>
+   * In that case,  <code>{ case expression => boolean_result }</code> = pattern, is a function <code>Any => Boolean</code><br>
    * If there is no match, return false and if there is a match, return the value inside the mapped option, which should be 
-   * <code>true</code>
+   * <code>true</code><br>
    * The <code>Sugar</code> object can be used to get shorter expression by having the <code>ok</code> alias for <code>true</code>:
-   *   List(1, 2) must beLike { case x::y::Nil => ok }
+   *   <code>List(1, 2) must beLike { case x::y::Nil => ok }</code>
+   * @param pattern a case expression
    */  
   def beLike(pattern: => (Any => Boolean)) = new Matcher[Any](){
      def apply(value: => Any) = ( 
@@ -63,7 +64,7 @@ trait PatternMatchers {
 
   /**
    * The CaseMatcher class allow to verify expressions such as:
-   * Some(x) must beSome[String].which(_.startWith("abc"))
+   * <code>Some(x) must beSome[String].which(_.startWith("abc"))</code>
    */
   abstract class CaseMatcher[T] extends Matcher[Option[T]] {
     private var whichFunction: Option[T => Boolean] = None
@@ -87,4 +88,7 @@ trait PatternMatchers {
     }
   }
 }
+/**
+ * Companion object for PatternMatchers
+ */
 object PatternMatchers extends PatternMatchers

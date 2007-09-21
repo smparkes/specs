@@ -12,11 +12,11 @@ object specsRunnerSpec extends Specification with TestRunner {
     usingBefore { () => runner.messages.clear }
     
     "execute a specification contained in a file" in { 
-      runWith("scala.specs.samples.sampleSpec1")
+      runWith("scala.specs.samples.sampleSpec1$")
       messages mustExistMatch "example"
     }
     "execute 2 specifications contained in a directory" in { 
-      runWith("scala.specs.samples.sampleSpec1", "scala.specs.samples.sampleSpec2")
+      runWith("scala.specs.samples.sampleSpec1$", "scala.specs.samples.sampleSpec2$")
       messages mustExistMatch "specification1"
       messages mustExistMatch "specification2"
     }
@@ -35,6 +35,8 @@ trait TestRunner {
   }
   def messages = runner.messages
 }
-object AllSpecsFileRunner extends SpecsFileRunner("./src/test/scala/scala/specs", "([^a].)*Spec") 
+object AllSpecsFileRunner extends SpecsFileRunner("./src/test/scala/scala/specs", "([^(?>all)].)*Spec") 
+object AllUnitFileRunner extends SpecsFileRunner("./src/test/scala/scala/specs", "([^(?>all)].)*Unit") 
+object AllFileRunner extends SpecsFileRunner("./src/test/scala/scala/specs", "([^(?>all)].)*.*") 
 
 

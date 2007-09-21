@@ -82,9 +82,9 @@ trait AnyMatchers {
   
   /**
    * Matches if value is throwing an exception which is assignable from errorType.getClass
-   * Otherwise rethrow any other exception
-   * Usage: value must throwA(new ExceptionType)
-   * Advanced usage: value must throwA(new ExceptionType).like {case ExceptionType(m) => m.startsWith("bad")}
+   * <br>Otherwise rethrow any other exception
+   * <br>Usage: <code>value must throwA(new ExceptionType)</code>
+   * <br>Advanced usage: <code>value must throwA(new ExceptionType).like {case ExceptionType(m) => m.startsWith("bad")}</code>
    */   
   def throwException[E <: Throwable](exception: E) = new Matcher[Any](){
      def apply(value: => Any) = { 
@@ -120,8 +120,8 @@ trait AnyMatchers {
   }
     
   /**
-   * returns an Option with the expected exception if it satisfies function <code>f</code>
-   * Rethrow the exception otherwise
+   * @returns an Option with the expected exception if it satisfies function <code>f</code>
+   * <br>rethrows the exception otherwise
    */   
   private def isThrown[E <: Throwable](value: => Any, expected: E, f: (Throwable => Boolean)) = { 
     getException(value) match {
@@ -140,9 +140,11 @@ trait AnyMatchers {
   }
 
   /**
-   * creates a FailureException corresponding to a thrown exception.
-   * Set the stacktrace of the Failure exception so that it starts with the code line where the original exception
+   * Creates a FailureException corresponding to a thrown exception.
+   * <br>Sets the stacktrace of the <code>FailureException</code> so that it starts with the code line where the original exception
    * was thrown
+   * @param e original exception 
+   * @param failureMessage exception message 
    */
   def throwFailure(e: Throwable, failureMessage: String) = {
     val failure = FailureException(failureMessage) 
@@ -151,11 +153,14 @@ trait AnyMatchers {
   }
 
   /**
-   * creates a FailureException corresponding to a thrown exception.
-   * Set the stacktrace of the Failure exception so that:
-   * -it drops 2 lines corresponding to place where the failure exception was created
-   * -drop the lines corresponding to the object having created the exception (an Assert object)
+   * Creates a FailureException corresponding to a thrown exception<br>	 
+   * Sets the stacktrace of the Failure exception so that:
+   * <ul><li>it drops 2 lines corresponding to place where the failure exception was created
+   * <li>drop the lines corresponding to the object having created the exception (an Assert object)
    *  in order to start the stacktrace where the failure happened
+   * </ul>
+   * @param origin object which is supposed to thrown the <code>FailureException</code> 
+   * @param failureMessage exception message 
    */
   def throwFailure(origin: Object, failureMessage: String) = {
     val failure = FailureException(failureMessage)

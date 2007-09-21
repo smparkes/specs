@@ -1,0 +1,2 @@
+scaladoc -d ./api2 -linksource -doctitle Specs -windowtitle Specs -top Specs -cp c:/projects/scala-utils/target/classes;C:/projects/scalacheck/target/classes;C:/projects/specs/target/classes;./lib/junit-3.8.1.jar ./src/main/scala/scala/specs/matcher/*.scala ./src/main/scala/scala/specs/mock/*.scala ./src/main/scala/scala/specs/runner/*.scala ./src/main/scala/scala/specs/specification/*.scala C:/projects/scala-utils/src/main/scala/scala/io/*.scala C:/projects/scala-utils/src/main/scala/scala/util/*.scala
+  

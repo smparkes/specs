@@ -115,6 +115,9 @@ abstract class Matcher[T] extends AbstractMatcher[T] with MatcherResult {
     */   
    def unless(condition : => Boolean) = when(!condition) 
 }
+/**
+ *  Result of <code>Matcher.apply</code>. Provides a success flag and status messages
+ */   
 trait MatcherResult {
   /**
    * This case class and the associated implicit definition is only here to add more meaningful names to

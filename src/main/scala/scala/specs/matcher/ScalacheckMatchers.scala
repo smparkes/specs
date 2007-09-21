@@ -23,16 +23,16 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
    implicit def defaultParameters = new Parameters(ScalacheckParameters.setParams(Nil))
 		
    /**
-    * Matches ok if the <code>function T => Boolean</code> returns <code>true</code> for any generated value
-    * Usage: <code>function must pass(generated_values)</code>
-    * params are the given by the implicit default parameters of Scalacheck
+    * Matches ok if the <code>function T => Boolean</code> returns <code>true</code> for any generated value<br>
+    * Usage: <code>function must pass(generated_values)</code><br>
+    * @param params are the given by the implicit default parameters of Scalacheck
     */
    def pass[T](g: Gen[T])(implicit params: Parameters) = new Matcher[T => Boolean](){
       def apply(f: => (T => Boolean)) = checkFunction(g)(f)(params)
     }
 
    /**
-    * Matches ok if the <code>function T => Boolean</code> returns <code>true</code> for any generated value
+    * Matches ok if the <code>function T => Boolean</code> returns <code>true</code> for any generated value<br>
     * Usage: <code>generated_values must pass(function)</code>
     */
    def pass[T](f: T => Boolean)(implicit params: Parameters) = new Matcher[Gen[T]](){
@@ -40,7 +40,7 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
    }
 
    /**
-    * Matches ok if the <code>property</code> is proved for any generated value
+    * Matches ok if the <code>property</code> is proved for any generated value<br>
     * Usage: <code>generated_values must pass(property)</code>
     */
    def pass[T](prop: Prop)(implicit params: Parameters) = new Matcher[Gen[T]](){
@@ -121,11 +121,11 @@ trait ScalacheckFunctions {
  */
 trait ScalacheckParameters {
   /**
-   * Values which can be used as Symbol aliases to specify Scalacheck parameters
-   * The naming is a bit different, in order to keep short names for frequent use cases
-   *  minTestsOk == minSuccessfulTests
-   *  maxDiscarded == maxDiscardedTests
-   *  minSize and maxSize keep their name 
+   * Values which can be used as Symbol aliases to specify Scalacheck parameters<br>
+   * The naming is a bit different, in order to keep short names for frequent use cases<ul>
+   *  <code><li>minTestsOk == minSuccessfulTests
+   *  <li>maxDiscarded == maxDiscardedTests
+   *  <li>minSize and maxSize keep their name <code><ul>
    */
   val (minSize, maxSize, maxDiscarded, minTestsOk) = ('minSize, 'maxSize, 'maxDiscarded, 'minTestsOk)
 
@@ -135,8 +135,8 @@ trait ScalacheckParameters {
   def defaultValues = Map(minTestsOk->100, maxDiscarded->500, minSize->0, maxSize->100) 
 
   /**
-   * This class is the base class for the print and set case classes
-   * it contains a Map of generation parameters and indicates if the generation
+   * This class is the base class for the print and set case classes<br>
+   * It contains a Map of generation parameters and indicates if the generation
    * must be verbose
    */  
   sealed class Parameters(params: Map[Symbol, Int]) {
@@ -145,28 +145,28 @@ trait ScalacheckParameters {
   }
 
   /**
-   * This class is used to set parameters and to print the property evaluation on the console
-   * Usage: generated_values must pass { v =>
-   *            property(v) mustBe ok 
-   *        }(print(minTestsOk->15, maxDiscarded->20)) 
+   * This class is used to set parameters and to print the property evaluation on the console<br>
+   * Usage: <code>generated_values must pass { v =><br>
+   *            property(v) mustBe ok <br>
+   *        }(print(minTestsOk->15, maxDiscarded->20))</code> 
    */  
   case class display(p: (Symbol, Int)*) extends Parameters(setParams(p)) {
     override def verbose = true
   }
 
   /**
-   * This class is used to set parameters but nothing will be printed to the console
-   * Usage: generated_values must pass { v =>
-   *            property(v) mustBe ok 
-   *        }(set(minTestsOk->15, maxDiscarded->20)) 
+   * This class is used to set parameters but nothing will be printed to the console<br>
+   * Usage: <code>generated_values must pass { v =><br>
+   *            property(v) mustBe ok <br>
+   *        }(set(minTestsOk->15, maxDiscarded->20))</code> 
    */  
   case class set(p: (Symbol, Int)*) extends Parameters(setParams(p))
 
   /**
-   * Those parameters will print the result on the console and use the default settings
-   * Usage: generated_values must pass { v =>
-   *            property(v) mustBe ok 
-   *        }(display) 
+   * Those parameters will print the result on the console and use the default settings<br>
+   * Usage: <code>generated_values must pass { v =><br>
+   *            property(v) mustBe ok <br>
+   *        }(display) </code>
    */  
   val display = new Parameters(setParams(Nil)) {override def verbose = true}
     
@@ -189,7 +189,7 @@ trait ScalacheckParameters {
   }
 }
 /**
- * Companion object of the <code>ScalacheckParameters</code> trait
+ * Companion object of the <code>ScalacheckParameters</code> trait<br>
  * Use import to access the <code>ScalacheckParameters</code> functions
  */
 object ScalacheckParameters extends ScalacheckParameters
