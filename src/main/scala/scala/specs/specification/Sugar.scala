@@ -3,8 +3,8 @@ package scala.specs
 object Sugar extends Sugar
 
 /**
- * Synctactic sugar for specifications. Since it makes heavy uses of implicit definitions,
- * the name reminds that it must be used with caution
+ * Synctactic sugar for specifications. Since it makes heavy uses of implicit definitions.<br>
+ * The name reminds that it must be used with caution
  */
 trait Sugar {
   
@@ -15,10 +15,10 @@ trait Sugar {
   val ko = false
 
   /**
-    This allows the following declarations:
-    val list0 = ()
-    val list1 = ("a")
-    val list2 = ("a", "b")
+    This allows the following declarations:<ul>
+    <li>val list0 = ()
+    <li>val list1 = ("a")
+    <li>val list2 = ("a", "b")</ul>
     Produced with the following ruby code:
     (1..19).each do |i|
       puts "implicit def productToList#{i}[T](t: Product#{i}[#{(1..i).map{|x|"T"}.join(", ")}]) = List(#{(1..i).map {|j| "t._" + j.to_s}.join(", ")})"
@@ -47,8 +47,8 @@ trait Sugar {
   implicit def productToList19[T](t: Product19[T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T]) = List(t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._8, t._9, t._10, t._11, t._12, t._13, t._14, t._15, t._16, t._17, t._18, t._19)
 
   /** 
-   * This implicit definition allows to write short loops, ruby-style:
-   * <code> 3.times { i => doThis() } </code>. 
+   * This implicit definition allows to write short loops, ruby-style:<br>
+   * <code> 3.times { i => doThis() } </code>. <br>
    * Warning: an integer variable i must be declared otherwise there will be a runtime exception
    */
   implicit def integerToRange(n: Int): RangeInt = new RangeInt(n)
@@ -57,7 +57,7 @@ trait Sugar {
   }
   
   /** 
-   * This implicit definition allows to print any object to the console with:
+   * This implicit definition allows to print any object to the console with:<br>
    * <code> myObject.pln </code> or <code> myObject.println </code>  
    */
   implicit def anyPrintable[T](a: T) = {

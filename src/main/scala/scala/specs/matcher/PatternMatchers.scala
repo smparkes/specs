@@ -8,14 +8,15 @@ import scala.specs.matcher.MatcherUtils._
 trait PatternMatchers {
   
   /**
-   * Matches if the value 'v' is like the pattern { case expression => boolean_result }<br>
-   * Uses the fact that we can use the following syntax to map Options:
-   *  </code> myOption.map { case expression => boolean result }<code><br>
-   * In that case,  <code>{ case expression => boolean_result }</code> = pattern, is a function <code>Any => Boolean</code><br>
-   * If there is no match, return false and if there is a match, return the value inside the mapped option, which should be 
-   * <code>true</code><br>
-   * The <code>Sugar</code> object can be used to get shorter expression by having the <code>ok</code> alias for <code>true</code>:
-   *   <code>List(1, 2) must beLike { case x::y::Nil => ok }</code>
+   * Matches if the value <code>v</code> is like the pattern <code> { case expression => boolean }</code><p>
+   * It uses the fact that we can use the following syntax to map Options:<ul> 
+   *  <li><code> myOption.map { case expression => boolean }</code><p></ul>
+   * In that case, the pattern parameter would be <code>{ case expression => boolean }</code>, a function of type <code>Any => Boolean</code><p>
+   * The <code>Sugar</code> object can be used to get a shorter expression by having the <code>ok</code> alias for <code>true</code>:
+   *  <ul><li> <code>List(1, 2) must beLike { case x::y::Nil => ok }</code></ul>
+   * 
+   * @return false if there is no match
+   * @return the value inside the mapped option if there is a match, which should be <code>true</code>
    * @param pattern a case expression
    */  
   def beLike(pattern: => (Any => Boolean)) = new Matcher[Any](){
@@ -31,7 +32,7 @@ trait PatternMatchers {
   }
   
   /**
-   * Matches if the value 'v' is None
+   * Matches if the value <code>v</code> is None
    */
   def beNone[T] = new Matcher[Option[T]](){
      def apply(value: => Option[T]) = ( 
@@ -44,7 +45,7 @@ trait PatternMatchers {
   }
 
   /**
-   * Matches if the value 'v' is Some(x)
+   * Matches if the value <code>v</code> is Some(x)
    */
   def beSome[T] = new CaseMatcher[T](){
      def someApply(value: => Option[T]) = ( 
@@ -63,7 +64,7 @@ trait PatternMatchers {
 
 
   /**
-   * The CaseMatcher class allow to verify expressions such as:
+   * The CaseMatcher class allow to verify expressions such as:<br>
    * <code>Some(x) must beSome[String].which(_.startWith("abc"))</code>
    */
   abstract class CaseMatcher[T] extends Matcher[Option[T]] {

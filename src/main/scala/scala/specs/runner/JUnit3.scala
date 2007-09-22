@@ -4,7 +4,7 @@ import scala.specs.specification._
 import junit.framework._
 
 /**
- * This class is a JUnitTestSuite class with an empty test.
+ * This class is a JUnitTestSuite class with an empty test.<br>
  * JUnit 3 imposes that there is at least one test in a test suite in order to be able to run it
  */
 abstract class EmptyJUnit3TestSuite extends TestSuite { 
@@ -12,23 +12,23 @@ abstract class EmptyJUnit3TestSuite extends TestSuite {
   /** defines an empty test to satisfy junit requirements for test cases */
   def testEmpty = {} 
 
-  /** returns test suites nested in this suite */
+  /** @return test suites nested in this suite */
   def suites = for(t <- tests; 
                    if (t.isInstanceOf[EmptyJUnit3TestSuite])) 
                  yield t.asInstanceOf[EmptyJUnit3TestSuite]
 
-  /** returns test cases nested in this suite */
+  /** @return test cases nested in this suite */
   def testCases = for(t <- tests; 
                     if (t.isInstanceOf[ExampleTestCase])) 
                  yield t.asInstanceOf[ExampleTestCase]
 }
 
 /**
- * This class is the base class for reporting the results of a Specification as a JUnit TestSuite
- * Usage: <code>object mySuite extends JUnit3(mySpec1, mySpec2)</code>
+ * This class is the base class for reporting the results of a Specification as a JUnit TestSuite<br>
+ * Usage: <code>object mySuite extends JUnit3(mySpec1, mySpec2)</code><br>
  * If there is more than one specification, then the name of the suite is the name of the class: i.e mySuite
  * else, it is the description of the only specification
- * 
+ * <p>
  * A nested junit TestSuite is created for each sub-specification and for each system under test
  */
 class JUnit3(val specifications : Specification*) extends EmptyJUnit3TestSuite {
@@ -48,7 +48,7 @@ class JUnit3(val specifications : Specification*) extends EmptyJUnit3TestSuite {
 
 /**
  * A <code>SpecificationTestSuite</code> is a junit TestSuite reporting the results of 
- * the suts of a Specification
+ * the suts of a Specification<br>
  * Its name is the description of the Specification
  */
 class SpecificationTestSuite(specification: Specification) extends EmptyJUnit3TestSuite {
@@ -70,7 +70,7 @@ class ExamplesTestSuite(description: String, examples: Iterable[Example]) extend
   }
 }
 /**
- * A <code>ExampleTestCase</code> reports the result of an example 
+ * A <code>ExampleTestCase</code> reports the result of an example<p> 
  * It overrides the run method from <code>junit.framework.TestCase</code>
  * to add errors and failures to a <code>junit.framework.TestResult</code> object
  */

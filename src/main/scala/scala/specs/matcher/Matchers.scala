@@ -20,9 +20,10 @@ trait Matchers extends AnyMatchers with
                        MatcherResult
                        
 /**
- * <p>The <code>AbstractMatcher</code> class is used by the Spec.must method.
- * This class can be subclassed and provide an appropriate <code>apply</code>
+ * <p>The <code>AbstractMatcher</code> class is used by the <code>Spec.must</code> method.
+ * This class should be subclassed to provide an appropriate <code>apply</code>
  * method that will check a value <code>a</code></p> 
+ * @param a a value to check
  */
 abstract class AbstractMatcher[T] {
   def apply(a: => T): (Boolean, String, String)
@@ -120,8 +121,9 @@ abstract class Matcher[T] extends AbstractMatcher[T] with MatcherResult {
  */   
 trait MatcherResult {
   /**
-   * This case class and the associated implicit definition is only here to add more meaningful names to
-   * the tuple components in the following operators 
+   * This case class and the associated implicit definition is used to add more meaningful names to
+   * the tuple representing the result of a match when implementing <code>Matcher</code> logical operators<br>
+   * Usage: <code>matcher.apply(value).okMessage</code> for instance
    */  
   case class MatcherResult(success: Boolean, okMessage: String, koMessage: String)
   implicit def toMatcherResult(t: (Boolean, String, String)): MatcherResult = MatcherResult(t._1, t._2, t._3)  

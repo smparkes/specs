@@ -10,9 +10,9 @@ import scala.collection.mutable.Queue
 trait SpecsFinder extends FileSystem {
 
    /** 
-    * returns specification names by scanning files and trying to find specifications declarations
-    * <code>path</code> is a path to a directory containing scala files (it can be a glob: i.e. "dir/**/*spec.scala")
-    * <code>pattern</code> is a regular expression which is supposed to match an object name extending a Specification
+    * @param path a path to a directory containing scala files (it can be a glob: i.e. "dir/**/*spec.scala")
+    * @param pattern ia regular expression which is supposed to match an object name extending a Specification
+    * @return specification names by scanning files and trying to find specifications declarations
     */
    def specificationNames(path: String, pattern: String) : List[String] = {
     var result = new Queue[String]
@@ -21,11 +21,12 @@ trait SpecsFinder extends FileSystem {
   }
   
   /**
-   * adds possible specification class names found in the file <code>filePath</code>
-   * <code>path</code> is a path to a directory containing scala files (it can be a glob: i.e. "dir/**/*spec.scala")
-   * <code>pattern</code> is a regular expression which is supposed to match an object name extending a Specification
+   * adds possible specification class names found in the file <code>filePath</code><br>
    * The specification pattern is: "\\s*object\\s*(" + pattern + ")\\s*extends\\s*.*Spec.*\\s*\\{"
    * This may be later extended to support other arbitrary patterns 
+   *
+   * @param path a path to a directory containing scala files (it can be a glob: i.e. "dir/**/*spec.scala")
+   * @param pattern ia regular expression which is supposed to match an object name extending a Specification
    */
   def collectSpecifications(result: Queue[String], filePath: String, pattern: String): Unit = {
     if (!filePath.endsWith(".scala")) return    
@@ -36,7 +37,7 @@ trait SpecsFinder extends FileSystem {
     }
   }
   
-  /** returns the package declaration at the beginning of a file */
+  /** @return the package declaration at the beginning of a file */
   def packageName(path: String) = {
     val pattern = "\\s*package\\s*(.+)\\s*"
     val m = Pattern.compile(pattern).matcher(readFile(path))

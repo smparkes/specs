@@ -5,11 +5,11 @@ import scala.util.ExtendedList._
 
 /**
  * The <code>Protocol</code> class stores the expectations of mocks, alongside with the actual received calls
- * It can be exclusive or not: i.e. return an error in case of unexpected calls or not
- * A <code>protocol</code> has 3 functions:
- * -be defined by nested protocol definitions and expected calls
- * -store received calls
- * -return failures if there are unmatched calls
+ * It can be exclusive or not: i.e. return an error in case of unexpected calls or not<br>
+ * A <code>protocol</code> has 3 functions:<ul>
+ * <li>be defined by nested protocol definitions and expected calls
+ * <li>store received calls
+ * <li>return failures if there are unmatched calls</ul>
  */
 class Protocol extends ProtocolTypes {
   /** actual calls received by mocks */
@@ -19,15 +19,15 @@ class Protocol extends ProtocolTypes {
   var exclusive = false
 
   /** 
-   * protocol allDefinitions which are stacked during creation
-   * but which will be nested after creation. Each protocol definition corresponds to 
-   * a block of an "expect" declaration:
+   * protocol definitions which are stacked during the protocol creation
+   * but which will be nested after creation.<br> Each protocol definition corresponds to 
+   * a block of an "expect" declaration:<pre>
    * <code>expect(twoOf) {
    *    expect(inSequence) {
    *      mock.callMethod1
    *      mock.callMethod2
    *    }
-   * }</code>
+   * }</code></pre>
    */
   private var allDefinitions: Stack[ProtocolDef] = new Stack
   
@@ -37,13 +37,13 @@ class Protocol extends ProtocolTypes {
   def definition = allDefinitions.top
 
   /** 
-   * takes a value <code>v</code>which will declare some mocks expectations
+   * takes a value <code>v</code>which will declare some mocks expectations<br>
    * By default the protocol type is <code>inAnyOrder</code>
    */
   def expect(v: => Any): ProtocolDef = expect(inAnyOrder)(v)
 
   /** 
-   * takes a value <code>v</code>which will declare some mocks expectations
+   * takes a value <code>v</code>which will declare some mocks expectations<br>
    * The protocol type is specified by the parameter <code>t</code>
    */
   def expect(t: ProtocolType)(v: => Any): ProtocolDef = {
@@ -64,17 +64,17 @@ class Protocol extends ProtocolTypes {
   }
 
    /** 
-    * add an expected method name to the current protocol definition 
+    * adds an expected method name to the current protocol definition 
     */
    def expectCall(methodName: String) = allDefinitions.top.expect(methodName)
 
    /** 
-    * add a received call to the list of received calls 
+    * adds a received call to the list of received calls 
     */
    def receiveCall(methodName: String) = receivedCalls = receivedCalls:::List(new ReceivedCall(methodName))
 
   /** 
-   * returns an error message if the protocol definition 
+   * @return an error message if the protocol definition 
    * has some expected calls which don't match the received calls
    */
   def failures: String = {
@@ -94,7 +94,7 @@ class Protocol extends ProtocolTypes {
   def isSpecified = !allDefinitions.isEmpty
 
   /** 
-   * Remove any previous protocol definition and received calls 
+   * Removes any previous protocol definition and received calls 
    */
   def clear = {
     allDefinitions = new Stack

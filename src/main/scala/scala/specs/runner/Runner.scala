@@ -4,7 +4,7 @@ import scala.util.JavaCollectionsConversion
 
 /**
  * This class implements the <code>ConsoleReporter</code> by adding a main 
- * method.
+ * method.<br>
  * Usage: <code>object mySpecRunner extends ConsoleRunner(mySpec1, mySpec2)</code>
  */  
 class ConsoleRunner(specifications: Specification*) extends ConsoleReporter {
@@ -14,8 +14,8 @@ class ConsoleRunner(specifications: Specification*) extends ConsoleReporter {
 
 /**
  * This class can be used to search for specifications on a given path 
- * and execute them.
- * Usage: <code>object myFileRunner extends SpecsFileRunner(path, pattern)</code>
+ * and execute them.<br>
+ * Usage: <code>object myFileRunner extends SpecsFileRunner(path, pattern)</code><br>
  * Where <code>path</code> is a path to a directory containing scala files (it can be a glob: i.e. "dir/**/*spec.scala")
  * and <code>pattern</code> is a regular expression which is supposed to match an object name extending a Specification
  * class named ".*Spec.*"
@@ -24,7 +24,7 @@ class SpecsFileRunner(path: String, pattern: String) extends ConsoleRunner with 
   
   /** 
    * overrides the <code>report</code> method in <code>ConsoleRunner</code>
-   * which is called by default in the main method
+   * which is called by default in the main method<br>
    * In that case, the <code>specifications</code> parameter is an empty list
    * but the list of specifications to report is build from specification names found on the path
    * indicated by the <code>path</code> parameter
@@ -37,16 +37,16 @@ class SpecsFileRunner(path: String, pattern: String) extends ConsoleRunner with 
         case None => ()
       }
     }
-    // This specification is added for better reporting
+    // this specification is added for better reporting
     object totalSpecification extends Specification {
       new java.io.File(path).getAbsolutePath isSpecifiedBy(specList: _*)
     }
     super.report(List(totalSpecification))
   } 
   /**
-   * returns a Specification object from a className if that class is a Specification class.
+   * @return a <code>Specification</code> object from a className if that class is a <code>Specification</code> class.<br>
    * Tries to load the class name and cast it to a specification
-   * Returns None in case of an exception. 
+   * @return None in case of an exception. 
    */
   def createSpecification(className: String): Option[Specification] = {
     try {

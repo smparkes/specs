@@ -5,7 +5,7 @@ import scala.specs.specification._
 
 object AnyMatchers extends AnyMatchers
 /**
- * The <code>AnyMatchers</code> trait provides matchers which are applicable to any scala Reference or Value
+ * The <code>AnyMatchers</code> trait provides matchers which are applicable to any scala reference or value
  */
 trait AnyMatchers {
 

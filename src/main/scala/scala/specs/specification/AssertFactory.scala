@@ -2,14 +2,14 @@ package scala.specs.specification;
 
 /**
  * This trait defines implicit definitions which are used to create Assert objects
- * and associate them with the latest defined example
+ * and associate them with the latest defined example<br>
  * Usage: <code>
  * 2.1 must beCloseTo(2.0, .1)
- * </code>or <code>
+ * </code>or<br><code>
  * theDouble(2.1) must beCloseTo(2.0, .1)
- * </code> 
+ * </code><p> 
  * Most of those definitions are declared because the implicit def mechanism doesn't seem to select
- * the most specific definition (to my understanding)
+ * the most specific definition (to my understanding)<br>
  * The implicit def for Strings is even stranger since values are supposed to have String as a lower bound.
  * Then StringMatchers are expecting values with String as an upper bound so that effectively only String instances
  * will be used with the implicit def (only solution found to make it all work, to my current understanding again)

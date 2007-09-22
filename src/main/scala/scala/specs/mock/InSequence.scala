@@ -6,16 +6,16 @@ case object inSequence extends inSequence(exactlyN(1))
 
 /**
  * The <code>inSequence</code> protocol type will try to consume expected calls
- * in sequence. It will not consume unexpected calls.
- * It accepts a <code>repetition</code> parameter specifying how many expected calls are supposed to happen:
- * -exactlyN(2): exactly 2 times
- * -atLeast(2): at least 2 times
- * -atMost(2): at most 2 times
+ * in sequence. It will not consume unexpected calls.<br>
+ * It accepts a <code>repetition</code> parameter specifying how many expected calls are supposed to happen:<ul>
+ * <li>exactlyN(2): exactly 2 times
+ * <li>atLeast(2): at least 2 times
+ * <li>atMost(2): at most 2 times</ul>
  */
 class inSequence(repetition: CallConstraint) extends ProtocolType(repetition) {
 
  /**
-  * returns a String specifying the constraints of this protocol: e.g. in sequence 2 of:
+  * @return a String specifying the constraints of this protocol: e.g. "in sequence 2 of:".
   * If it is exactly one, returns "in sequence"
   */
   def constraints = {
@@ -27,12 +27,12 @@ class inSequence(repetition: CallConstraint) extends ProtocolType(repetition) {
   
   /**
    * Tries to match expected calls with received calls in sequence
-   * until the <code>repetition</code> parameter is satisfied
+   * until the <code>repetition</code> parameter is satisfied.<br>
    * Before doing so, it sets the repetition number on expected calls, so that they
-   * know when to stop matching received calls (especially for atLeast and atMost constraints).
+   * know when to stop matching received calls (especially for atLeast and atMost constraints).<br>
    * If consumed received calls are not in the same order as their respective expected calls
    * it resets them so that the received calls are not consumed and the expected calls are not passed
-   * Returns the list of expected calls and the list of received calls
+   * @return the list of expected calls and the list of received calls
    */
   def consume(exp: List[SpecifiedCall], rec: List[ReceivedCall]) = {
     exp.foreach(_.repetition = repetition)

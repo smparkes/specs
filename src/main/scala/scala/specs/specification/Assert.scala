@@ -3,15 +3,15 @@ import scala.specs.matcher._
 import scala.specs.matcher.Matchers._
 
 /**
- * The assert class adds matcher methods to objects which are being specified
- * Usage: <code>new Assert(value, example) must 'matcher'(otherValue)</code>
+ * The assert class adds matcher methods to objects which are being specified<br>
+ * Usage: <code>new Assert(value, example) must beMatching(otherValue)</code><p>
  *
  * An assert is created with its parent <code>Example</code> in order to register failures
  * and errors if a matcher is not ok 
  *
  */
 class Assert[+T](value: => T, example: Example) {
-  /** increment the number of assertions of the example when this object is created */
+  /** increments the number of assertions of the example when this object is created */
   example.assertionsNb += 1
   
   /**
@@ -57,22 +57,45 @@ case class FailureException(message: String) extends RuntimeException(message)
 
 /** Specialized assert class with string matchers aliases */
 class AssertString[A <: String](value: => A, example: Example) extends Assert[A](value, example) {
+  /** alias for <code>must(beMatching(a))</code> */
   def mustMatch(a: String) = must(beMatching(a))
+
+  /** alias for <code>must(not(beMatching(a)))</code> */
   def mustNotMatch(a: String) = must(not(beMatching(a)))
+  
+  /** alias for <code>must(equalIgnoreCase(a))</code> */
   def must_==/(a: String) = must(equalIgnoreCase(a))
+
+  /** alias for <code>must(notEqualIgnoreCase(a))</code> */
   def must_!=/(a: String) = must(notEqualIgnoreCase(a))
 }
 /** Specialized assert class with iterable matchers aliases */
 class AssertIterable[I <: AnyRef](value: Iterable[I], example: Example) extends Assert[Iterable[I]](value, example) {
+
+  /** alias for <code>must(exist(function(_))</code> */
   def mustExist(function: I => Boolean) = must(exist {x:I => function(x)})
+
+  /** alias for <code>must(notExist(function(_))</code> */
   def mustNotExist(function: I => Boolean) = must(notExist{x:I => function(x)})
+
+  /** alias for <code>must(contain(a))</code> */
   def mustContain(elem: I) = must(contain(elem))
+
+  /** alias for <code>must(notContain(a))</code> */
   def mustNotContain(elem: I) = must(notContain(elem))
 }
 /** Specialized assert class with iterable[String] matchers aliases */
 class AssertIterableString(value: Iterable[String], example: Example) extends AssertIterable[String](value, example) {
-  def mustHaveMatch(elem: String) = must(existMatch(elem))
-  def mustNotHaveMatch(elem: String) = must(notExistMatch(elem))
+
+  /** alias for <code>must(existMatch(pattern))</code> */
+  def mustHaveMatch(pattern: String) = must(existMatch(pattern))
+
+  /** alias for <code>must(notExistMatch(pattern))</code> */
+  def mustNotHaveMatch(pattern: String) = must(notExistMatch(pattern))
+
+  /** alias for <code>must(existMatch(pattern))</code> */
   def mustExistMatch(pattern: String) = must(existMatch(pattern))
+
+  /** alias for <code>must(notExistMatch(pattern))</code> */
   def mustNotExistMatch(pattern: String) = must(notExistMatch(pattern))
 }

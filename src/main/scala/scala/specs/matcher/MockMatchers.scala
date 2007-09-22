@@ -15,7 +15,8 @@ trait MockMatchers {
     }
   }
   /**
-   * <code>any()</code> can be used to match any parameter in a mock call
+   * <code>any[Type]</code> can be used to match any parameter in a mock call<br>
+   * Usage: <code>mock.callMethodWith(any[String])</code>
    */
   def any[T]: T = {
      null.asInstanceOf[T]

@@ -20,19 +20,19 @@ trait IterableMatchers {
   def notContain[T](a: T) = contain(a).not 
 
   /**
-   * Matches if there is one element in the iterable verifying the <code>function</code>: (iterable.exists(function(_))
+   * Matches if there is one element in the iterable verifying the <code>function</code> parameter: <code>(iterable.exists(function(_))</code>
    */   
   def exist[T](function: T => Boolean) = new Matcher[Iterable[T]](){ 
      def apply(iterable: => Iterable[T]) = (iterable.exists{function(_)}, "at least one element verifies the property in " + q(iterable), "no element verifies the property in " + q(iterable)) 
   }
 
   /**
-   * Matches if there is no element in the iterable verifying the <code>function</code>: !(iterable.exists(function(_))
+   * Matches if there is no element in the iterable verifying the <code>function</code> parameter: <code>!(iterable.exists(function(_))</code>
    */   
   def notExist[T](function: T => Boolean) = exist(function).not 
 
   /**
-   * Matches if there is one element in the iterable[String] matching the <code>pattern</code>: iterable.exists( matches(pattern) _)
+   * Matches if there is one element in the iterable[String] matching the <code>pattern</code> parameter: <code> iterable.exists(matches(pattern) _)</code>
    */   
   def existMatch(pattern: String) = new Matcher[Iterable[String]](){
      def apply(iterable: => Iterable[String]) = (iterable.exists( matches(pattern) _), "at least one element matches " + q(pattern) + " in " + q(iterable), "no element matches " + q(pattern) + " in " + q(iterable))
@@ -49,7 +49,7 @@ trait IterableMatchers {
   def notExistMatch(pattern: String) = existMatch(pattern).not
 
   /**
-   * Matches if there is one element in the iterable[String] matching the <code>pattern</code>: iterable.exists( matches(pattern) _)
+   * Matches if there is one element in the iterable[String] matching the <code>pattern</code>: iterable.exists(matches(pattern) _)
    */   
   def haveSameElementsAs[T](l: Iterable[T]) = new Matcher[Iterable[T]](){
     def apply(iterable: => Iterable[T]) = (

@@ -14,11 +14,12 @@ import scala.specs.specification._
 
 /**
  * The <code>ScalacheckMatchers</code> trait provides matchers which allow to 
- * assess properties multiple times with generated data
+ * assess properties multiple times with generated data.
+ * @see the <a href="http://code.google.com/p/scalacheck/">Scalacheck project</a>
  */
 trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
    /**
-    * Default parameters. Use Scalacheck default values and don't print to the console
+    * default parameters. Uses Scalacheck default values and doesn't print to the console
     */
    implicit def defaultParameters = new Parameters(ScalacheckParameters.setParams(Nil))
 		
@@ -135,9 +136,9 @@ trait ScalacheckParameters {
   def defaultValues = Map(minTestsOk->100, maxDiscarded->500, minSize->0, maxSize->100) 
 
   /**
-   * This class is the base class for the print and set case classes<br>
+   * This class is the base class for the print and set case classes.<br>
    * It contains a Map of generation parameters and indicates if the generation
-   * must be verbose
+   * must be verbose.
    */  
   sealed class Parameters(params: Map[Symbol, Int]) {
     def apply(s: Symbol) = params(s)
@@ -146,9 +147,10 @@ trait ScalacheckParameters {
 
   /**
    * This class is used to set parameters and to print the property evaluation on the console<br>
-   * Usage: <code>generated_values must pass { v =><br>
-   *            property(v) mustBe ok <br>
-   *        }(print(minTestsOk->15, maxDiscarded->20))</code> 
+   * Usage: <pre><code>
+   *  generated_values must pass { v =>
+   *    property(v) mustBe ok
+   *  }(print(minTestsOk->15, maxDiscarded->20))</code></pre> 
    */  
   case class display(p: (Symbol, Int)*) extends Parameters(setParams(p)) {
     override def verbose = true
@@ -156,17 +158,19 @@ trait ScalacheckParameters {
 
   /**
    * This class is used to set parameters but nothing will be printed to the console<br>
-   * Usage: <code>generated_values must pass { v =><br>
-   *            property(v) mustBe ok <br>
-   *        }(set(minTestsOk->15, maxDiscarded->20))</code> 
+   * Usage: <pre><code>
+   * generated_values must pass { v =>
+   *   property(v) mustBe ok
+   * }(set(minTestsOk->15, maxDiscarded->20))</code></pre> 
    */  
   case class set(p: (Symbol, Int)*) extends Parameters(setParams(p))
 
   /**
    * Those parameters will print the result on the console and use the default settings<br>
-   * Usage: <code>generated_values must pass { v =><br>
-   *            property(v) mustBe ok <br>
-   *        }(display) </code>
+   * Usage: <pre><code>
+   * generated_values must pass { v =
+   *   property(v) mustBe ok
+   * }(display) </code></pre>
    */  
   val display = new Parameters(setParams(Nil)) {override def verbose = true}
     

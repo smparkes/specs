@@ -12,22 +12,22 @@ import scala.specs.matcher.MatcherUtils._
 abstract class ProtocolType(repetition: CallConstraint) {
 
   /**
-   * A string describing the constraints of this protocol type
-   * it must be implemented by subclasses to provide a meaningful name to describe the protocol
+   * A string describing the constraints of this protocol type<br>
+   * It must be implemented by subclasses to provide a meaningful name to describe the protocol
    * in error messages
    */
   def constraints: String
 
   /**
-   * Consumes the expected messages with the actual received ones
+   * Consumes the expected messages with the actual received ones<br>
    * If the expected messages are not all consumed, there will be a failure message
    */
   def consume(expected: List[SpecifiedCall], received: List[ReceivedCall]): (List[SpecifiedCall], List[ReceivedCall])
   
   /**
-   * returns error messages specifying if some expected calls have not been met.
-   * If exclusive is true, then return also an error message when unexpected calls occured
-   * return "" otherwise
+   * @return error messages specifying if some expected calls have not been met.<br>
+   * @return also an error message when unexpected calls occured if exclusive is true 
+   * @return "" otherwise
    */
    def failures(expected: List[SpecifiedCall], received: List[ReceivedCall], exclusive: Boolean): String = {
      consume(expected, received)
@@ -39,7 +39,7 @@ abstract class ProtocolType(repetition: CallConstraint) {
    }
 
   /**
-   * returns a user message specifying the protocol constraints on the expected calls:
+   * @return a user message specifying the protocol constraints on the expected calls:
    * for example "in any order m1; m2" or "in sequence m1; m2; m3"
    */
   def expectedDefs(expected: List[SpecifiedCall]): String = {
@@ -47,7 +47,7 @@ abstract class ProtocolType(repetition: CallConstraint) {
   }
 
   /**
-   * returns a user message with the list of received messages
+   * @return a user message with the list of received messages
    */
   def receivedMessages(received: List[ReceivedCall]) = { 
     "Received" + (if (received.isEmpty) " none" else 
@@ -71,12 +71,12 @@ case class atMostNOf(n: Int) extends inAnyOrder(atMostN(n))
 
 /**
  * This trait adds some frequent protocol types and some
- * syntactic sugar to be able to specify such protocol types
- * anyOf = inAnyOrder(exactlyN(0))
- * oneOf = inAnyOrder(exactlyN(1))
- * 2.of = inAnyOrder(exactlyN(2))
- * 3.atLeastOf = inAnyOrder(exactlyN(3))
- * 3.inSequenceAtMostOf = inAnyOrder(exactlyN(3))
+ * syntactic sugar to be able to specify such protocol types<ul>
+ * <li><code>anyOf = inAnyOrder(exactlyN(0))</code>
+ * <li><code>oneOf = inAnyOrder(exactlyN(1))</code>
+ * <li><code>2.of = inAnyOrder(exactlyN(2))</code>
+ * <li><code>3.atLeastOf = inAnyOrder(exactlyN(3))</code>
+ * <li><code>3.inSequenceAtMostOf = inAnyOrder(exactlyN(3))</code></ul>
  */
 trait ProtocolTypes {
   def oneOf = new inAnyOrder(exactlyN(1))

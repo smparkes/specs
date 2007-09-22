@@ -2,9 +2,9 @@ package scala.specs.matcher
 import scala.specs.matcher.MatcherUtils._
 
 /**
- * The <code>MapMatchers</code> trait provides matchers which are applicable to Map objects
- * It currently accepts any Iterable[(K, V)] whereas it should only accept Map[K, V]
- * This is because the implicit defs in the {@link <code>SpecificationStructure</code>} trait
+ * The <code>MapMatchers</code> trait provides matchers which are applicable to Map objects<br>
+ * It currently accepts any Iterable[(K, V)] whereas it should only accept Map[K, V]. 
+ * This is because the implicit defs in the <code>SpecificationStructure</code> trait
  * are picking up iterables in general
  */
 trait MapMatchers {

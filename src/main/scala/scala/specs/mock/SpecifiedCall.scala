@@ -9,25 +9,25 @@ abstract class SpecifiedCall {
   var repetition: CallConstraint = atLeastN(0)
 
   /**
-   * tries to mark received messages as consume when they can be expected by expected calls
+   * tries to mark received messages as consume when they can be expected by expected calls<br>
    * If an expected calls has received everything that was expected, it is marked as "passes"
    */
   def consume(received: List[ReceivedCall]): (List[SpecifiedCall], List[ReceivedCall])
 
   /**
-   * remove any memory of what has been previously matched
+   * removes any memory of what has been previously matched
    */
   def clear: Unit
 
   /**
-   * returns <code>true</code> if every expected method has been properly called
+   * @return <code>true</code> if every expected method has been properly called
    */
   def passes: Boolean = false
 }
 
 /**
  * Specifies that a method is expected to be called. By construction, the method name will include the line number
- * in the original source file. Anyway the requisite here is that 2 different expected methods should have 2 different
+ * in the original source file. The precondition is that 2 different expected methods should have 2 different
  * names (so even in cases where a method is overloaded)
  */
 case class ExpectedCall(val method: String) extends SpecifiedCall {
@@ -38,14 +38,14 @@ case class ExpectedCall(val method: String) extends SpecifiedCall {
   /** clears the number of times the method has been called */
   def clear = callsNumber = 0
 
-  /** returns true if the method has been called a sufficient number of times, defined by <code>repetition</code> */
+  /** @return true if the method has been called a sufficient number of times, defined by <code>repetition</code> */
   override def passes : Boolean = repetition.verifies(callsNumber)
 
   /** 
-   * tries to consume every received call, until:
-   * -a matching received unconsumed call (with the same method name) is found
-   * -the repetition criteria indicates that we can stop
-   * Returns a pair with the list of expected calls, i.e. this one and the list of received calls 
+   * tries to consume every received call, until:<ul>
+   * <li>a matching received unconsumed call (with the same method name) is found
+   * <li>the repetition criteria indicates that we can stop</ul>
+   * @return a pair with the list of expected calls, i.e. this one and the list of received calls 
    */
   def consume(received: List[ReceivedCall]) = {
     var found = false
@@ -70,16 +70,15 @@ case class ExpectedCall(val method: String) extends SpecifiedCall {
 }
 
 /**
- * Specifies that a method has been received. 
+ * Specifies that a method has been received.<br> 
  * By construction, the method name will include the line number in the original source file. 
- * Anyway the requisite here is that 2 different expected methods should have 2 different
  */
 case class ReceivedCall(val method: String) {
   
   /** stores the expected calls having consumed this received call */
   var consumedBy: Option[SpecifiedCall] = None
 
-  /** returns true if the method has been expected by an expected call */
+  /** @return true if the method has been expected by an expected call */
   def consumed = (consumedBy != None)
 
   override def toString = method
@@ -100,16 +99,16 @@ case class ProtocolDef(val protocolType: ProtocolType, var expectedCalls: List[S
   /** consumes the received calls, according to the expected ones and the protocol type (inAnyOrder, inSequence,...) */
   def consume(received: List[ReceivedCall]) = protocolType.consume(expectedCalls, received)
 
-  /** returns the list of failures computed by the protocol type */
+  /** @return the list of failures computed by the protocol type */
   def failures(rs: List[ReceivedCall], exclusive: Boolean): String = protocolType.failures(expectedCalls, rs, exclusive)
 
   /** clears the specified calls so that another match can be attempted */
   def clear = expectedCalls foreach {_.clear}
 
-  /** returns true if every specified call passes */
+  /** @return true if every specified call passes */
   override def passes : Boolean = expectedCalls.forall(_.passes)
 
-  /** returns a user-friendly description of the expected calls */
+  /** @return a user-friendly description of the expected calls */
   override def toString = protocolType.expectedDefs(expectedCalls)
 }
 

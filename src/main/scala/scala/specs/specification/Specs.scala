@@ -8,13 +8,13 @@ import scala.specs.SpecUtils._
 import scala.specs.specification._
 
 /**
- * This class is the main class for declaring a new specification
- * In the context of a specification, you can:
- * -declare nested specifications
- * -define systems under test
- * -specify examples and assertions
+ * This class is the main class for declaring a new specification<br>
+ * In the context of a specification, you can:<ul>
+ * <li>declare nested specifications
+ * <li>define systems under test
+ * <li>specify examples and assertions</ul>
  * Usage: <code>object mySpec extends Specification</code>
- *
+ * <p>
  * A specification is "executed" when it is constructed, then the failures and errors can 
  * be collected with the corresponding methods
  *
@@ -26,33 +26,33 @@ abstract class Specification extends Matchers with SpecificationStructure {
   /** adds an "after" function to the last sut being defined */
   def usingAfter(afterFunction: () => Unit) = { suts.last.after = Some(afterFunction) }
 
-  /** returns the failures of each sut */
+  /** @return the failures of each sut */
   def failures = suts.flatMap {_.failures}
 
-  /** returns the errors of each sut */
+  /** @return the errors of each sut */
   def errors = suts.flatMap {_.errors}
 
-  /** returns the total number of assertions for each sut */
+  /** @return the total number of assertions for each sut */
   def assertionsNb = suts.foldLeft(0) {_ + _.assertionsNb}
 
-  /** returns a description of this specification with all its suts (used for the ConsoleReporter) */
+  /** @return a description of this specification with all its suts (used for the ConsoleReporter) */
   def pretty = description + suts.foldLeft("") {_ + _.pretty(addSpace("\n"))}
 
   /** 
-   * Convenience method: adds a new failure to the latest example
+   * Convenience method: adds a new failure to the latest example<br>
    * Usage: <code>fail("this code should fail anyway")</code>
    */
   def fail(m: String) = lastExample.addFailure(FailureException(m))
 }
 
 /**
- * The <code>Sut</code> class represents a system under test
- * It has:
- * -a description declaring what kind of system it is
- * -an <code>ExampleLifeCycle</code> which defines behaviour before/after example and test
+ * The <code>Sut</code> class represents a system under test<br>
+ * It has:<ul>
+ * <li>a description declaring what kind of system it is
+ * <li>an <code>ExampleLifeCycle</code> which defines behaviour before/after example and test</ul>
  * It is also an <code>ExampleLifeCycle</code> so it can refine the passed cycle
- *
- * In specifications, a Sut "should" or "can" provide some functionalities which are defined in <code>Examples</code>
+ * <p>
+ * In specifications, a Sut "should" or "can" provide some functionalities which are defined in <code>Examples</code><br>
  * A Sut is "executed" during its construction and failures and errors are collected from its examples
  */
 case class Sut(description: String, cycle: ExampleLifeCycle) extends ExampleLifeCycle {
@@ -77,30 +77,30 @@ case class Sut(description: String, cycle: ExampleLifeCycle) extends ExampleLife
   /** Alias method to describe more advanced or optional behaviour. This will change the verb used to report the sut behavior */
   def can(ex : Example) = {verb = "can"}
 
-  /** return all examples failures */
+  /** @return all examples failures */
   def failures = examples.flatMap {_.failures}
 
-  /** return all examples errors */
+  /** @return all examples errors */
   def errors = examples.flatMap {_.errors}
 
-  /** return the total number of assertions for this sut */
+  /** @return the total number of assertions for this sut */
   def assertionsNb = examples.foldLeft(0) {_ + _.assertionsNb}
 
-  /** returns a description of this sut with all its examples (used for the ConsoleReporter) */
+  /** @return a description of this sut with all its examples (used for the ConsoleReporter) */
   def pretty(tab: String) = tab + description + " " + verb + " " + examples.foldLeft("") {_ + _.pretty(addSpace(tab))}
 
-  /** call the before method of the "parent" cycle, then the sut before method before an example if that method is defined. */
+  /** calls the before method of the "parent" cycle, then the sut before method before an example if that method is defined. */
   override def beforeExample(ex: Example) = {
     cycle.beforeExample(ex)
     before.foreach {_.apply()}
   }
 
-  /** forward the call to the "parent" cycle */
+  /** forwards the call to the "parent" cycle */
   override def beforeTest(ex: Example) = { cycle.beforeTest(ex) }
-  /** forward the call to the "parent" cycle */
+  /** forwards the call to the "parent" cycle */
   override def afterTest(ex: Example) = { cycle.afterTest(ex) }
 
-  /** call the after method of the "parent" cycle, then the sut after method after an example if that method is defined. */
+  /** calls the after method of the "parent" cycle, then the sut after method after an example if that method is defined. */
   override def afterExample(ex: Example) = { 
     cycle.afterExample(ex)
     after.foreach {_.apply()}
@@ -108,17 +108,17 @@ case class Sut(description: String, cycle: ExampleLifeCycle) extends ExampleLife
 }
 
 /**
- * The <code>Example</code> class specifies one example of a system behaviour
- * It has:
- * -a description explaining what is being done
- * -an <code>ExampleLifeCycle</code> which defines behaviour before/after example and test
- * 
- * Usage: <code>"this is an example" in { // code containing assertions }</code> or
- * <code>"this is an example" >> { // code containing assertions }</code>
+ * The <code>Example</code> class specifies one example of a system behaviour<br>
+ * It has:<ul>
+ * <li>a description explaining what is being done
+ * <li>an <code>ExampleLifeCycle</code> which defines behaviour before/after example and test</ul>
+ * <p>
+ * Usage: <code>"this is an example" in { // code containing assertions }</code> or<br>
+ * <code>"this is an example" >> { // code containing assertions }</code><br>
  * ">>" can be used instead of "in" if that word makes no sense in the specification
- * 
+ * <p>
  * An example can also contain subexamples which are executed will evaluating the <code>in</code> method.
- *
+ * <p>
  * When assertions have been evaluated inside an example they register their failures and errors for later reporting 
  */
 case class Example(description: String, cycle: ExampleLifeCycle) {
@@ -144,6 +144,7 @@ case class Example(description: String, cycle: ExampleLifeCycle) {
    * creates a new Example object and, in the process of doing so, evaluates the <code>test</code>
    * value which may contain assertions. Errors and failures are then attached to the current example
    * by calling the <code>addFailure</code> and <code>addError</code> methods
+   * @return a new <code>Example</code>
    */
   def in (test: => Any): Example = {
     isInsideDefinition = true
@@ -171,7 +172,7 @@ case class Example(description: String, cycle: ExampleLifeCycle) {
     isInsideDefinition = false
     this
   }
-  /** Alias for the <code>in</code> method */
+  /** alias for the <code>in</code> method */
   def >> (test: => Any) = in(test)
   
   /** creates and adds a new error from an exception t */
@@ -180,18 +181,19 @@ case class Example(description: String, cycle: ExampleLifeCycle) {
   /** creates and adds a failure exception */
   def addFailure(failure: FailureException) = thisFailures += failure
 
-  /** returns the failures of this example and its subexamples */
+  /** @return the failures of this example and its subexamples */
   def failures: Seq[FailureException] = thisFailures ++ subExamples.flatMap { _.failures }
 
-  /** returns the errors of this example and its subexamples */
+  /** @return the errors of this example and its subexamples */
   def errors: Seq[Throwable] = thisErrors ++ subExamples.flatMap {_.errors}
 
-  /** returns a user message with failures and messages, addSpaceed with a specific tab string (used in ConsoleReport) */
+  /** @return a user message with failures and messages, addSpaceed with a specific tab string (used in ConsoleReport) */
   def pretty(tab: String) = tab + description + failures.foldLeft("") {_ + addSpace(tab) + _.message} + 
                                                 errors.foldLeft("") {_ + addSpace(tab) + _.getMessage}
 }
 
-/** utility object to indent a striaddSpaceh 2 spaces */
+/** utility object to indent a string with 2 spaces */
 object SpecUtils {
+  /** @return <code>s + "  "</code> */
   def addSpace(s: String) = s + "  "
 }

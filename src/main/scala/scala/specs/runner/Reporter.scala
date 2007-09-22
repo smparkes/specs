@@ -27,7 +27,7 @@ trait OutputReporter extends Reporter with Output {
   def report(specs: Iterable[Specification]): Unit = specs foreach (reportSpec(_, ""))
 
   /**
-   * reports a list of specifications with a given space separator to display before the results.
+   * reports a list of specifications with a given space separator to display before the results.<br>
    * This method may be called recursively by the <code>reportSpec</code> method if a specification
    * has subSpecifications, hence the <code>padding</code> will be incremented
    */
@@ -37,7 +37,7 @@ trait OutputReporter extends Reporter with Output {
   def reportSpec(spec: Specification): Unit = reportSpec(spec, "")
 
   /**
-   * reports a specification with a given space separator to display before the results.
+   * reports a specification with a given space separator to display before the results.<br>
    * This method may be called recursively by the <code>reportSpec</code> method if a specification
    * has subSpecifications, hence the <code>padding</code> will be incremented
    */
@@ -55,7 +55,7 @@ trait OutputReporter extends Reporter with Output {
     new Object {  def +(t2: Tuple4[Int, Int, Int, Int]) = (t1._1 + t2._1, t1._2 + t2._2, t1._3 + t2._3, t1._4 + t2._4) }
   }
   /**
-   * returns the number of examples, assertions, failures and errors for a specification
+   * @return the number of examples, assertions, failures and errors for a specification
    * by collecting those numbers on sub-specifications and suts
    */
   def stats(spec: Specification): (Int, Int, Int, Int) = {
@@ -64,7 +64,7 @@ trait OutputReporter extends Reporter with Output {
   }
   
   /**
-   * returns the number of examples, assertions, failures and errors for a sut
+   * @return the number of examples, assertions, failures and errors for a sut
    * by collecting those numbers on examples
    */
   def stats(sut: Sut): (Int, Int, Int, Int)  = {
@@ -72,7 +72,7 @@ trait OutputReporter extends Reporter with Output {
   }
 
   /**
-   * returns the number of examples, assertions, failures and errors for an example
+   * @return the number of examples, assertions, failures and errors for an example
    * by collecting those numbers on this example and on sub-examples
    */
   def stats(example: Example): (Int, Int, Int, Int) = {
@@ -81,7 +81,7 @@ trait OutputReporter extends Reporter with Output {
   }
 
   /**
-   * report the sut results. If there are more than one, then report stats for each
+   * reports the sut results. If there are more than one, then report stats for each
    * else just print the specification of the sut, the parent specification will display the total
    * for that sut
    */
@@ -93,12 +93,12 @@ trait OutputReporter extends Reporter with Output {
   }
 
   /**
-   * report one sut results: print the sut specifications, then the statistics
+   * reports one sut results: print the sut specifications, then the statistics
    */
   def reportSut(sut: Sut, padding: String) = { printSut(sut, padding); printStats(sut, padding) }
 
   /**
-   * print one sut specifications
+   * prints one sut specification
    */
   def printSut(sut: Sut, padding: String) = {
     println(padding + sut.description + " " + sut.verb)
@@ -106,7 +106,7 @@ trait OutputReporter extends Reporter with Output {
     println("")
   }
   /**
-   * print the statistics for a sut
+   * prints the statistics for a sut
    */
   def printStats(sut: Sut, padding: String): Unit = {
     println(padding + "Total for SUT \"" + sut.description + "\":")
@@ -114,7 +114,7 @@ trait OutputReporter extends Reporter with Output {
   }
   
   /**
-   * print the statistics for a specification
+   * prints the statistics for a specification
    */
   def printStats(stat: (Int, Int, Int, Int), padding: String) = {
     val (examplesNb, assertionsNb,  failuresNb, errorsNb) = stat
@@ -128,7 +128,7 @@ trait OutputReporter extends Reporter with Output {
   }
 
   /**
-   * report a list of examples and indent subexamples if there are some
+   * reports a list of examples and indent subexamples if there are some
    */
   def reportExamples(examples: Iterable[Example], padding: String): Unit = {
 		for (example <- examples) {
@@ -138,7 +138,7 @@ trait OutputReporter extends Reporter with Output {
   }
 
   /**
-   * report one example: + if it succeeds, x if it fails, its description, its failures or errors 
+   * reports one example: + if it succeeds, x if it fails, its description, its failures or errors 
    */
   def reportExample(example: Example, padding: String) = {
     def status(example: Example) = if (example.errors.size + example.failures.size > 0) "x " else "+ "
