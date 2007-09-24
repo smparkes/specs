@@ -11,7 +11,7 @@ trait SpecsFinder extends FileSystem {
 
    /** 
     * @param path a path to a directory containing scala files (it can be a glob: i.e. "dir/**/*spec.scala")
-    * @param pattern ia regular expression which is supposed to match an object name extending a Specification
+    * @param pattern a regular expression which is supposed to match an object name extending a Specification
     * @return specification names by scanning files and trying to find specifications declarations
     */
    def specificationNames(path: String, pattern: String) : List[String] = {
@@ -26,7 +26,7 @@ trait SpecsFinder extends FileSystem {
    * This may be later extended to support other arbitrary patterns 
    *
    * @param path a path to a directory containing scala files (it can be a glob: i.e. "dir/**/*spec.scala")
-   * @param pattern ia regular expression which is supposed to match an object name extending a Specification
+   * @param pattern a regular expression which is supposed to match an object name extending a Specification
    */
   def collectSpecifications(result: Queue[String], filePath: String, pattern: String): Unit = {
     if (!filePath.endsWith(".scala")) return    
