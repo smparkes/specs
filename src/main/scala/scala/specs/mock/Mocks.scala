@@ -1,7 +1,7 @@
 package scala.specs.mock
 import scala.specs.Sugar._
 import scala.collection.mutable.Stack
-import scala.util.ExtendedList._
+import scala.collection.ExtendedList._
 
 /**
  * The <code>Protocol</code> class stores the expectations of mocks, alongside with the actual received calls

@@ -1,6 +1,6 @@
 package scala.specs.runner
-import scala.util.log.ConsoleLog
-import scala.util.JavaCollectionsConversion
+import scala.log.ConsoleLog
+import scala.collection.JavaCollectionsConversion
 
 /**
  * This class implements the <code>ConsoleReporter</code> by adding a main 

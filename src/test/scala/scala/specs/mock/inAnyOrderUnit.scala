@@ -3,7 +3,7 @@ import scala.specs.runner._
 import scala.specs.Sugar._
 import scala.specs.mock._
 import scalacheck.Gen._
-import scala.util.ExtendedList._
+import scala.collection.ExtendedList._
 import scala.specs.matcher.ScalacheckParameters._
 
 object inAnyOrderUnitSuite extends JUnit3(inAnyOrderUnit)

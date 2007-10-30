@@ -66,6 +66,17 @@ trait Sugar {
       def pln = Console.println(a) 
     }
   }
-
+  
+  implicit def stringToMult(s: String) = {
+    new Object {
+      def mult(s: String, i: Int): String = {        
+        if (i == 0) 
+          ""
+        else
+          s + mult(s, i-1)
+      }
+      def * (i: Int): String = mult(s, i)
+    }
+  }
 }
 

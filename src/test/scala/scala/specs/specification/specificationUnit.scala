@@ -9,6 +9,7 @@ import scala.collection.mutable._
 import scalacheck.Gen._
 import scala.specs.matcher.MatcherUtils._
 
+object specificationUnitRunner extends ConsoleRunner(specificationUnit)
 object specificationUnitSuite extends JUnit3(specificationUnit)
 object specificationUnit extends Specification {
 
@@ -25,13 +26,21 @@ object specificationUnit extends Specification {
                                            not(beMatching("\\.")) and
                                            not(beInt))
       }
+   }  
+  "create a default sut and example if an assertion is created alone" in {
+    object nudeSpec extends Specification {
+        "name" mustEqual "name"
+    }
+      nudeSpec.suts.size mustBe 1
+      nudeSpec.suts.head.examples.size mustBe 1
+      nudeSpec.assertionsNb mustBe 1
    }
+
   }
   def isInt(s: String): Boolean = {try {s.toInt} catch {case _ => return false}; true}
   def beInt = new Matcher[String](){
     def apply(s: => String) = (isInt(s), q(s) + " is an integer", q(s) + " is not an integer")
   }
- 
   object specification extends Specification
 }
 

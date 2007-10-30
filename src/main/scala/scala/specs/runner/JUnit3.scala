@@ -2,6 +2,7 @@ package scala.specs.runner
 import scala.specs.runner.javaConversions._
 import scala.specs.specification._
 import junit.framework._
+import scala.collection.JavaCollectionsConversion._
 
 /**
  * This class is a JUnitTestSuite class with an empty test.<br>

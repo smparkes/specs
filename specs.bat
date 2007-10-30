@@ -1,0 +1,1 @@
+java -cp ./lib/specs-1.0.jar;./lib/junit-3.8.1.jar;./lib/ScalaCheck-1.0.jar;./lib/scala-library.jar scala.specs.allRunner

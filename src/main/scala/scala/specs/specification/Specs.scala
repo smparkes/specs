@@ -1,5 +1,6 @@
 package scala.specs
 import scala.util._
+import scala.xml._
 import scala.specs.matcher._
 import scala.collection.mutable._
 import scala.specs.runner._
@@ -27,13 +28,13 @@ abstract class Specification extends Matchers with SpecificationStructure {
   def usingAfter(afterFunction: () => Unit) = { suts.last.after = Some(afterFunction) }
 
   /** @return the failures of each sut */
-  def failures = suts.flatMap {_.failures}
+  def failures: List[FailureException] = subSpecifications.flatMap{_.failures} ::: suts.flatMap {_.failures}
 
   /** @return the errors of each sut */
-  def errors = suts.flatMap {_.errors}
+  def errors: List[Throwable] = subSpecifications.flatMap{_.errors} ::: suts.flatMap {_.errors}
 
   /** @return the total number of assertions for each sut */
-  def assertionsNb = suts.foldLeft(0) {_ + _.assertionsNb}
+  def assertionsNb: Int = subSpecifications.foldLeft(0) {_ + _.assertionsNb} + suts.foldLeft(0) {_ + _.assertionsNb}
 
   /** @return a description of this specification with all its suts (used for the ConsoleReporter) */
   def pretty = description + suts.foldLeft("") {_ + _.pretty(addSpace("\n"))}
@@ -59,6 +60,12 @@ case class Sut(description: String, cycle: ExampleLifeCycle) extends ExampleLife
   /** default verb used to define the behaviour of the sut */
   var verb = "should"
 
+  /** 
+   * instead of using several examples, a whole text with embedded assertions can be used to
+   * specify the Sut
+   */
+  var literalDescription: Option[String] = None
+
   /** examples describing the sut behaviour */
   var examples = new Queue[Example]
 
@@ -74,6 +81,12 @@ case class Sut(description: String, cycle: ExampleLifeCycle) extends ExampleLife
   /** alternately there may be no example given yet */
   def should(noExampleGiven: Unit) = {}
 
+  /** specifies the system with a literal description and embedded assertions */
+  def is(e: => Elem)= {
+      verb = "specifies"
+      literalDescription = Some(e.text)
+  }
+
   /** Alias method to describe more advanced or optional behaviour. This will change the verb used to report the sut behavior */
   def can(ex : Example) = {verb = "can"}
 
@@ -88,7 +101,7 @@ case class Sut(description: String, cycle: ExampleLifeCycle) extends ExampleLife
 
   /** @return a description of this sut with all its examples (used for the ConsoleReporter) */
   def pretty(tab: String) = tab + description + " " + verb + " " + examples.foldLeft("") {_ + _.pretty(addSpace(tab))}
-
+  
   /** calls the before method of the "parent" cycle, then the sut before method before an example if that method is defined. */
   override def beforeExample(ex: Example) = {
     cycle.beforeExample(ex)
@@ -190,6 +203,8 @@ case class Example(description: String, cycle: ExampleLifeCycle) {
   /** @return a user message with failures and messages, addSpaceed with a specific tab string (used in ConsoleReport) */
   def pretty(tab: String) = tab + description + failures.foldLeft("") {_ + addSpace(tab) + _.message} + 
                                                 errors.foldLeft("") {_ + addSpace(tab) + _.getMessage}
+  /** @return the example description */
+  override def toString = description
 }
 
 /** utility object to indent a string with 2 spaces */

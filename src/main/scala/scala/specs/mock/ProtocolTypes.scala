@@ -2,7 +2,7 @@ package scala.specs.mock
 import scala.specs.Sugar._
 import scala.specs._
 import scala.specs.matcher._
-import scala.util.ExtendedList._
+import scala.collection.ExtendedList._
 import scala.specs.matcher.MatcherUtils._
 
 /**

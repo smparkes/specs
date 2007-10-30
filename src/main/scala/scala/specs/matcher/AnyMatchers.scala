@@ -1,7 +1,8 @@
 package scala.specs.matcher
-import scala.specs.matcher.MatcherUtils._
-import scala.specs.matcher.PatternMatchers._
+
 import scala.specs.specification._
+import scala.specs.matcher.MatcherUtils.{q, matches}
+import scala.specs.matcher.PatternMatchers._
 
 object AnyMatchers extends AnyMatchers
 /**
@@ -39,6 +40,11 @@ trait AnyMatchers {
    */   
   def is_!=[T](a: T) = (is_==(a)).not 
   
+  /**
+   * Matches is (a != b)
+   */   
+  def be_!=[T](a: T) = (is_==(a)).not 
+
   /**
    * Matches if iterable.exists(_ == a)
    */   

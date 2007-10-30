@@ -1,7 +1,7 @@
 package scala.specs.runner
 
 import scala.collection.mutable.Queue
-import scala.util.log.ConsoleLog
+import scala.log.ConsoleLog
 import scala.util.Timer
 import scala.util.SimpleTimer
 import scala.io._
@@ -21,7 +21,7 @@ trait Reporter {
  */  
 trait OutputReporter extends Reporter with Output {
   /** the timer is used to display execution times */
-  val timer: Timer
+  val timer: scala.util.Timer
 
   /** reports a list of specifications */
   def report(specs: Iterable[Specification]): Unit = specs foreach (reportSpec(_, ""))
@@ -102,6 +102,7 @@ trait OutputReporter extends Reporter with Output {
    */
   def printSut(sut: Sut, padding: String) = {
     println(padding + sut.description + " " + sut.verb)
+    sut.literalDescription foreach {s => println(padding + s)}
     reportExamples(sut.examples, padding)
     println("")
   }
@@ -143,8 +144,9 @@ trait OutputReporter extends Reporter with Output {
   def reportExample(example: Example, padding: String) = {
     def status(example: Example) = if (example.errors.size + example.failures.size > 0) "x " else "+ "
     println(padding + status(example) + example.description)
-    example.failures.foreach {f: Throwable => println(padding + "  " + f.getMessage) }
-    example.errors.foreach {f: Throwable => println(padding + "  " + f.getMessage) }
+    // if the failure or the error message has linefeeds they must be padded too
+    example.failures.foreach {f: Throwable => println(padding + "  " + f.getMessage.replaceAll("\n", "\n" + padding + "  ")) }
+    example.errors.foreach {f: Throwable => println(padding + "  " + f.getMessage.replaceAll("\n", "\n" + padding + "  ")) }
   }
 }
 

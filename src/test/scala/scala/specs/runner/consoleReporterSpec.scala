@@ -9,11 +9,12 @@ import junit.framework._
 import scala.specs.Sugar._
 import scala.specs.matcher.MatcherUtils._
 
+object consoleReporterRunner extends ConsoleRunner(consoleReporterSpec)
 object consoleReporterSuite extends JUnit3(consoleReporterSpec)
 object consoleReporterSpec extends Specification {
 
   "A console reporter" should {
-    "report the name of the specification: 'A specification should'" in { 
+    "report the name of the specification: 'A specification should'" in {
       specWithOneExample(that.isOk) must containMatch("A specification should")
     }
     "report the specification examples: '-have example 1 ok'" in { 
@@ -50,6 +51,9 @@ object consoleReporterSpec extends Specification {
     }
     "have a 'fail' method adding a new failure to the last example" in {
       specWithOneExample(that.isKoWithTheFailMethod) mustExistMatch "1 failure" 
+    }
+    "report the literal description of a sut if it is set"  in {
+      new SpecWithLiteralDescription(that.isOk).run mustExistMatch "Some text with embedded assertions"
     }
   }
 
@@ -89,6 +93,15 @@ class SpecWithTwoExamples(behaviours: List[(that.Value)]) extends TestSpec {
       "have example 2.1 ok" in { assertions(behaviours).head.apply}
       "have example 2.2 ok" in { assertions(behaviours).last.apply }
     }
+    reportSpec(this)
+    messages
+  }   
+}
+class SpecWithLiteralDescription(behaviours: List[(that.Value)]) extends TestSpec {
+  def run = {
+    "The specification" is <p> 
+      Some text with {"embedded assertions" in {assertions(behaviours) foreach {_.apply}}}
+    </p>
     reportSpec(this)
     messages
   }   

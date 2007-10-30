@@ -5,6 +5,7 @@ import scalacheck.Prop
 import scalacheck.Prop._
 import scalacheck.Test
 import scalacheck.Test._
+import scalacheck.ConsoleReporter._
 import scala.collection.immutable.HashMap
 import scala.io.ConsoleOutput
 import scala.specs.matcher.ScalacheckParameters._
@@ -88,7 +89,7 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
      
      // display the final result if verbose = true
      if (verbose) {
-       val s = stats.pretty
+       val s = prettyTestStats(stats)
        printf("\r{0} {1}{2}\n", if (stats.result.passed) "+" else "!", s, List.make(70 - s.length, " ").mkString(""))
      }
 
@@ -98,14 +99,14 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
      def noCounterExample(n: Int) = "The property passed without any counter-example " + afterNTries(n)
      stats match {
        case Test.Stats(Passed(), n, _)          => (true,  noCounterExample(n: Int), "A counter-example was found " + afterNTries(n)) 
-       case s@Test.Stats(GenException(e), n, _) => (false, noCounterExample(n: Int), s.pretty) 
-       case s@Test.Stats(Exhausted(), n, _)     => (false, noCounterExample(n: Int), s.pretty) 
+       case s@Test.Stats(GenException(e), n, _) => (false, noCounterExample(n: Int), prettyTestStats(s)) 
+       case s@Test.Stats(Exhausted(), n, _)     => (false, noCounterExample(n: Int), prettyTestStats(s)) 
        case Test.Stats(Failed(List((msg, _))), n, _) => 
          (false, noCounterExample(n: Int), "A counter-example is '"+msg+"' (" + afterNTries(n)+")") 
        case Test.Stats(PropException(List((msg, _)), FailureException(ex)), n, _) => 
          (false, noCounterExample(n: Int), "A counter-example is '"+msg+"': " + ex + " ("+afterNTries(n)+")") 
        case s@Test.Stats(PropException(List((msg, _)), ex), n, _) => 
-         (false, noCounterExample(n: Int), s.pretty) 
+         (false, noCounterExample(n: Int), prettyTestStats(s)) 
      }
    }
   

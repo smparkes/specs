@@ -1,6 +1,6 @@
 package scala.specs.matcher
 import scala.specs.matcher.MatcherUtils._
-import scala.util.ExtendedIterable._
+import scala.collection.ExtendedIterable._
 
 /**
  * The <code>IterableMatchers</code> trait provides matchers which are applicable to Iterable objects
@@ -49,7 +49,8 @@ trait IterableMatchers {
   def notExistMatch(pattern: String) = existMatch(pattern).not
 
   /**
-   * Matches if there is one element in the iterable[String] matching the <code>pattern</code>: iterable.exists(matches(pattern) _)
+   * Matches if there l contains the same elements as the Iterable <code>iterable</code>.<br>
+   * This verification does not consider the order of the elements but checks the iterables recursively
    */   
   def haveSameElementsAs[T](l: Iterable[T]) = new Matcher[Iterable[T]](){
     def apply(iterable: => Iterable[T]) = (

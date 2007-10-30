@@ -17,6 +17,7 @@ trait Matchers extends AnyMatchers with
                        ScalacheckMatchers with
                        PatternMatchers with 
                        MockMatchers with 
+                       XmlMatchers with 
                        MatcherResult
                        
 /**

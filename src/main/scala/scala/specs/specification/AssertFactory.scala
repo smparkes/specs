@@ -15,8 +15,8 @@ package scala.specs.specification;
  * will be used with the implicit def (only solution found to make it all work, to my current understanding again)
  */
 trait AssertFactory {
-  /** utility variable to track the last example being currently defined, in order to be able to add assertions to it */ 
-  protected[this] var lastExample: Example = _ 
+  /** utility function to track the last example being currently defined, in order to be able to add assertions to it */ 
+  protected[this] def lastExample: Example 
 
   /** implicit transformation of a double into an object supporting numeric matchers */
   implicit def theDouble[A <: Double](value: => A) = {

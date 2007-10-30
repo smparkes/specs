@@ -1,6 +1,7 @@
 package scala.specs
 import scala.specs.runner._
 
+object sugarRunner extends ConsoleRunner(sugarSpec)
 object sugarSuite extends JUnit3(sugarSpec)
 object sugarSpec extends Specification with Sugar {
   "A sugar trait" should {
@@ -11,6 +12,9 @@ object sugarSpec extends Specification with Sugar {
       var j = 0
       3 times {j += _}
       j mustBe 6
+    }
+    "have a * method on String to multiply a string a number of times" in {
+      "s" * 3 must_== "sss"
     }
   }
   

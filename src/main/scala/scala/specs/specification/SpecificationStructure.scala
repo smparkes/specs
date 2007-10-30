@@ -90,7 +90,7 @@ trait SpecificationStructure extends ExampleLifeCycle with AssertFactory {
   }
 
   /** utility method to track the last sut being currently defined, in order to be able to add examples to it */ 
-  protected[this] def currentSut = suts.last
+  protected[this] def currentSut = if (!suts.isEmpty) suts.last else specify("The system")
 
   /** 
    * implicit definition allowing to declare a new example described by a string <code>desc</code><br>   
@@ -99,10 +99,15 @@ trait SpecificationStructure extends ExampleLifeCycle with AssertFactory {
    * <code>forExample("return 0 when asked for (0+0)").in {...}</code>
    */
   implicit def forExample(desc: String): Example = {
-    lastExample = new Example(desc, currentSut)
-    currentExamplesList += lastExample
-    lastExample
+    val newExample = new Example(desc, currentSut)
+    currentExamplesList += newExample 
+    lastCreatedExample = newExample
+    newExample
   }
+  
+  /** utility function to track the last example being currently defined, in order to be able to add assertions to it */ 
+  protected[this] def lastExample: Example = if (lastCreatedExample == null) forExample("example") else lastCreatedExample
+  protected[this] var lastCreatedExample: Example = _
 
   /** 
    * utility method to track the last example list being currently defined.<br>
