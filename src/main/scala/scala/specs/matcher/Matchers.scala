@@ -126,6 +126,8 @@ trait MatcherResult {
    * the tuple representing the result of a match when implementing <code>Matcher</code> logical operators<br>
    * Usage: <code>matcher.apply(value).okMessage</code> for instance
    */  
-  case class MatcherResult(success: Boolean, okMessage: String, koMessage: String)
+  case class MatcherResult(success: Boolean, okMessage: String, koMessage: String) 
   implicit def toMatcherResult(t: (Boolean, String, String)): MatcherResult = MatcherResult(t._1, t._2, t._3)  
+  implicit def toTuple(m: MatcherResult): (Boolean, String, String) = (m.success, m.okMessage, m.koMessage)
+
 }

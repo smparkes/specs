@@ -11,5 +11,6 @@ object allMatchersUnit extends Specification {
                                         stringMatchersUnit,
                                         numericMatchersUnit,
                                         patternMatchersUnit,
-                                        scalacheckMatchersUnit)
+                                        scalacheckMatchersUnit,
+                                        xmlMatchersUnit)
 }

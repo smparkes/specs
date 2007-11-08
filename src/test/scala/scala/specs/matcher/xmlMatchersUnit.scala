@@ -7,33 +7,6 @@ class MyTest extends TestCase
 
 object xmlMatchersSuite extends JUnit3(xmlMatchersUnit)
 object xmlMatchersUnit extends MatchersSpecification with XmlMatchers {
-  "A \\\\ matcher" should {
-    "match a node with its own label" in {
-      <a></a> must \\("a")
-    }
-    "match a node b contained in a node a, with the label 'b'" in {
-      <a><b></b></a> must \\("b")
-    }
-    "match a node c deeply nested in a node a with the label 'c'" in {
-      <a><s><c></c></s></a> must \\("c")
-    }
-    "not match a node whose label doesn't exist" in {
-      assertion(<a><b><c></c></b></a> must \\("d")) must failWith("<a><b><c></c></b></a> doesn't contain node d")
-    }
-    "match a node given its label and one attribute name" in {
-      <a><b name="value"></b></a> must \\("b", "name")
-    } 
-    "match a node given its label and all of its attribute names" in {
-      <a><b><c name="value" name2="value"></c></b></a> must \\("c", ("name2", "name"))
-      assertion(<a><b name2="value"></b></a> must \\("b", "name")) must failWith("<a><b name2=\"value\"></b></a> doesn't contain node b with attributes: name")
-    } 
-    "not match a node given its label and one missing attribute name" in {
-      assertion(<a><b name2="value"></b></a> must \\("b", "name")) must failWith("<a><b name2=\"value\"></b></a> doesn't contain node b with attributes: name")
-    } 
-    "match a node given its label and some only of all of its attribute names" in {
-      <a><b name="value" name2="value"></b></a> must \\("b", "name")
-    } 
-  }
   "A \\ matcher" should {
     "match a node b contained in the node a with the label 'b'" in {
       <a><b></b></a> must \("b")
@@ -66,13 +39,51 @@ object xmlMatchersUnit extends MatchersSpecification with XmlMatchers {
     "not match a node contained in another given its label and a missing attributes" in {
       assertion(<a><b name="value" name2="value"></b></a> must \("b", Map("name"->"value"))) must failWith("<a><b name2=\"value\" name=\"value\"></b></a> doesn't contain subnode b with attributes: name=\"value\"")
     }
+    "match a node <b><c></c></b> contained in the node a" in {
+      <a><b><c></c></b></a> must \(<b><c></c></b>)
+    }
+    "not match a node <b><d></d></b> not contained in the node a" in {
+      assertion(<a><b><c></c></b></a> must \(<b><d></d></b>)) must failWith("<a><b><c></c></b></a> doesn't contain <b><d></d></b>")
+    }
+  }
+  "A \\\\ matcher" should {
+    "match a node with its own label" in {
+      <a></a> must \\("a")
+    }
+    "match a node b contained in a node a, with the label 'b'" in {
+      <a><b></b></a> must \\("b")
+    }
+    "match a node c deeply nested in a node a with the label 'c'" in {
+      <a><s><c></c></s></a> must \\("c")
+    }
+    "not match a node whose label doesn't exist" in {
+      assertion(<a><b><c></c></b></a> must \\("d")) must failWith("<a><b><c></c></b></a> doesn't contain node d")
+    }
+    "match a node given its label and one attribute name" in {
+      <a><b name="value"></b></a> must \\("b", "name")
+    } 
+    "match a node given its label and all of its attribute names" in {
+      <a><b><c name="value" name2="value"></c></b></a> must \\("c", ("name2", "name"))
+    } 
+    "not match a node given its label and one missing attribute name" in {
+      assertion(<a><b name2="value"></b></a> must \\("b", "name")) must failWith("<a><b name2=\"value\"></b></a> doesn't contain node b with attributes: name")
+    } 
+    "match a node given its label and some only of all of its attribute names" in {
+      <a><b name="value" name2="value"></b></a> must \\("b", "name")
+    } 
+    "match a node <c><d></d></c> deeply contained in the node a" in {
+      <a><b><c><d></d></c></b></a> must \\(<c><d></d></c>)
+    }
+    "not match a node <c><e></e></c> not deeply contained in the node a" in {
+      assertion(<a><b><c><d></d></c></b></a> must \\(<c><e></e></c>)) must failWith("<a><b><c><d></d></c></b></a> doesn't contain <c><e></e></c>")
+    }
   }
   "\\ and \\\\ matchers" can {
     "be chained with \\ to provide full path searches" in {
       <a><b><c><d></d></c></b></a> must \("b").\("c")
     }
     "be chained with \\\\ to provide more full path searches" in {
-      <a><b><c><d></d></c></b></a> must \\("b").\("c")
+      <a><b><c><d></d></c></b></a> must \\("c").\("d")
       <a><b><c><d></d></c></b></a> must \\("b").\\("d")
     }
   }

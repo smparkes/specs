@@ -28,9 +28,8 @@ object allSpecs extends Specification {
 
 object allUnits extends Specification {
   "The unit tests" areSpecifiedBy (
-      fileSystemUnit,  
-      extendedIterableUnit,  
-      extendedListUnit,  
+      fileSystemUnit, 
+      collectionUnit,  
       specificationUnit, 
       allMatchersUnit, 
       protocolsUnit,
