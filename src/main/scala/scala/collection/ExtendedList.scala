@@ -1,4 +1,5 @@
 package scala.collection
+import scala.collection.immutable._
 
 object ExtendedList {
   def mix[T](x: T, l: List[T]): List[List[T]] = {
@@ -36,6 +37,11 @@ object ExtendedList {
         case x::Nil => List(l)
         case x::rest => List(x)::rest.prefixes.map(x::_)
       }
+    }
+    def toMap[D](defaultValue: D): scala.collection.immutable.Map[T, D] = {
+      var newMap: scala.collection.immutable.Map[T, D] = new HashMap[T, D]
+      l.foreach {t:T => newMap = newMap.update(t, defaultValue)}  
+      newMap
     }
     def scramble = l.sort((a, b) => (new java.util.Random).nextInt(1) > 0)
   }

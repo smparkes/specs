@@ -204,7 +204,7 @@ class PathFunction(val node: Node, val attributes: List[String], val attributeVa
    */
   def matchNode(found: Node): Boolean = {
     // returns true if m matches the attribute names or attribute names + values
-    def metaDataMatch(m: MetaData) = if (!attributes.isEmpty)
+    def attributesMatch(m: MetaData) = if (!attributes.isEmpty)
                                        m.map((a: MetaData) => a.key).toList.intersect(attributes) == attributes
                                      else
                                        Map(m.map((a: MetaData) => a.key -> a.value.toString).toList: _*) == attributeValues
@@ -212,7 +212,7 @@ class PathFunction(val node: Node, val attributes: List[String], val attributeVa
     // returns true if the node matches the specified children
     def childrenMatch(n: Node) = if (node.child.isEmpty) true else n.child == node.child
 
-    childrenMatch(found) && metaDataMatch(found.attributes)
+    attributesMatch(found.attributes) && childrenMatch(found) 
   }
 
   /**
