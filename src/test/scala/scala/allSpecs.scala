@@ -9,6 +9,7 @@ import scala.io._
 import scala.collection._
 import scala.util._
 
+
 object allSpecsSuite extends JUnit3(allSpecs)
 object allSpecs extends Specification {
     "The specifications" areSpecifiedBy (

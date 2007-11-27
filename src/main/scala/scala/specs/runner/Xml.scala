@@ -7,20 +7,32 @@ import java.io.Writer
 import scala.xml.{Elem, PrettyPrinter}
 import scala.specs.specification._
 
-class XmlRunner(s: Specification, var outputDir: String) extends Reporter with FileSystem with ConsoleLog with FileWriter {
-  var fileName = "" 
+/**
+ * The <code>XmlRunner</code> class is used to create an xml file, in a specified output directory
+ * with the results of a specification execution.
+ * Usage: <code>object runner extends XmlRunner(mySpec, "./results/specs")</code>
+ * The name of the generated file is specification.name by default but can be overriden:<pre>
+ * object runner extends XmlRunner(mySpec, "./results/specs"){override val fileName="result"}</pre>
+ * If the output directory is not specified <pre>object runner extends XmlRunner(mySpec)</pre> then the
+ * current directory will be used
+ */
+class XmlRunner(specification: Specification, var outputDir: String) extends Reporter with FileSystem with ConsoleLog with FileWriter {
+  val fileName = specification.name
+  var filePath = normalize(outputDir) + fileName + ".xml"
   def main(args: Array[String]): Unit = execute
-  def this(s: Specification) = this(s, ".")
+  def this(specification: Specification) = this(specification, ".")
+  def normalize(dir: String) = {
+    var properDir = dir.replaceAll("\\\\", "/")
+    if (!properDir.startsWith("/") && !properDir.startsWith("."))
+      properDir = ("./" + properDir)
+    if (!properDir.endsWith("/"))
+      properDir += "/"
+    properDir
+  }
   def execute = {
-    outputDir = outputDir.replaceAll("\\\\", "/")
-    if (!outputDir.startsWith("/") && !outputDir.startsWith("."))
-      outputDir = ("./" + outputDir)
-    if (!outputDir.endsWith("/"))
-      outputDir += "/"
-    fileName = outputDir + s.name + ".xml"
-    createFile(fileName)
-    write(fileName) { out: Writer =>
-      out.write(new PrettyPrinter(200, 2).format(asXml(s)))
+    createFile(filePath)
+    write(filePath) { out: Writer =>
+      out.write(new PrettyPrinter(200, 2).format(asXml(specification)))
     }
   }
   def asXml(s: Specification): Elem =
@@ -40,5 +52,5 @@ class XmlRunner(s: Specification, var outputDir: String) extends Reporter with F
 
   def asXml(failure: FailureException): Elem = 
     <failure>{failure.message}</failure>
-  def report(s: Iterable[Specification]) = {}
+  def report(specifications: Iterable[Specification]) = {}
 }

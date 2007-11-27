@@ -1,16 +1,61 @@
 package scala.util
 import scala.Products._
 
+/**
+ * The Datatables trait provides implicit methods to start table headers 
+ * and DataRows.<p>
+ */
 trait DataTables {
+  /**
+   * @returns a table header which first column is the string <code>a</code> 
+   */
   implicit def toTableHeader(a: String) = TableHeader(List(a))
+
+  /**
+   * @returns a table row whose type will be <code>T</code> for each element and
+   * which starts with <code>a</code> as the first element 
+   */
   implicit def toDataRow[T](a: T) = DataRow1(a)
 }
+
+/**
+ * The TableHeader case class models the header of a data table which should be a list of strings
+ * A header can be created using the | operator a separator between strings<pre>
+ * "a" | "b" | "c = a + b"|
+ * </pre>
+ * A header can be closed using the | method which will return the TableHeader object<p>
+ * A header can be followed by data rows which only requirement is to have a <code>def header_=(t: TableHeader)</code> function
+ */
 case class TableHeader(h: List[String]) {
-  def | = this
-  def |[T <: Any {def header_=(t: TableHeader)}](d: T) = {d.header_=(this); d}
-  def |>[T <: Any {def header_=(t: TableHeader); def shouldExecute_=(b: Boolean)}](d: T) = {d.header_=(this); d.shouldExecute_=(true); d}
+  /**
+   * Adds a new column to the header
+   * @returns the extended header
+   */
   def |(s: String) = TableHeader(h:::List(s))
-  override def toString = h.mkString("|", "|", "|")
+
+  /**
+  * Used to close the header
+  * @returns the header
+  */
+  def | = this
+
+  /**
+   * Accepts any object on which a header can be set. Sets the header on that object and returns it
+   * @returns the header-accepting object (usually a DataRow object)
+   */
+  def |[T <: Any {def header_=(t: TableHeader)}](d: T) = {d.header_=(this); d}
+
+  /**
+   * Accepts any object on which a header can be set and which is executable. 
+   * Sets the header on the object, marks it as "should be executed" and returns it.
+   * @returns the header-accepting object (usually a DataRow object), ready to execute
+   */
+  def |>[T <: Any {def header_=(t: TableHeader); def shouldExecute_=(b: Boolean)}](d: T) = {d.header_=(this); d.shouldExecute_=(true); d}
+
+  /**
+   * @returns the header as string: |"a" | "b" | "c = a + b"|
+   */
+   override def toString = h.mkString("|", "|", "|")
 }
 
 /**
@@ -97,6 +142,7 @@ case class TableHeader(h: List[String]) {
  * 
  * 
  */
+
 abstract class DataRow[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19](val values: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19)) {
   var header: TableHeader = TableHeader(Nil)
   var shouldExecute: Boolean = false;
@@ -115,20 +161,80 @@ trait ExecutableDataTable {
   def execute: this.type
   def results: String
 }
+
+/**
+ * A DataTable contains: a header describing the columns, datarows containing values, a function to execute on each row
+ * In the following example of a DataTable:<pre>
+ * val datatable = "a" | "b" | "c = a + b" |>
+ *                  1  !  2  !     3       | 
+ *                  2  !  2  !     4       | 
+ *                  3  !  2  !     5       | {
+ *                (a: Int, b: Int, c: Int) => c must_== calc.add(a, b)
+ *                 } </pre>
+ * The header defines 3 columns, there are 3 rows of type (Int, Int, Int) and a function taking its values in each row.
+ * The '>' sign added to the header means that the function will be executed on each row when the table is defined. The result
+ * of the execution will be available via a <code>results</code> function returning a string.<p>
+ * A DataTable has the following constraints:<ul>
+ * <li/>It cannot have more than 20 columns
+ * <li/>The rows must be of identical types
+ * <li/>The function must have the same parameter types as the types of the rows (However the function can have less parameters than the number of row cells)
+ * </ul>
+ */
 case class DataTable[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19](header: TableHeader, rows: List[DataRow[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]], var shouldExecute: Boolean) extends ExecutableDataTable {
+  
+  /**
+   * @returns the result of the function execution on each row: the string representation of the row and an optional error message in case of a failure
+   */  
   var rowResults: String = " " + header.toString
+
+  /**
+   * function to execute on each row
+   */  
   var function : Function0[DataTable[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]] = _
+
+  /**
+   * Datatable constructor with an empty header
+   */  
   def this(rows: List[DataRow[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]]) = this(TableHeader(Nil), rows, false)
+
+  /**
+   * Adds a new datarow to the existing table
+   */  
   def |(r: DataRow[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]) = DataTable(header, r::rows, shouldExecute) 
+
+  /**
+   * Adds a new datarow to the existing table and sets the table for immediate execution
+   */  
   def |>(r: DataRow[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]) = { this.|(r); shouldExecute = true; this }
+
+  /**
+   * closes the table
+   */  
   def | = this 
+
+  /**
+   * executes the function on each table row  if the function exists
+   */  
   def execute = {
     if (function != null) 
-      function.apply();
+      function.apply()
     this
   }
+
+  /**
+   * @returns the result of the execution of the table
+   */  
   def results: String = rowResults
+
+  /**
+   * @returns a string representation of the table
+   */  
   override def toString = header.toString + "\n" + rows.mkString("\n")
+
+  /**
+   * execute a row by checking the execution of the user-supplied function and
+   * either displaying the row or displaying the row and an error message
+   */  
   private def executeRow(row: List[Any], rowResult: => Any) = {
     var failed = false
     try { rowResult } 
@@ -140,7 +246,14 @@ case class DataTable[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13,
     if (!failed)
       rowResults += ("\n" + row.mkString("|", "|", "|"))
   }
+  /**
+   * apply a function of one argument to the table and set the table for execution
+   */  
   def |>[R](f: Function1[T0, R]) = {shouldExecute = true; this.|(f)}
+
+  /**
+   * apply a function of one argument to the table
+   */  
   def |[R](f: Function1[T0, R]) = {
     val outer = this
     function = new Function0[DataTable[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]]() {       def apply(): DataTable[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19] = {rows foreach {r => executeRow(r, f(r.values._1))}; outer }    }

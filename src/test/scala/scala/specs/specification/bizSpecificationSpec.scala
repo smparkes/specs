@@ -13,7 +13,7 @@ object timerSpecificationSpec extends BizSpecification with TestData {
 <p> 
    A Simple timer is an object which can measure time. Let's create a timer.
    When a timer is stopped{timer.stop.shh}, the timer should { "fail to return the elapsed time" in { 
-                                                                    timer.hms must beMatching("\\d seconds")} } then
+                                                                    timer.hms must beMatching("\\d second")} } then
    {"return the elapsed time" in {timer.hms must beMatching("\\d second")}}
   
    A person can have its name reset. Let's set the person name to {Peter as person.setName _}, 
