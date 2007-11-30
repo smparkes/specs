@@ -6,9 +6,14 @@ import scala.specs.Sugar._
 class MyTest extends TestCase
 object xmlMatchersSuite extends JUnit3(xmlMatchersUnit)
 object xmlMatchersUnit extends MatchersSpecification with XmlMatchers {
-  "A equals without spaces matcher should not take care of spaces when comparing nodes" in {
-    <a><b/></a> must equalIgnoreSpace(<a> 
-                                        <b/></a>)  
+  "A equals ignore spaces matcher" should { 
+    "not take care of spaces when comparing nodes [Alias ==/]" in {
+      <a><b/></a> must equalIgnoreSpace(<a> <b/></a>)  
+      <a><b/></a> must ==/(<a> <b/></a>)  
+    }
+    "fail if 2 nodes are not equal, even ignoring spaces" in {
+      assertion(<a><b/></a> must equalIgnoreSpace(<a> <c/></a>)) must failWith("<a><b></b></a> is not equal to <a> <c></c></a>")
+    }
   }
   "A \\ matcher" should {
     "match a node b contained in the node a with the label 'b'" in {

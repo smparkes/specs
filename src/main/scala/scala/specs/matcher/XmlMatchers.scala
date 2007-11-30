@@ -74,10 +74,14 @@ trait XmlMatchers {
   def \(label: String, attributeValues: Map[String, String]): XmlMatcher = \(label.toElem, attributeValues)
   
   /**
-   * Matches if <code>node</code> is a direct child of the tested node and has exactly the <code>attributeValues</code> 
-   * as names and values for its attributes
+   * Matches if <code>node</code> is equal to the tested node without testing empty text
    */   
-  def equalIgnoreSpace(node: Iterable[Node]): Matcher[Iterable[Node]] = new Matcher[Iterable[Node]] { def apply(n: =>Iterable[Node]) = (isEqualIgnoreSpace(node.toList, n.toList), node + " is equal to " + n, node + " is not equal to " + n) }
+  def equalIgnoreSpace(node: Iterable[Node]): Matcher[Iterable[Node]] = new Matcher[Iterable[Node]] { def apply(n: =>Iterable[Node]) = (isEqualIgnoreSpace(node.toList, n.toList), n + " is equal to " + node, n + " is not equal to " + node) }
+
+  /**
+   * Alias for equalIgnoreSpace
+   */   
+  def ==/(node: Iterable[Node]): Matcher[Iterable[Node]] = equalIgnoreSpace(node)
 }
 
 /**
