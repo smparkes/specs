@@ -4,9 +4,12 @@ import junit.framework._
 import scala.specs.Sugar._
 
 class MyTest extends TestCase
-
 object xmlMatchersSuite extends JUnit3(xmlMatchersUnit)
 object xmlMatchersUnit extends MatchersSpecification with XmlMatchers {
+  "A equals without spaces matcher should not take care of spaces when comparing nodes" in {
+    <a><b/></a> must equalIgnoreSpace(<a> 
+                                        <b/></a>)  
+  }
   "A \\ matcher" should {
     "match a node b contained in the node a with the label 'b'" in {
       <a><b></b></a> must \("b")
@@ -59,6 +62,9 @@ object xmlMatchersUnit extends MatchersSpecification with XmlMatchers {
     "not match a node whose label doesn't exist" in {
       assertion(<a><b><c></c></b></a> must \\("d")) must failWith("<a><b><c></c></b></a> doesn't contain node d")
     }
+    "match a node given its label even if it has an attribute" in {
+      <a><b name="value"></b></a> must \\("b")
+    } 
     "match a node given its label and one attribute name" in {
       <a><b name="value"></b></a> must \\("b", "name")
     } 
@@ -70,6 +76,12 @@ object xmlMatchersUnit extends MatchersSpecification with XmlMatchers {
     } 
     "match a node given its label and some only of all of its attribute names" in {
       <a><b name="value" name2="value"></b></a> must \\("b", "name")
+    } 
+    "match a node given its label and all of its attribute names and values" in {
+      <a><b><c name="value" name2="value2">string</c></b></a> must \\(<c name2="value2" name="value">string</c>)
+    } 
+    "match a node given its label, all of its attribute names and values and subnodes" in {
+      <a><b att="val"><c name="value" name2="value2">string</c></b></a> must \\(<b att="val"><c name2="value2" name="value">string</c></b>)
     } 
     "match a node <c><d></d></c> deeply contained in the node a" in {
       <a><b><c><d></d></c></b></a> must \\(<c><d></d></c>)

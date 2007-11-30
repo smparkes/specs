@@ -1,7 +1,10 @@
 package scala.specs.matcher
 import scala.xml._
+import scala.xml.NodeSeq._
 import StringToElem._
 import xpath._
+import scala.collection.ExtendedIterable._
+import scala.specs.matcher.NodeEquality._
 /**
  * The <code>XmlMatchers</code> trait provides matchers which are applicable to xml nodes
  */
@@ -70,7 +73,27 @@ trait XmlMatchers {
    * Alias for <code>\(node, attributeValues)</code> with the node label only
    */   
   def \(label: String, attributeValues: Map[String, String]): XmlMatcher = \(label.toElem, attributeValues)
+  
+  def equalIgnoreSpace(node: Node): Matcher[Iterable[Node]] = new Matcher[Iterable[Node]] { def apply(n: =>Iterable[Node]) = (isEqualIgnoreSpace(node, n.toList.head), node + " is equal to " + n, node + " is not equal to " + n) }
 }
+
+object NodeEquality {
+  def isSpaceNode(n1: Node) = {n1.label.equals("#PCDATA") && n1.text.replaceAll("\\s", "").isEmpty}
+  def isEqualIgnoreSpace(node: NodeSeq, n: NodeSeq): Boolean = {
+    if (node == null && n != null || node != null && n == null)
+      false
+    else
+      node.theSeq.filter(!isSpaceNode(_)).sameElement(n.theSeq.filter(!isSpaceNode(_)), isEqualIgnoreSpace _)
+  } 
+  
+  def isEqualIgnoreSpace(node: Node, n: Node): Boolean = {
+      node.prefix == n.prefix && 
+      node.attributes == n.attributes && 
+      node.label == n.label &&
+      node.child.filter(!isSpaceNode(_)).sameElement(n.child.filter(!isSpaceNode(_)), isEqualIgnoreSpace _)
+  } 
+}
+
 /**
  * The XmlMatcher class matches an xml Node, or a list of Nodes against a list of search functions, which can either search for:<ul>
  * <li/>a given direct child, with its label and/or attributes and/or attributes names and values
@@ -205,12 +228,19 @@ class PathFunction(val node: Node, val attributes: List[String], val attributeVa
   def matchNode(found: Node): Boolean = {
     // returns true if m matches the attribute names or attribute names + values
     def attributesMatch(m: MetaData) = if (!attributes.isEmpty)
-                                       m.map((a: MetaData) => a.key).toList.intersect(attributes) == attributes
-                                     else
-                                       Map(m.map((a: MetaData) => a.key -> a.value.toString).toList: _*) == attributeValues
+                                         m.map((a: MetaData) => a.key).toList.intersect(attributes) == attributes
+                                       else if (!attributeValues.isEmpty)
+                                         Map(m.map((a: MetaData) => a.key -> a.value.toString).toList: _*) == attributeValues
+                                       else
+                                         true
 
     // returns true if the node matches the specified children
-    def childrenMatch(n: Node) = if (node.child.isEmpty) true else n.child == node.child
+    def childrenMatch(n: Node) = {
+      if (node.child.isEmpty) 
+        true 
+      else 
+        isEqualIgnoreSpace(fromSeq(n.child), fromSeq(node.child))
+    }
 
     attributesMatch(found.attributes) && childrenMatch(found) 
   }

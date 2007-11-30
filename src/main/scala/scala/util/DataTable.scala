@@ -1,5 +1,6 @@
 package scala.util
 import scala.Products._
+import scala._
 
 /**
  * The Datatables trait provides implicit methods to start table headers 
@@ -181,11 +182,11 @@ trait ExecutableDataTable {
  * </ul>
  */
 case class DataTable[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19](header: TableHeader, rows: List[DataRow[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]], var shouldExecute: Boolean) extends ExecutableDataTable {
-  
+  type AbstractDataRow = DataRow[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]
   /**
    * @returns the result of the function execution on each row: the string representation of the row and an optional error message in case of a failure
    */  
-  var rowResults: String = " " + header.toString
+  var rowResults: List[RowResult] = Nil
 
   /**
    * function to execute on each row
@@ -200,51 +201,71 @@ case class DataTable[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13,
   /**
    * Adds a new datarow to the existing table
    */  
-  def |(r: DataRow[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]) = DataTable(header, r::rows, shouldExecute) 
+  def |(r: AbstractDataRow) = DataTable(header, rows:::List(r), shouldExecute) 
 
   /**
    * Adds a new datarow to the existing table and sets the table for immediate execution
    */  
-  def |>(r: DataRow[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]) = { this.|(r); shouldExecute = true; this }
+  def |>(r: AbstractDataRow) = { this.|(r); shouldExecute = true; this }
 
   /**
    * closes the table
    */  
   def | = this 
 
+  def failed = rowResults.exists(!_.isOk)
   /**
    * executes the function on each table row  if the function exists
    */  
   def execute = {
     if (function != null) 
       function.apply()
+    if (failed) throw new scala.specs.specification.FailureException(results)
     this
   }
 
   /**
    * @returns the result of the execution of the table
    */  
-  def results: String = rowResults
+  def results: String = {
+    val result = 
+     header.toString + "\n" +
+     rowResults.map(_.toString).mkString("\n")
+    
+    def alignRows = " " + result.replaceAll("\n\\|", "\n \\|") 
+    if (failed) 
+      alignRows   
+    else 
+      result
+  }
 
   /**
    * @returns a string representation of the table
    */  
-  override def toString = header.toString + "\n" + rows.mkString("\n")
-
+  override def toString = (header.toString + "\n" + rows.mkString("\n"))
+  sealed abstract class RowResult {
+    def isOk: boolean
+  }
+  case class RowOk(row: AbstractDataRow) extends RowResult {
+    def isOk = true
+    override def toString = row.toString
+  }
+  
+  case class RowKo(row: AbstractDataRow, e: Throwable) extends RowResult {
+    def isOk = false
+    override def toString = ("x" + row.toString + " " + e.getMessage)
+  }
   /**
    * execute a row by checking the execution of the user-supplied function and
    * either displaying the row or displaying the row and an error message
    */  
-  private def executeRow(row: List[Any], rowResult: => Any) = {
-    var failed = false
+  private def executeRow(row: AbstractDataRow, rowResult: => Any) = {
+    var result: RowResult = RowOk(row)
     try { rowResult } 
     catch {
-      case e: Throwable => {
-        failed = true
-        rowResults += ("\nx" + row.mkString("|", "|", "|") + " " + e.getMessage)}
+      case e: Throwable => result = RowKo(row, e)
     }
-    if (!failed)
-      rowResults += ("\n" + row.mkString("|", "|", "|"))
+    rowResults = rowResults:::List(result)
   }
   /**
    * apply a function of one argument to the table and set the table for execution
@@ -372,7 +393,8 @@ case class DataTable[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13,
     val outer = this
     function = new Function0[DataTable[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]]() {       def apply(): DataTable[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19] = {rows foreach {r => executeRow(r, f(r.values._1, r.values._2, r.values._3, r.values._4, r.values._5, r.values._6, r.values._7, r.values._8, r.values._9, r.values._10, r.values._11, r.values._12, r.values._13, r.values._14, r.values._15, r.values._16, r.values._17, r.values._18, r.values._19, r.values._20))}; outer }    }
     if (shouldExecute) execute else this
-  }}
+  }
+}
 case class DataRow1[T0](v0: T0) extends DataRow((v0, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None)) {
   def ![T](v: T) = DataRow2[T0, T](v0, v)
 }

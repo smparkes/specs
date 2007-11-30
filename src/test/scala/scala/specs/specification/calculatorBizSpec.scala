@@ -12,18 +12,16 @@ object calcSpecificationSpec extends BizSpecification with DataTables {
 A calculator can { "add integers: calc.add(a, b) == c" inTable { 
                      "a" 	| "b" | "c" | 
                       1	   	!  2  !  3  |
-                      2     !  1  !  3  |
                       2     !  2  !  4  |
                       2     !  6  !  8  | {(a: Int, b: Int, c: Int) => c must_== calc.add(a, b) }
                     }
-} which is the summum of technicity
+} which is the summum of technicity!
 
 </p>
   "A classical spec for the calculator" should {
     "use tables directly" in {
                      "a" 	| "b" | "c" |> 
                       1	   	!  2  !  3  |
-                      2     !  6  !  6  |
                       2     !  2  !  4  |
                       2     !  6  !  8  | {(a: Int, b: Int, c: Int) => c must_== calc.add(a, b) }
    }
