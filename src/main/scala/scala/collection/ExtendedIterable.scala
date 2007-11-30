@@ -13,7 +13,8 @@ object ExtendedIterable {
         if (x.isInstanceOf[anyIterable]) x.asInstanceOf[anyIterable].toDeepString else x.toString
       }.mkString(", ") + "]" 
     }
-    def sameElement[B >: A](that: Iterable[B], f:Function2[A, B, Boolean]): Boolean = {
+    
+    def hasSameElements[B >: A](that: Iterable[B], f: Function2[A, B, Boolean]): Boolean = {
       val ita = xs.elements
       val itb = that.elements
       var res = true

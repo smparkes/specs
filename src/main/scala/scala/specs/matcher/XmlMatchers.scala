@@ -3,8 +3,7 @@ import scala.xml._
 import scala.xml.NodeSeq._
 import StringToElem._
 import xpath._
-import scala.collection.ExtendedIterable._
-import scala.specs.matcher.NodeEquality._
+import scala.xml.NodeFunctions._
 /**
  * The <code>XmlMatchers</code> trait provides matchers which are applicable to xml nodes
  */
@@ -75,23 +74,6 @@ trait XmlMatchers {
   def \(label: String, attributeValues: Map[String, String]): XmlMatcher = \(label.toElem, attributeValues)
   
   def equalIgnoreSpace(node: Node): Matcher[Iterable[Node]] = new Matcher[Iterable[Node]] { def apply(n: =>Iterable[Node]) = (isEqualIgnoreSpace(node, n.toList.head), node + " is equal to " + n, node + " is not equal to " + n) }
-}
-
-object NodeEquality {
-  def isSpaceNode(n1: Node) = {n1.label.equals("#PCDATA") && n1.text.replaceAll("\\s", "").isEmpty}
-  def isEqualIgnoreSpace(node: NodeSeq, n: NodeSeq): Boolean = {
-    if (node == null && n != null || node != null && n == null)
-      false
-    else
-      node.theSeq.filter(!isSpaceNode(_)).sameElement(n.theSeq.filter(!isSpaceNode(_)), isEqualIgnoreSpace _)
-  } 
-  
-  def isEqualIgnoreSpace(node: Node, n: Node): Boolean = {
-      node.prefix == n.prefix && 
-      node.attributes == n.attributes && 
-      node.label == n.label &&
-      node.child.filter(!isSpaceNode(_)).sameElement(n.child.filter(!isSpaceNode(_)), isEqualIgnoreSpace _)
-  } 
 }
 
 /**
