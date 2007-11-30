@@ -3,6 +3,7 @@ import scala.specs._
 import scala.specs.runner._
 import scala.xml.ExtendedNode._
 import scala.xml.NodeFunctions._
+import scala.xml.NodeSeq._
 
 object extendedNodeSuite extends JUnit3(extendedNodeUnit)
 object extendedNodeUnit extends Specification {
@@ -24,6 +25,12 @@ object extendedNodeUnit extends Specification {
     }
     "return true for <a> </a> ==/ <a></a>" in {
       <a> </a> ==/ <a></a> mustBe true
+    }
+    "return true for <b/><c> </c> ==/ <b/><c></c>" in {
+      fromSeq(<a><b/><c> </c></a>.child.toList) ==/ fromSeq(<a><b/><c></c></a>.child.toList) mustBe true
+    }
+    "return false for <b/><c>1</c> ==/ <b/><c></c>" in {
+      fromSeq(<a><b/><c>1</c></a>.child.toList) ==/ fromSeq(<a><b/><c></c></a>.child.toList) mustBe false
     }
     "return true for <a>\n</a> ==/ <a></a>" in {
       <a> 
