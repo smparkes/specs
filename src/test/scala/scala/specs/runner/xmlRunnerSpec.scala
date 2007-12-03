@@ -4,29 +4,27 @@ import scala.util._
 import scala.xml._
 
 object xmlSpecRunner extends ConsoleRunner(xmlRunnerSpec)
-object xmlRunnerSpec extends RunnerSpecification { 
+object xmlRunnerSpec extends RunnerFixture { 
 
 "The XML runner specification" is <p> 
 A specification can be run by a XML runner object. The XML runner object is responsible for
 collecting the results of sub-specifications, systems under test and examples and organize 
 them hierarchically as xml elements.
 
-<h1>1. File creation</h1> 
-<h2>1.1 Simple file creation</h2> 
+1. File creation 
+1.1 Simple file creation 
   
-Let's take a simple specification with one system under test and one example: {spec1}
-Let's create an XML runner{createSimpleSpecRunner}
-Running an XML runner on that specification{executeRunner} should { 
-"create a file whose path is " + "./spec1.xml".as(path) in checkFilePath 
-}
-<h2>1.2 Output directory</h2> 
+Running an XML runner{createSimpleSpecRunner} on a specification{executeRunner} should create 
+a file whose path is ./spec1.xml. {"./spec1.xml".as(path) in checkFilePath}
+
+1.2 Output directory 
 It is possible to indicate the output directory of the runner, for example: {"specresults" as runnerOutputDir}
 In that case, {"the xml file should be created in the output directory with path: " + 
                ("./" + runner.outputDir + "/spec1.xml").as(path) in checkOutputDirectory
 }
 
 
-<h1>2 XML content</h1> 
+2. XML content 
 
 Running an XML runner on a specification should create an xml structure:  
 
@@ -63,7 +61,21 @@ If the XML runner is run on a composite specification{executeCompositeSpecRunner
 
 }
 
-trait RunnerSpecification extends BizSpecification {
+trait RunnerFixture extends BizSpecification with RunnerTestData {
+  def createSimpleSpecRunner = runner = simpleSpecRunner
+  def executeCompositeSpecRunner = {runner = compositeSpecRunner; executeRunner}
+  def executeRunner = {runner.reset; runner.execute.shh}
+  def runnerOutputDir = runner.outputDir_=_
+  def checkXml = XML.loadString(runner.readFile(runner.files.keys.next)) must \\(xml()) 
+ 
+  def checkFilePath = runner.files must haveKey(path())
+  def checkOutputDirectory = {
+    runner.reset
+    runner.execute
+    runner.files must haveKey(path.toString)
+  }
+}
+trait RunnerTestData {
   import scala.io.mock._
   import scala.io._
   import scala.specs.specification._
@@ -83,18 +95,5 @@ trait RunnerSpecification extends BizSpecification {
   object compositeSpecRunner extends XmlRunner(compositeSpec) with MockFileSystem
   object compositeSpec extends Specification { 
     "a composite spec" isSpecifiedBy(spec1, spec1)
-  }
-  def createSimpleSpecRunner = runner = simpleSpecRunner
-  def executeCompositeSpecRunner = {runner = compositeSpecRunner; executeRunner}
-  def executeRunner = {runner.reset; runner.execute.shh}
-  def runnerOutputDir = runner.outputDir_=_
-  def checkXml = { 
-    XML.loadString(runner.readFile(runner.files.keys.next)) must \\(xml()) 
-  }
-  def checkFilePath = runner.files must haveKey(path())
-  def checkOutputDirectory = {
-    runner.reset
-    runner.execute
-    runner.files must haveKey(path.toString)
   }
 }

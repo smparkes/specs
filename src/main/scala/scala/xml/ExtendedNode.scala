@@ -21,7 +21,7 @@ object NodeFunctions {
   /**
    * @returns true if the Node represents some empty text (containing spaces or newlines)
    */
-  def isSpaceNode(n1: Node): Boolean = {n1.label.equals("#PCDATA") && n1.text.replaceAll("\\s", "").isEmpty}
+  def isSpaceNode(n1: Node): Boolean = {n1.label.equals("#PCDATA") && n1.text.matches("\\s*")}
 
   /**
    * @returns true if the Node represents some empty text (containing spaces or newlines)

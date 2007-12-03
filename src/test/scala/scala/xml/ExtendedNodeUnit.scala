@@ -12,7 +12,11 @@ object extendedNodeUnit extends Specification {
       <a/>.isSpaceNode mustBe false  
     }
     "return true for a node containing space" in {
-      <a> </a>.child.toList.head.isSpaceNode mustBe true  
+      <a> </a>.child.last.isSpaceNode mustBe true  
+    }
+    "return true for a node containing a newline and spaces" in {
+      <a>
+        </a>.child.last.isSpaceNode mustBe true  
     }
   }
   
