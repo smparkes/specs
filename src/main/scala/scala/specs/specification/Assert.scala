@@ -24,6 +24,11 @@ class Assert[+T](value: => T, example: Example) {
       case _ => true
     }
   }
+  
+  /**
+   * applies the negation of a matcher 
+   */
+  def mustNot[S >: T](m: => Matcher[S]): Boolean =  must(m.not)
 
   /** alias for <code>must verify(f)</code>  */
   def mustVerify[S >: T](f: S => Boolean): Boolean = must[S](verify(f))

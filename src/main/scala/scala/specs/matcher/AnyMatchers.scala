@@ -36,15 +36,41 @@ trait AnyMatchers {
   def notEq[T](a: T) = be(a).not 
 
   /**
-   * Matches is (a != b)
+   * Matches if (a != b)
    */   
   def is_!=[T](a: T) = (is_==(a)).not 
   
   /**
-   * Matches is (a != b)
+   * Matches if (a != b)
    */   
   def be_!=[T](a: T) = (is_==(a)).not 
 
+  /**
+   * Matches if b is null
+   */   
+  def beNull[T] = new Matcher[T](){
+     def apply(b: =>T) = (b == null, "the value is null", q(b) + " is not null") 
+   }  
+
+  /**
+   * Matches if b is not null
+   */   
+  def notBeNull[T] = beNull[T].not
+
+  /**
+   * Matches if b is true
+   */   
+  def beTrue[T] = new Matcher[T](){
+     def apply(b: =>T) = (b == true, q(b) + " is true", q(b) + " is false") 
+   }  
+
+  /**
+   * Matches if b is false
+   */   
+  def beFalse[T] = new Matcher[T](){
+     def apply(b: =>T) = (b == false, q(b) + " is false", q(b) + " is true") 
+  }  
+  
   /**
    * Matches if iterable.exists(_ == a)
    */   

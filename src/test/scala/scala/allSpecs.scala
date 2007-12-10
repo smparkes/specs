@@ -14,7 +14,7 @@ object allSpecsSuite extends JUnit3(allSpecs)
 object allSpecs extends Specification {
     "The specifications" areSpecifiedBy (
         fileWriterSpec,  
-        timerSpec,
+        allUtilSpec,
         matchersSpec, 
         specificationSpec, 
         sugarSpec, 
@@ -24,6 +24,7 @@ object allSpecs extends Specification {
         specsRunnerSpec,
         stackSpecification,
         junit3TestSuiteSpec,
+        xmlRunnerSpec,
         mocksSpec)
 }
 
@@ -31,6 +32,7 @@ object allUnits extends Specification {
   "The unit tests" areSpecifiedBy (
       fileSystemUnit, 
       collectionUnit,  
+      allUtilUnit, 
       specificationUnit, 
       allMatchersUnit, 
       protocolsUnit,

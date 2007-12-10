@@ -45,6 +45,42 @@ object anyMatchersUnit extends MatchersSpecification {
       assertion("name" must be_==(s)) must failWith("'name' is not equal to 'null'")
     }
   }
+  "A 'beNull' matcher" should {
+    "be ok if comparing with a null object" in {
+      val a: String = null
+      a must beNull
+    }
+    "display a failure message if the value is not null" in {
+      val a: String = "not null"
+      assertion(a must beNull) must failWith("'not null' is not null")
+    }
+  }
+  "A 'notBeNull' matcher" should {
+    "be ok if comparing with a non-null object" in {
+      val a: String = ""
+      a must notBeNull
+    }
+    "display a failure message if the value is null" in {
+      val a: String = null
+      assertion(a must notBeNull) must failWith("the value is null")
+    }
+  }
+  "A 'beTrue' matcher" should {
+    "be ok if comparing with a true object" in {
+      true must beTrue
+    }
+    "display a failure message if the value is not true" in {
+      assertion(false must beTrue) must failWith("'false' is false")
+    }
+  }
+  "A 'beFalse' matcher" should {
+    "be ok if comparing with a false object" in {
+      false must beFalse
+    }
+    "display a failure message if the value is not true" in {
+      assertion(true must beFalse) must failWith("'true' is true")
+    }
+  }
   "A throwA + exception matcher" should {
     "be ok if a value throws the expected exception type" in {
       throwA(new Error)(throw new Error("test")) must beLike { case (true, _, _) => ok } 

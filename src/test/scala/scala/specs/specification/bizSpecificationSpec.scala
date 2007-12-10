@@ -1,7 +1,6 @@
 package scala.specs.specification
 import scala.specs._
 import scala.specs.specification._
-import scala.specs.runner.HtmlBizRunner
 import scala.specs.runner.ConsoleRunner
 import scala.util._
 import scala.xml._
