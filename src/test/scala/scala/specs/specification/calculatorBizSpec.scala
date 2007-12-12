@@ -5,7 +5,7 @@ import scala.specs.runner._
 import scala.util.DataTables
 
 object calcRunner extends ConsoleRunner(calcSpecificationSpec)
-object calcSpecificationSpec extends BizSpecification with DataTables {
+object calcSpecificationSpec extends LiteralSpecification with DataTables {
   val calc = new Object {def add(x: Int, y: int): Int = x + y }
   "A literal spec for the calculator" is 
 <p>

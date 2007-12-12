@@ -16,7 +16,10 @@ object xmlMatchersUnit extends MatchersSpecification with XmlMatchers {
     }
   }
   "A \\ matcher" should {
-    "match a node b contained in the node a with the label 'b'" in {
+    "match a node <b/> contained in the node a with the label 'b'" in {
+      <a><b/></a> must \("b")
+    }
+    "match a node <b></b> contained in the node a with the label 'b'" in {
       <a><b></b></a> must \("b")
     }
     "not match a node a with the label 'a'" in {

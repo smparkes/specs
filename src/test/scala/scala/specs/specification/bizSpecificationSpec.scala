@@ -23,10 +23,11 @@ class TimerSpecification extends BizSpecification {
   val person = new Person; val Peter = "Peter"
 }
 
-class TimerSpecificationActionWords extends BizSpecification {
+class TimerSpecificationActionWords extends LiteralSpecification {
   val timer = new SimpleTimer
   class Person {var name: String = ""; def setName(n: String) = name = n}
-  val person = new Person; val Peter = "Peter"
+  val person = new Person; 
+  val Peter = "Peter"
   def stop = timer.stop.shh
   def fail = timer.hms must beMatching("\\d second")
   def succeeds = timer.hms must beMatching("\\d second")

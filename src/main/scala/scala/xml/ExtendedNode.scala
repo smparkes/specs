@@ -2,21 +2,35 @@ package scala.xml
 import scala.collection.ExtendedIterable._
 import scala.xml.NodeFunctions._
 
+/**
+ * This class adds more methods to the NodeSeq class
+ */
 class ExtendedNodeSeq(ns: NodeSeq) {
     def ==/(n: NodeSeq): Boolean = NodeFunctions.isEqualIgnoreSpace(ns, n)
     def isEqualIgnoreSpace(n: NodeSeq): Boolean = NodeFunctions.isEqualIgnoreSpace(ns, n)
 }
+
+/**
+ * This class adds more methods to the Node class
+ */
 class ExtendedNode(n: Node) {
   /**
    * @returns true if the Node represents some empty text (containing spaces or newlines)
    */
   def isSpaceNode: Boolean = NodeFunctions.isSpaceNode(n)
 }
+
+/**
+ * This object provides implicit methods to extend Node and NodeSeq objects
+ */
 object ExtendedNode {
   implicit def toExtendedNodeSeq(n: NodeSeq) = new ExtendedNodeSeq(n)
   implicit def toExtendedNode(n: Node) = new ExtendedNode(n)
 }
 
+/**
+ * This object provides useful functions for Nodes and NodeSeqs
+ */
 object NodeFunctions {
   /**
    * @returns true if the Node represents some empty text (containing spaces or newlines)
@@ -24,10 +38,13 @@ object NodeFunctions {
   def isSpaceNode(n1: Node): Boolean = {n1.label.equals("#PCDATA") && n1.text.matches("\\s*")}
 
   /**
-   * @returns true if the Node represents some empty text (containing spaces or newlines)
+   * Alias for isEqualIgnoreSpace
    */
   def ==/(node: NodeSeq, n: NodeSeq): Boolean = isEqualIgnoreSpace(node, n)
 
+  /**
+   * @returns true if the Node represents some empty text (containing spaces or newlines)
+   */
   def isEqualIgnoreSpace(node: NodeSeq, n: NodeSeq): Boolean = {
     (node, n) match {
       case (null, other) => other == null
