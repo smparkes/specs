@@ -1,9 +1,9 @@
-package scala.collection
+package org.specs.collection
 import org.specs.runner._
 import org.specs.Sugar._
 import org.specs._
 import org.specs.matcher.ScalacheckParameters._
-import org.collection.ExtendedList._
+import org.specs.collection.ExtendedList._
 import scalacheck.Gen._
 
 object extendedListUnitSuite extends JUnit3(extendedListUnit)

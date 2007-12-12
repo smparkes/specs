@@ -1,7 +1,7 @@
-package scala.specs.runner
+package org.specs.runner
 
 import org.specs._
-import scala.util._
+import org.specs.util._
 import scala.collection.mutable.Queue
 import org.specs.io.mock.MockOutput
 import org.specs.runner._
@@ -12,13 +12,14 @@ object specsRunnerSpec extends Specification with TestRunner {
     usingBefore { () => runner.messages.clear }
     
     "execute a specification contained in a file" in { 
-      runWith("scala.specs.samples.sampleSpec1$")
-      messages mustExistMatch "example"
+      runWith("org.specs.samples.sampleSpec1$")
+      messages mustHaveMatch "example"
     }
     "execute 2 specifications contained in a directory" in { 
-      runWith("scala.specs.samples.sampleSpec1$", "scala.specs.samples.sampleSpec2$")
-      messages mustExistMatch "specification1"
-      messages mustExistMatch "specification2"
+      runWith("org.specs.samples.sampleSpec1$", "org.specs.samples.sampleSpec2$")
+      messages foreach {m =>  println(m)}
+      messages mustHaveMatch "specification1"
+      messages mustHaveMatch "specification2"
     }
   }
 }
@@ -35,8 +36,8 @@ trait TestRunner {
   }
   def messages = runner.messages
 }
-object AllSpecsFileRunner extends SpecsFileRunner("./src/test/scala/scala/specs", "([^(?>all)].)*Spec") 
-object AllUnitFileRunner extends SpecsFileRunner("./src/test/scala/scala/specs", "([^(?>all)].)*Unit") 
-object AllFileRunner extends SpecsFileRunner("./src/test/scala/scala/specs", "([^(?>all)].)*.*") 
+object AllSpecsFileRunner extends SpecsFileRunner("./src/test/scala/org/specs", "([^(?>all)].)*Spec") 
+object AllUnitFileRunner extends SpecsFileRunner("./src/test/scala/org/specs", "([^(?>all)].)*Unit") 
+object AllFileRunner extends SpecsFileRunner("./src/test/scala/org/specs", "([^(?>all)].)*.*") 
 
 

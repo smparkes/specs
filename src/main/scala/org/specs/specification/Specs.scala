@@ -1,5 +1,5 @@
-package scala.specs
-import scala.util._
+package org.specs
+import org.specs.util._
 import scala.xml._
 import org.specs.matcher._
 import scala.collection.mutable._

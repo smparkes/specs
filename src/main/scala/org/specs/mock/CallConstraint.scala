@@ -1,4 +1,4 @@
-package scala.specs.mock
+package org.specs.mock
 
 /**
  * This class is used to specify constraints on a sequence of expected calls.<br>

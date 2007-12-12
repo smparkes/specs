@@ -1,5 +1,5 @@
-package scala.specs.mock
-import org.collection.ExtendedList._
+package org.specs.mock
+import org.specs.collection.ExtendedList._
 import org.specs.Sugar._
 
 case object inAnyOrder extends inAnyOrder(exactlyN(1))

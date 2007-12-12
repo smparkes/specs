@@ -1,6 +1,7 @@
-package scala.xml
-import org.collection.ExtendedIterable._
-import scala.xml.NodeFunctions._
+package org.specs.xml
+import org.specs.collection.ExtendedIterable._
+import org.specs.xml.NodeFunctions._
+import scala.xml._
 
 /**
  * This class adds more methods to the NodeSeq class

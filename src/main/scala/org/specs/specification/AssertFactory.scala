@@ -1,4 +1,4 @@
-package scala.specs.specification;
+package org.specs.specification
 
 /**
  * This trait defines implicit definitions which are used to create Assert objects

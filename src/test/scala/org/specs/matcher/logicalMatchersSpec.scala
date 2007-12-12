@@ -1,4 +1,4 @@
-package scala.specs.matcher
+package org.specs.matcher
 import org.specs.runner._
 
 object logicalMatchersSpecSuite extends JUnit3(logicalMatchersSpec) 

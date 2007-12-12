@@ -1,10 +1,10 @@
-package scala.specs
+package org.specs
 
 import org.specs._
 import org.specs.matcher._
 import org.specs.Sugar._
 import org.specs.runner._
-import scala.util._
+import org.specs.util._
 import scala.collection.mutable._
 import scalacheck.Gen._
 import org.specs.matcher.MatcherUtils._

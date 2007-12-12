@@ -1,6 +1,6 @@
-package scala.specs.runner
-import scala.log.ConsoleLog
-import org.collection.JavaCollectionsConversion
+package org.specs.runner
+import org.specs.log.ConsoleLog
+import org.specs.collection.JavaCollectionsConversion
 
 /**
  * This class implements the <code>ConsoleReporter</code> by adding a main 
@@ -34,7 +34,7 @@ class SpecsFileRunner(path: String, pattern: String) extends ConsoleRunner with 
     specificationNames(path, pattern) foreach {className => 
       createSpecification(className) match {
         case Some(s) => specList = s::specList
-        case None => ()
+        case None => {println("Could not load " + className);()}
       }
     }
     // this specification is added for better reporting

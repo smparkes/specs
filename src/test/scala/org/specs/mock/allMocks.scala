@@ -1,4 +1,4 @@
-package scala.specs.mock
+package org.specs.mock
 import org.specs.runner._
 
 

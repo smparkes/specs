@@ -1,6 +1,6 @@
-package scala.specs.runner
+package org.specs.runner
 import org.specs.specification._
-import scala.util._
+import org.specs.util._
 import scala.xml._
 
 object xmlRunnerSuite extends JUnit3(xmlRunnerSpec)

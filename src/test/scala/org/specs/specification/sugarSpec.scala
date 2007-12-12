@@ -1,4 +1,4 @@
-package scala.specs
+package org.specs
 import org.specs.runner._
 
 object sugarRunner extends ConsoleRunner(sugarSpec)

@@ -1,6 +1,6 @@
-package scala.specs.runner
+package org.specs.runner
 import org.specs.io._
-import scala.util._
+import org.specs.util._
 import org.specs._
 
 trait XmlToHtml {

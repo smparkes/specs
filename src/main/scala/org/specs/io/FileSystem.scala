@@ -1,9 +1,9 @@
 package org.specs.io;
 import java.io._
-import org.collection.JavaCollectionsConversion._
+import org.specs.collection.JavaCollectionsConversion._
 import java.util.regex._
 import scala.collection.mutable.Queue
-import scala.log.Log
+import org.specs.log.Log
 
 trait FileSystem extends FileReader with FileWriter with Log {
   

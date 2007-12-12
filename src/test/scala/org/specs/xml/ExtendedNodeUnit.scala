@@ -1,8 +1,8 @@
-package scala.xml
+package org.specs.xml
 import org.specs._
 import org.specs.runner._
-import scala.xml.ExtendedNode._
-import scala.xml.NodeFunctions._
+import org.specs.xml.ExtendedNode._
+import org.specs.xml.NodeFunctions._
 import scala.xml.NodeSeq._
 
 object extendedNodeSuite extends JUnit3(extendedNodeUnit)

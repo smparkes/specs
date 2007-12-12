@@ -1,4 +1,4 @@
-package scala.specs.specification
+package org.specs.specification
 import org.specs.io.mock.MockOutput
 import org.specs.runner._
 import org.specs._

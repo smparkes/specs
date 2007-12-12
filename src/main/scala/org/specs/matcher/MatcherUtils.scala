@@ -1,4 +1,4 @@
-package scala.specs.matcher
+package org.specs.matcher
 import java.util.regex._
 
 /**

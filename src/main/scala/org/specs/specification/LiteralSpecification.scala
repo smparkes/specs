@@ -1,6 +1,6 @@
-package scala.specs.specification
+package org.specs.specification
 import scala.xml._
-import scala.util._
+import org.specs.util._
 import org.specs.Sugar._
 
 /**

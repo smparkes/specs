@@ -1,4 +1,4 @@
-package scala.collection;
+package org.specs.collection;
 import java.util.ArrayList
 
 object JavaCollectionsConversion {

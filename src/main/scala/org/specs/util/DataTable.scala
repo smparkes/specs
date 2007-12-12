@@ -1,5 +1,6 @@
-package scala.util
-import scala.Products._
+package org.specs.util
+import org.specs.Products._
+import org.specs.xml.NodeFunctions._
 import scala._
 
 /**

@@ -1,5 +1,4 @@
-package scala.specs
-import scala.Products
+package org.specs
 
 object Sugar extends Sugar
 

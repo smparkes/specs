@@ -1,4 +1,4 @@
-package scala.util
+package org.specs.util
 import java.util.Calendar
 
 trait HmsTimer extends Timer {

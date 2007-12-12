@@ -1,4 +1,4 @@
-package scala.specs.runner
+package org.specs.runner
 
 object javaConversions {
 }

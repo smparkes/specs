@@ -1,6 +1,6 @@
-package scala.specs.mock
+package org.specs.mock
 import org.specs.Sugar._
-import org.collection.ExtendedList._
+import org.specs.collection.ExtendedList._
 
 case object inSequence extends inSequence(exactlyN(1))
 

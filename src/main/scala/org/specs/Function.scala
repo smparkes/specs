@@ -1,4 +1,4 @@
-package scala
+package org.specs
 
 /**
  * Those functions are added to the Function 0..9 Traits in the standard Scala distribution

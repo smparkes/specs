@@ -1,4 +1,4 @@
-package scala.specs.samples
+package org.specs.samples
 
 import org.specs.runner._
 

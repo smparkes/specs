@@ -1,9 +1,9 @@
-package scala.specs.matcher
+package org.specs.matcher
 import scala.xml._
 import scala.xml.NodeSeq._
 import StringToElem._
 import xpath._
-import scala.xml.NodeFunctions._
+import org.specs.xml.NodeFunctions._
 /**
  * The <code>XmlMatchers</code> trait provides matchers which are applicable to xml nodes
  */

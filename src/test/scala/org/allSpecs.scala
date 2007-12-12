@@ -1,4 +1,4 @@
-package scala
+package org.specs
 import org.specs.runner._
 import org.specs.matcher._
 import org.specs.samples._
@@ -6,8 +6,8 @@ import org.specs.mock._
 import org.specs.specification._
 import org.specs._
 import org.specs.io._
-import scala.collection._
-import scala.util._
+import org.specs.collection._
+import org.specs.util._
 
 
 object allSpecsSuite extends JUnit3(allSpecs)

@@ -1,4 +1,4 @@
-package scala.specs.mock
+package org.specs.mock
 
 /**
  * Specifies which kind of received calls can be expected

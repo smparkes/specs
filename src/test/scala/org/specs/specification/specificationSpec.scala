@@ -1,4 +1,4 @@
-package scala.specs
+package org.specs
 import org.specs.runner._
 import org.specs.matcher._
 import org.specs.Sugar._

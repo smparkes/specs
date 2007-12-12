@@ -1,4 +1,4 @@
-package scala.specs.mock
+package org.specs.mock
 import org.specs.matcher._
 import java.util.regex.Pattern
 import org.specs.specification._

@@ -1,4 +1,4 @@
-package scala.specs.samples
+package org.specs.samples
 
 object sampleSpec1 extends Specification {
   "A sample specification1" should {

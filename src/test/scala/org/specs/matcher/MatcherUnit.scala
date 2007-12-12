@@ -1,4 +1,4 @@
-package scala.specs.matcher
+package org.specs.matcher
 import org.specs.Specification
 import scalacheck.Gen._
 import scalacheck._

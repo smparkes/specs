@@ -1,9 +1,9 @@
-package scala.specs.runner
+package org.specs.runner
 
 import scala.collection.mutable.Queue
-import scala.log.ConsoleLog
-import scala.util.Timer
-import scala.util.SimpleTimer
+import org.specs.log.ConsoleLog
+import org.specs.util.Timer
+import org.specs.util.SimpleTimer
 import org.specs.io._
 import java.util.Calendar
 
@@ -21,7 +21,7 @@ trait Reporter {
  */  
 trait OutputReporter extends Reporter with Output {
   /** the timer is used to display execution times */
-  val timer: scala.util.Timer
+  val timer: org.specs.util.Timer
 
   /** reports a list of specifications */
   def report(specs: Iterable[Specification]): Unit = specs foreach (reportSpec(_, ""))

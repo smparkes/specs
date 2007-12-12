@@ -1,4 +1,4 @@
-package scala.log
+package org.specs.log
 import org.specs.io.{ConsoleOutput, Output}
 
 trait Log extends Output {

@@ -1,8 +1,8 @@
-package scala.specs.runner
+package org.specs.runner
 import org.specs.runner.javaConversions._
 import org.specs.specification._
 import junit.framework._
-import org.collection.JavaCollectionsConversion._
+import org.specs.collection.JavaCollectionsConversion._
 
 /**
  * This class is a JUnitTestSuite class with an empty test.<br>

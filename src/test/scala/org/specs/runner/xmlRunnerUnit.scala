@@ -1,9 +1,9 @@
-package scala.specs.runner
+package org.specs.runner
 import org.specs.specification._
-import scala.util.DataTables
+import org.specs.util.DataTables
 
 object xmlRunnerUnitRunner extends ConsoleRunner(xmlRunnerUnit)
-object xmlRunnerUnit extends BizSpecification with TestData {
+object xmlRunnerUnit extends LiteralSpecification with TestData {
   "An xml runner" should {
     "create an xml file in the default directory if nothing is specified" in {
        xmlRunner.execute

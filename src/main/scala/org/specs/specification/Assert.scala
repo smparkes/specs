@@ -1,4 +1,4 @@
-package scala.specs.specification
+package org.specs.specification
 import org.specs.matcher._
 import org.specs.matcher.Matchers._
 

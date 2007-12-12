@@ -1,4 +1,4 @@
-package scala.specs.matcher
+package org.specs.matcher
 
 /**
  * The <code>NumericMatchers</code> trait provides matchers which allow numerical comparisons

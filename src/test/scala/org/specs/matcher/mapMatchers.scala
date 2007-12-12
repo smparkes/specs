@@ -1,4 +1,4 @@
-package scala.specs.matcher
+package org.specs.matcher
 import org.specs.runner._
 
 object mapMatchersSpecSuite extends JUnit3(mapMatchersSpec) 

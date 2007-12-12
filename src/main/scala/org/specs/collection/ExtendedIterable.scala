@@ -1,6 +1,6 @@
-package scala.collection
+package org.specs.collection
 
-import org.collection.ExtendedList._
+import org.specs.collection.ExtendedList._
 
 object ExtendedIterable {
   implicit def iterableToExtended[A](xs : Iterable[A]) = new ExtendedIterable(xs)

@@ -1,4 +1,4 @@
-package scala.specs.runner
+package org.specs.runner
 
 import org.specs.io.mock.MockOutput
 import org.specs.runner.javaConversions._

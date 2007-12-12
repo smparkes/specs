@@ -1,4 +1,4 @@
-package scala.collection
+package org.specs.collection
 import scala.collection.immutable._
 
 object ExtendedList {

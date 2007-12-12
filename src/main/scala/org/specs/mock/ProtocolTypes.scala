@@ -1,8 +1,8 @@
-package scala.specs.mock
+package org.specs.mock
 import org.specs.Sugar._
 import org.specs._
 import org.specs.matcher._
-import org.collection.ExtendedList._
+import org.specs.collection.ExtendedList._
 import org.specs.matcher.MatcherUtils._
 
 /**

@@ -1,4 +1,4 @@
-package scala.specs.matcher
+package org.specs.matcher
 import scala.collection.mutable.Queue
 import org.specs.runner._
 import org.specs.Sugar._

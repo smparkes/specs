@@ -1,8 +1,8 @@
-package scala.specs.specification
+package org.specs.specification
 import org.specs._
 import org.specs.specification._
 import org.specs.runner._
-import scala.util.DataTables
+import org.specs.util.DataTables
 
 object calcRunner extends ConsoleRunner(calcSpecificationSpec)
 object calcSpecificationSpec extends LiteralSpecification with DataTables {

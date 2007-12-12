@@ -1,4 +1,4 @@
-package scala
+package org.specs
 object Products extends Products
 trait Products {
   /**

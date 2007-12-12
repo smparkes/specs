@@ -1,4 +1,4 @@
-package scala.specs.mock
+package org.specs.mock
 import org.specs.runner._
 import org.specs.Sugar._
 import org.specs.mock._

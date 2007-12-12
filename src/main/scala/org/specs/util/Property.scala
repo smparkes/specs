@@ -1,4 +1,4 @@
-package scala.util
+package org.specs.util
 
 /**
  * This class represent properties which can be updated and retrieved using customized getter and setter functions

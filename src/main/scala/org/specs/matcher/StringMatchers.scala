@@ -1,5 +1,5 @@
-package scala.specs.matcher;
-import org.specs.matcher.MatcherUtils._
+package org.specs.matcher;
+import MatcherUtils._
 
 /**
  * The <code>StringMatchers</code> trait provides matchers which are applicable to String objects

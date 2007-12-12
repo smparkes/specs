@@ -1,4 +1,4 @@
-package scala.collection
+package org.specs.collection
 
 trait ExtendedRange {
   var i = 0

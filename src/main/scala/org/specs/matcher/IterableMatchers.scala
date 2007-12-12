@@ -1,6 +1,6 @@
-package scala.specs.matcher
+package org.specs.matcher
 import org.specs.matcher.MatcherUtils._
-import org.collection.ExtendedIterable._
+import org.specs.collection.ExtendedIterable._
 
 /**
  * The <code>IterableMatchers</code> trait provides matchers which are applicable to Iterable objects

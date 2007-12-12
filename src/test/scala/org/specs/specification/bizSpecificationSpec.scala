@@ -1,8 +1,8 @@
-package scala.specs.specification
+package org.specs.specification
 import org.specs._
 import org.specs.specification._
 import org.specs.runner.ConsoleRunner
-import scala.util._
+import org.specs.util._
 import scala.xml._
 import org.specs.Sugar._
 
@@ -17,7 +17,7 @@ object timerSpecificationSpec extends TimerSpecificationActionWords {
    then {"the person must be named Peter" in checkName}
 </p>
 }
-class TimerSpecification extends BizSpecification {
+class TimerSpecification extends LiteralSpecification {
   val timer = new SimpleTimer
   class Person {var name: String = ""; def setName(n: String) = name = n}
   val person = new Person; val Peter = "Peter"

@@ -1,9 +1,9 @@
-package scala.collection
+package org.specs.collection
 import org.specs.runner._
 import org.specs.Sugar._
 import org.specs._
-import org.collection.ExtendedIterable._
-import org.collection.ExtendedList._
+import org.specs.collection.ExtendedIterable._
+import org.specs.collection.ExtendedList._
 import scalacheck.Gen._
 import org.specs.matcher.ScalacheckParameters._
 
