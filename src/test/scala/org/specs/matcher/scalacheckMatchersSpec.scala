@@ -4,6 +4,7 @@ import org.specs.runner._
 import org.specs.Sugar._
 import org.specs.matcher.ScalacheckParameters._
 import scalacheck._
+import scalacheck.Arbitrary._
 import scalacheck.Gen._
 import org.specs.mock._
 import org.specs.io._

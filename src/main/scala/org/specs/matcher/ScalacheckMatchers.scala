@@ -97,13 +97,15 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
      // the failure message indicates a counter-example to the property
      def afterNTries(n: Int) = "after " + (if (n <= 1) n + " try" else n + " tries")
      def noCounterExample(n: Int) = "The property passed without any counter-example " + afterNTries(n)
+     def afterNShrinks(shrinks: Int) = if (shrinks >= 1) (", " + shrinks + " shrinks") else ""
+
      stats match {
        case Test.Stats(Passed(), n, _)          => (true,  noCounterExample(n: Int), "A counter-example was found " + afterNTries(n)) 
        case s@Test.Stats(GenException(e), n, _) => (false, noCounterExample(n: Int), prettyTestStats(s)) 
        case s@Test.Stats(Exhausted(), n, _)     => (false, noCounterExample(n: Int), prettyTestStats(s)) 
-       case Test.Stats(Failed(List((msg, _))), n, _) => 
-         (false, noCounterExample(n: Int), "A counter-example is '"+msg+"' (" + afterNTries(n)+")") 
-       case Test.Stats(PropException(List((msg, _)), FailureException(ex)), n, _) => 
+       case Test.Stats(Failed(List((msg, shrinks))), n, _) => 
+         (false, noCounterExample(n: Int), "A counter-example is '"+msg+"' (" + afterNTries(n) + afterNShrinks(shrinks) + ")") 
+       case Test.Stats(PropException(List((msg, shrinks)), FailureException(ex)), n, _) => 
          (false, noCounterExample(n: Int), "A counter-example is '"+msg+"': " + ex + " ("+afterNTries(n)+")") 
        case s@Test.Stats(PropException(List((msg, _)), ex), n, _) => 
          (false, noCounterExample(n: Int), prettyTestStats(s)) 
@@ -116,7 +118,7 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
  */
 trait ScalacheckFunctions {
   def check(params: Test.Params, prop: Prop, printResult: (Option[Prop.Result], Int, Int) => Unit) = Test.check(params, prop, printResult)
-  def forAll[A,P](g: Gen[A])(f: A => Prop): Prop = Prop.forAll(g)(f)
+  def forAll[A,P](g: Gen[A])(f: A => Prop): Prop = forAll(g)(f)
 }
 /**
  * This trait provides generation parameters to use with the <code>ScalacheckMatchers</code>

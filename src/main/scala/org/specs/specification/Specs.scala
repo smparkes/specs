@@ -76,11 +76,11 @@ case class Sut(description: String, cycle: ExampleLifeCycle) extends ExampleLife
   var after: Option[() => Unit] = None
 
   /** default way of defining the behaviour of a sut */
-  def should(ex : Example) = {}
+  def should(ex: Example) = this
 
   /** alternately there may be no example given yet */
-  def should(noExampleGiven: Unit) = {}
-
+  def should(noExampleGiven: Unit) = this
+  
   /** specifies the system with a literal description and embedded assertions */
   def is(e: => Elem)= {
       verb = "specifies"
@@ -88,7 +88,7 @@ case class Sut(description: String, cycle: ExampleLifeCycle) extends ExampleLife
   }
 
   /** Alias method to describe more advanced or optional behaviour. This will change the verb used to report the sut behavior */
-  def can(ex : Example) = {verb = "can"}
+  def can(ex: Example) = {verb = "can"; this}
 
   /** @return all examples failures */
   def failures = examples.flatMap {_.failures}
