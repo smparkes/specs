@@ -13,7 +13,7 @@ object matchersSpec extends Specification {
                              patternMatchersSpec,
                              scalacheckMatchersSpec)
 }
-trait MatchersSpecification extends Specification {
+class MatchersSpecification extends Specification {
   var reported: Example = new Example("this example serves as a stub to collect failure messages", new Sut("", this))
   def clearExample = { reported = new Example("", new Sut("", this)) }
   def failWith(message: String) = is_==(message)

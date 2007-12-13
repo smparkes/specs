@@ -118,7 +118,7 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
  */
 trait ScalacheckFunctions {
   def check(params: Test.Params, prop: Prop, printResult: (Option[Prop.Result], Int, Int) => Unit) = Test.check(params, prop, printResult)
-  def forAll[A,P](g: Gen[A])(f: A => Prop): Prop = forAll(g)(f)
+  def forAll[A,P](g: Gen[A])(f: A => Prop): Prop = Prop.forAll(g)(f)
 }
 /**
  * This trait provides generation parameters to use with the <code>ScalacheckMatchers</code>

@@ -36,8 +36,8 @@ trait Sugar extends Products {
     }
   }
   
-  implicit def stringToMult(s: String) = {
-    new Object {
+  implicit def stringToMult(s: String) = new ExtendedString(s) 
+  class ExtendedString(s: String) {
       def mult(s: String, i: Int): String = {        
         if (i == 0) 
           ""
@@ -46,6 +46,6 @@ trait Sugar extends Products {
       }
       def * (i: Int): String = mult(s, i)
     }
-  }
+  
 }
 

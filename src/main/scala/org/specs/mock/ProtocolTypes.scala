@@ -85,16 +85,14 @@ trait ProtocolTypes {
   def anyOf = new inAnyOrder(atLeastN(0))
   def atLeastOneOf = new inAnyOrder(atLeastN(1))
   def atMostOneOf = new inAnyOrder(atMostN(1))
-  implicit def intToProtocolTypeBuilder(i: Int) = {
-    
-    new Object {
+  implicit def intToProtocolTypeBuilder(i: Int) = new ProtocolTypeBuilder(i)
+  class ProtocolTypeBuilder(val i: Int) {
       def of = exactlyNOf(i)
       def atLeastOf = atLeastNOf(i)
       def atMostOf = atMostNOf(i)
       def inSequenceOf = new inSequence(exactlyN(i))
       def inSequenceAtLeastOf = new inSequence(atLeastN(i))
       def inSequenceAtMostOf = new inSequence(atMostN(i))
-    }
   }
 }
 

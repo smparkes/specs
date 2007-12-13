@@ -19,7 +19,10 @@ trait LiteralSpecification  extends Specification with DataTables {
    * The timer should be stopped {timer.stop.shh}
    * </pre>. This will not output the result of the stop method
    */
-  implicit def anyToShh(a: Any) = new Object {def shh = ""}
+  implicit def anyToShh(a: Any) = new Silenced
+  class Silenced {
+    def shh = ""
+  }
 
   /**
    * This method is used setup a property value, in order to avoid repeting a string. For example: <pre>

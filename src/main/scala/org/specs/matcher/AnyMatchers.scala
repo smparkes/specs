@@ -118,7 +118,8 @@ trait AnyMatchers {
    * <br>Usage: <code>value must throwA(new ExceptionType)</code>
    * <br>Advanced usage: <code>value must throwA(new ExceptionType).like {case ExceptionType(m) => m.startsWith("bad")}</code>
    */   
-  def throwException[E <: Throwable](exception: E) = new Matcher[Any](){
+  def throwException[E <: Throwable](exception: E) = new ExceptionMatcher(exception)
+    class ExceptionMatcher[E <: Throwable](exception: E) extends Matcher[Any] {
      def apply(value: => Any) = { 
        (isThrown(value, exception, (e => exception.getClass.isAssignableFrom(e.getClass))).isDefined, exception + " was thrown", exception + " should have been thrown")
      }
@@ -131,7 +132,8 @@ trait AnyMatchers {
            beLike(f)(thrown.get)
        }
      }
-   } 
+   }
+    
   /**
    * Alias for throwException
    */   
