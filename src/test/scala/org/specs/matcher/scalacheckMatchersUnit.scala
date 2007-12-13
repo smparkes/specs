@@ -83,10 +83,10 @@ trait ScalacheckMock extends Mocker {
   } 
   val matcher = new ScalacheckMatchers with ConsoleOutputMock with ScalacheckFunctionsMock  
   val matcherWithFailure = new ScalacheckMatchers with ConsoleOutputMock with ScalacheckFunctionsMock {
-    override def result = Test.Stats(Test.Failed(List(("", 1))), 1, 2)
+    override def result = Test.Stats(Test.Failed(List(Arg("", null, 1))), 1, 2)
   }  
   val matcherWithPropertyException = new ScalacheckMatchers with ConsoleOutputMock with ScalacheckFunctionsMock {
-    override def result = Test.Stats(Test.PropException(List(("", 2)), FailureException("")), 1, 2)
+    override def result = Test.Stats(Test.PropException(List(Arg("", null, 2)), FailureException("")), 1, 2)
   }  
   val matcherWithGenerationException = new ScalacheckMatchers with ConsoleOutputMock with ScalacheckFunctionsMock {
     override def result = Test.Stats(Test.GenException(new Exception), 1, 2)
