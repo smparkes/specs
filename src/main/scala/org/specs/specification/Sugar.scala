@@ -29,11 +29,10 @@ trait Sugar extends Products {
    * This implicit definition allows to print any object to the console with:<br>
    * <code> myObject.pln </code> or <code> myObject.println </code>  
    */
-  implicit def anyPrintable[T](a: T) = {
-    new Object { 
+  implicit def anyPrintable[T](a: T) = new Printable(a)
+  class Printable[T](a: T){
       def println = Console.println(a)
       def pln = Console.println(a) 
-    }
   }
   
   implicit def stringToMult(s: String) = new ExtendedString(s) 

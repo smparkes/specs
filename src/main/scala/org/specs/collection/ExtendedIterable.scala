@@ -42,6 +42,7 @@ object ExtendedIterable {
         case (a, b) => a == b  
       } 
     }
-    implicit def anyToSameElements(x: Any) = new Object { def sameElementsAs(that: Any): Boolean = {x == that}}
+    implicit def anyToSameElements(x: Any) = new AnyWithSameElements(x)
+    class AnyWithSameElements(x: Any) { def sameElementsAs(that: Any): Boolean = {x == that}}
   }
 }

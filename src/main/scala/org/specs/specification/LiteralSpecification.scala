@@ -29,12 +29,13 @@ trait LiteralSpecification  extends Specification with DataTables {
    * The name of the person should be {"john" as personName in checkPersonName}
    * </pre>. 
    */
-  implicit def anyToAs[T](a: T) = { new Object {
+  implicit def anyToAs[T](a: T) = new AsProperty(a)
+  class AsProperty[T](a: T) { 
     def as(p: Property[T]) = {p() = a; p.toString }
     def apply(p: Property[T]) = {p() = a; p.toString }
     def apply(f: T => Any)= {f(a); a.toString }
     def as(f: T => Any)= {f(a); a.toString }
-  }}
+  }
   
   /**
    * This method allows to embbed a DataTable in a literal specification and display the results of its execution

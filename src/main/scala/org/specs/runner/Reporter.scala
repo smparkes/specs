@@ -51,9 +51,9 @@ trait OutputReporter extends Reporter with Output {
   }
    
   /** utility implicit definition to be able to add tuples */ 
-  implicit def toAddableTuple(t1: Tuple4[Int, Int, Int, Int]) = {
-    new Object {  def +(t2: Tuple4[Int, Int, Int, Int]) = (t1._1 + t2._1, t1._2 + t2._2, t1._3 + t2._3, t1._4 + t2._4) }
-  }
+  implicit def toAddableTuple(t1: Tuple4[Int, Int, Int, Int]) = new AddableTuple(t1)
+  class AddableTuple(t1: Tuple4[Int, Int, Int, Int]) {  def +(t2: Tuple4[Int, Int, Int, Int]) = (t1._1 + t2._1, t1._2 + t2._2, t1._3 + t2._3, t1._4 + t2._4) }
+  
   /**
    * @return the number of examples, assertions, failures and errors for a specification
    * by collecting those numbers on sub-specifications and suts

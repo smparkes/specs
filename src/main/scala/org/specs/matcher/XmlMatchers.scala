@@ -242,5 +242,6 @@ class PathFunction(val node: Node, val attributes: List[String], val attributeVa
   
 }
 object StringToElem {
-  implicit def toElement(s: String) = new Object {def toElem: Elem = Elem(null, s, Null, TopScope)}
+  implicit def toElement(s: String) = new ToElem(s)
+  class ToElem(s: String) {def toElem: Elem = Elem(null, s, Null, TopScope)}
 }
