@@ -26,6 +26,9 @@ object consoleReporterSpec extends Specification {
     "display '1 failure' if one example isKo" in { 
       specWithOneExample(that.isKo) must existMatch("1 failure") 
     } 
+    "indicate the line and class where the failure occurred" in { 
+      specWithOneExample(that.isKo) must existMatch("(consoleReporterSpec.scala:\\d)") 
+    } 
     "display the first failure of an example having several ones" in { 
       specWithOneExample(that.isKo, that.isKo) must existMatch("first failure") 
       specWithOneExample(that.isKo, that.isKo) must notExistMatch("second failure")

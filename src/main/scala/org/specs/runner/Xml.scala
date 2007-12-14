@@ -6,6 +6,7 @@ import org.specs._
 import java.io.Writer
 import scala.xml.{Elem, PrettyPrinter}
 import org.specs.specification._
+import org.specs.ExtendedThrowable._
 
 /**
  * The <code>XmlRunner</code> class is used to create an xml file, in a specified output directory
@@ -89,11 +90,11 @@ class XmlRunner(specification: Specification, var outputDir: String) extends Fil
   /**
    * @returns an error translated as to xml 
    */
-  def asXml(error: Throwable): Elem = <error>{error.getMessage}</error>
+  def asXml(error: Throwable): Elem = <error location={error.location}>{error.getMessage}</error>
 
   /**
    * @returns a failure translated as to xml 
    */
-  def asXml(failure: FailureException): Elem = <failure>{failure.message}</failure>
+  def asXml(failure: FailureException): Elem = <failure location={failure.location}>{failure.message}</failure>
 
 }

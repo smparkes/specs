@@ -6,6 +6,7 @@ import org.specs.util.Timer
 import org.specs.util.SimpleTimer
 import org.specs.io._
 import java.util.Calendar
+import org.specs.ExtendedThrowable._
 
 /**
  * Generic trait for reporting the result of a list of specifications
@@ -145,8 +146,9 @@ trait OutputReporter extends Reporter with Output {
     def status(example: Example) = if (example.errors.size + example.failures.size > 0) "x " else "+ "
     println(padding + status(example) + example.description)
     // if the failure or the error message has linefeeds they must be padded too
-    example.failures.foreach {f: Throwable => println(padding + "  " + f.getMessage.replaceAll("\n", "\n" + padding + "  ")) }
-    example.errors.foreach {f: Throwable => println(padding + "  " + f.getMessage.replaceAll("\n", "\n" + padding + "  ")) }
+    def parens(f: Throwable) = " (" + f.location + ")"
+    example.failures.foreach {f: Throwable => println(padding + "  " + f.getMessage.replaceAll("\n", "\n" + padding + "  ") + parens(f)) }
+    example.errors.foreach {f: Throwable => println(padding + "  " + f.getMessage.replaceAll("\n", "\n" + padding + "  ") + parens(f)) }
   }
 }
 

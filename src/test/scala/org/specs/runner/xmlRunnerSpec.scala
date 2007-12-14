@@ -38,12 +38,12 @@ Running an XML runner on a specification should create an xml structure:
 
 - {"containing an element for the ko example test containing the failure:\n" +
   <example assertions="1" failures="1" description="have one ko example" errors="0">
-          <failure>'1' is not the same as '2'</failure>
+          <failure location="xmlRunnerSpec.scala:93">'1' is not the same as '2'</failure>
     </example>.as(xml) in checkXml }
 
 - {"containing an element for the ko example test containing the exception:\n" +
   <example description="have an example with an error" assertions="1" failures="0" errors="1">
-      <error>error message</error>
+      <error location="xmlRunnerSpec.scala:94">error message</error>
     </example>.as(xml) in checkXml }
 
 - {"containing an element for the example containing a sub-example:\n" +

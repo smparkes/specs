@@ -52,7 +52,11 @@ trait SpecificationStructure extends ExampleLifeCycle with AssertFactory {
    * <li>split on . and reverse: [MyClass, pack1, com]
    * <li>take the last element: MyClass</ul>
    */ 
-  def createDescription(s: String) = s.split("\\$").reverse.dropWhile(isInteger(_))(0).split("\\.").reverse(0)
+  def createDescription(s: String) = s.
+    split("\\$").reverse.
+    dropWhile(isInteger(_))(0).
+    split("\\.").
+    reverse.toList(0)
 
   /** specifications contained by the current specification. An empty list by default */ 
   var subSpecifications: List[Specification] = Nil
