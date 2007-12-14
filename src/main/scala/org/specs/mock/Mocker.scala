@@ -87,7 +87,7 @@ trait Mocker extends ProtocolTypes with ExampleLifeCycle with MockMatchers {
    * gets the name of the recorded method by throwing an exception and parsing the stacktrace
    */
   private def methodName = {
-    val message = (new Exception()).getStackTrace.dropWhile(!_.toString.contains("record")).dropWhile(_.toString.contains("record"))(0).toString
+    val message = (new Exception()).getStackTrace.toList.dropWhile(!_.toString.contains("record")).dropWhile(_.toString.contains("record"))(0).toString
     val matcherExp = Pattern.compile(".*\\.(.*\\(.*)").matcher(message)
     matcherExp.find
     matcherExp.group(1)

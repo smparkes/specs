@@ -103,11 +103,11 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
        case Test.Stats(Passed(), n, _)          => (true,  noCounterExample(n: Int), "A counter-example was found " + afterNTries(n)) 
        case s@Test.Stats(GenException(e), n, _) => (false, noCounterExample(n: Int), prettyTestStats(s)) 
        case s@Test.Stats(Exhausted(), n, _)     => (false, noCounterExample(n: Int), prettyTestStats(s)) 
-       case Test.Stats(Failed(List(Arg(msg, _, shrinks))), n, _) => 
+       case Test.Stats(Failed(List(Arg(_, msg, shrinks))), n, _) => 
          (false, noCounterExample(n: Int), "A counter-example is '"+msg+"' (" + afterNTries(n) + afterNShrinks(shrinks) + ")") 
-       case Test.Stats(PropException(List(Arg(msg, _, shrinks)), FailureException(ex)), n, _) => 
+       case Test.Stats(PropException(List(Arg(_, msg, shrinks)), FailureException(ex)), n, _) => 
          (false, noCounterExample(n: Int), "A counter-example is '"+msg+"': " + ex + " ("+afterNTries(n)+")") 
-       case s@Test.Stats(PropException(List(Arg(msg, _, shrinks)), ex), n, _) => 
+       case s@Test.Stats(PropException(List(Arg(_, msg, shrinks)), ex), n, _) => 
          (false, noCounterExample(n: Int), prettyTestStats(s)) 
      }
    }

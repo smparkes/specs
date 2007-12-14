@@ -132,9 +132,7 @@ trait AnyMatchers {
            beLike(f)(thrown.get)
        }
      }
-   }
-    
-  /**
+   }  /**
    * Alias for throwException
    */   
   def throwA[E <: Throwable](e: E) = throwException[E](e)
@@ -182,7 +180,7 @@ trait AnyMatchers {
    */
   def throwFailure(e: Throwable, failureMessage: String) = {
     val failure = FailureException(failureMessage) 
-    failure.setStackTrace((e.getStackTrace.dropWhile {x: StackTraceElement => matches("AnyMatchers")(x.toString)}).toArray)
+    failure.setStackTrace((e.getStackTrace.toList.dropWhile {x: StackTraceElement => matches("AnyMatchers")(x.toString)}).toArray)
     throw failure
   }
 
@@ -198,7 +196,7 @@ trait AnyMatchers {
    */
   def throwFailure(origin: Object, failureMessage: String) = {
     val failure = FailureException(failureMessage)
-    failure.setStackTrace((failure.getStackTrace.drop(2).dropWhile {x: StackTraceElement => matches(origin.getClass.getName.split("\\.").last)(x.toString)}).toArray)
+    failure.setStackTrace((failure.getStackTrace.toList.drop(2).dropWhile {x: StackTraceElement => matches(origin.getClass.getName.split("\\.").last)(x.toString)}).toArray)
     throw failure
   }
 
