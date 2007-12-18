@@ -8,14 +8,14 @@ object dataTableUnit extends Specification with DataTables {
   "a data table" should {
     "be just a datarow if it has one single row" in {
       val data = "a"|"b"|"c"|
-                  1 ! 2 ! 3 | 
+                  1 ! 2 ! 3 |
    
       data.getClass.getName must beMatching("DataRow")
     }
     "be a datatable if it has at least 2 rows" in {
       val data = "a"|"b"|"c"|
                   1 ! 2 ! 3 | 
-                  1 ! 2 ! 3 | 
+                  1 ! 2 ! 3 |> {(a: Int, b: Int, c: Int) => ()}
    
       data.getClass.getName must beMatching("DataTable")
     }
@@ -23,7 +23,7 @@ object dataTableUnit extends Specification with DataTables {
       val datatable = "a"|"b"|"c"|
                        1 ! 0 ! 1 | 
                        1 ! 1 ! 2 | 
-                       1 ! 2 ! 3 | 
+                       1 ! 2 ! 3 |> {(a: Int, b: Int, c: Int) => ()}
    
       datatable.toString must_== "|a|b|c|\n" +
                                  "|1|0|1|\n" +

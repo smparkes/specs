@@ -32,7 +32,10 @@ trait Sugar extends Products {
   implicit def anyPrintable[T](a: T) = new Printable(a)
   class Printable[T](a: T){
       def println = Console.println(a)
-      def pln = Console.println(a) 
+      def pln = println
+
+      /** print and pass: print the value and return it */ 
+      def pp = {Console.println(a); a}
   }
   
   implicit def stringToMult(s: String) = new ExtendedString(s) 

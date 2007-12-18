@@ -12,11 +12,21 @@ trait NumericMatchers {
    }
 
   /**
+   * Alias for beStrictlyLessThan
+   */   
+  def be_<[S <% Double](n: S) = beStrictlyLessThan(n)
+
+  /**
    * Matches if x > n
    */   
   def beStrictlyGreaterThan[S <% Double](n: S) = new Matcher[S](){ 
      def apply(x: => S) = (x > n, x + " is strictly greater than " + n, x + " is not strictly greater than " + n)
    }
+
+  /**
+   * Alias for beStrictlyGreaterThan
+   */   
+  def be_>[S <% Double](n: S) = beStrictlyGreaterThan(n)
 
   /**
    * Matches if x <= n
@@ -26,11 +36,21 @@ trait NumericMatchers {
    }
 
   /**
+   * Alias for beLessThan
+   */   
+  def be_<=[S <% Double](n: S) = beLessThan(n)
+
+  /**
    * Matches if x >= n
    */   
   def beGreaterThan[S <% Double](n: S) = new Matcher[S](){ 
      def apply(x: => S) = (x >= n, x + " is greater than " + n, x + " is not greater than " + n)
    }
+
+  /**
+   * Alias for beGreaterThan
+   */   
+  def be_>=[S <% Double](n: S) = beGreaterThan(n)
 
   /**
    * Matches if x = n +/- delta

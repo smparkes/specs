@@ -89,9 +89,11 @@ object mockProtocols extends MatchersSpecification with ButtonAndLightMock {
   "Mock protocols" can { usingBefore { () => {clearExample; button.init()} }
   "be nested to allow complex expectations: expect, inAnyOrder 1 'on' and 2 'off'" in {
       val protocol = expect(inAnyOrder) { 
-        1.of {mock.on; mock.off; mock.on} 
-        1.of {mock.off} 
-      }
+        expect(oneOf){mock.on; mock.off; mock.on}
+        expect(oneOf){mock.off}
+      } 
+      
+    
       assertion(protocol must beMet) must failWithMatch(".*Expected in any order \\[in any order \\[on\\(.*\\); off\\(.*\\); on\\(.*\\)]; in any order \\[off\\(.*\\)\\]\\]. Received none")
 
       2.times {i => button.push}

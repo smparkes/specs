@@ -1,7 +1,13 @@
 package org.specs.collection
 import scala.collection.immutable._
 
+/**
+ * This object provides useful functions for Lists
+ */
 object ExtendedList {
+  /**
+   * @returns a list of lists where x is inserted between every element of the original list
+   */
   def mix[T](x: T, l: List[T]): List[List[T]] = {
     l match {
       case Nil => List(List(x))
@@ -9,6 +15,9 @@ object ExtendedList {
       case y::rest => List(x::l):::mix(x, rest).map((s: List[T]) => y::s)
     }
   }
+  /**
+   * @returns a list of lists containing permutations of the initial list
+   */
   def everyOrder[T](l: List[T]): List[List[T]] = {
     l match {
       case Nil => Nil
@@ -16,6 +25,9 @@ object ExtendedList {
       case x::rest => everyOrder(rest).flatMap {mix(x, _)}
     }
   }
+  /**
+   * @returns a list of lists containing permutations of the initial list
+   */
   class ExtendedList[T](l: List[T]) {
     def removeFirst(f: T => Boolean): List[T] = {
       l match {
