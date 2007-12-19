@@ -17,7 +17,8 @@ import org.specs.ExtendedThrowable._
  * If the output directory is not specified <pre>object runner extends XmlRunner(mySpec)</pre> then the
  * current directory will be used
  */
-class XmlRunner(specification: Specification, var outputDir: String) extends FileSystem with ConsoleLog with FileWriter {
+class XmlRunner(val specification: Specification, var outputDir: String) extends FileSystem with ConsoleLog with FileWriter with ConsoleReporter {
+
   /**
    * Alternate constructor with the specification only. The output dir is the current directory
    */
@@ -42,6 +43,7 @@ class XmlRunner(specification: Specification, var outputDir: String) extends Fil
    * creates the file and write the xml result of the specification execution 
    */
   def execute = {
+    report(List(specification))
     createFile(filePath)
     write(filePath) { out: Writer =>
       out.write(new PrettyPrinter(200, 2).format(asXml(specification)))

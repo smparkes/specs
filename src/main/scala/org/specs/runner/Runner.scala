@@ -7,7 +7,7 @@ import org.specs.collection.JavaCollectionsConversion
  * method.<br>
  * Usage: <code>object mySpecRunner extends ConsoleRunner(mySpec1, mySpec2)</code>
  */  
-class ConsoleRunner(specifications: Specification*) extends ConsoleReporter {
+class ConsoleRunner(val specifications: Specification*) extends ConsoleReporter {
    def ConsoleRunner(specs: List[Specification]) = new ConsoleRunner(specs :_*)
    def main(args: Array[String]) = report(specifications)
 }
