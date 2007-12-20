@@ -1,6 +1,7 @@
 package org.specs.runner
 import org.specs.specification._
 import org.specs.util.DataTables
+import org.specs.Sugar._
 
 object xmlRunnerUnitRunner extends ConsoleRunner(xmlRunnerUnit)
 object xmlRunnerUnit extends LiteralSpecification with TestData {
@@ -11,7 +12,7 @@ object xmlRunnerUnit extends LiteralSpecification with TestData {
     }
     "create an xml file in the specified output directory, handling file separators" in {
        "output dir" | 	"spec name" | 	"file path"  				|>
-       "" 		 	! 	"spec1" 	!	"./spec1.xml"				|  
+       "" 		! 	"spec1" 	!	"./spec1.xml"				|  
        "result" 	!	"spec1" 	!	"./result/spec1.xml" 		|  
        "result/" 	!	"spec1" 	!	"./result/spec1.xml" 		|  
        "result\\" 	!	"spec1" 	!	"./result/spec1.xml" 		|  
@@ -19,6 +20,7 @@ object xmlRunnerUnit extends LiteralSpecification with TestData {
        "\\result" 	!	"spec1" 	!	"/result/spec1.xml" 		|
        "result/xml" ! 	"spec1"     !	"./result/xml/spec1.xml"	| {
        (dir: String, 	spec: String, 	result: String) => {
+           xmlRunner.reset
            xmlRunner.outputDir = dir; spec1.name = spec; xmlRunner.execute
            xmlRunner.files must haveKey(result)
          }
