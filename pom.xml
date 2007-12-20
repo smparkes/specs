@@ -27,7 +27,7 @@ THE SOFTWARE.
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.specs</groupId>
   <artifactId>specs</artifactId>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.1</version>
   <packaging>jar</packaging>
   <name>${project.artifactId}</name>
   <description>specs is a Behaviour-Driven-Design framework</description>
@@ -40,6 +40,15 @@ THE SOFTWARE.
       <distribution>repo</distribution>
     </license>
   </licenses>
+  <scm>
+    <connection>scm:svn:http://specs.googlecode.com/svn/trunk</connection>
+    <developerConnection>scm:svn:https://specs.googlecode.com/svn/trunk</developerConnection>
+    <url>http://specs.googlecode.com/svn/trunk</url>
+  </scm>
+  <issueManagement>
+    <system>code.google</system>
+    <url>http://code.google.com/p/specs/issues/</url>
+  </issueManagement>
   <developers>
     <developer>
       <id>etorreborre</id>
@@ -48,7 +57,7 @@ THE SOFTWARE.
     </developer>
   </developers>
   <properties>
-    <scala.version>2.6.1</scala.version>
+    <scala.version>2.6.0</scala.version>
     <java.src.version>1.5</java.src.version>
   </properties>
 
@@ -72,7 +81,7 @@ THE SOFTWARE.
     <dependency>
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
-      <version>${scala.version}</version>
+      <version>[${scala.version},)</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -89,6 +98,13 @@ THE SOFTWARE.
   </dependencies>
 
   <build>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-webdav</artifactId>
+        <version>1.0-beta-2</version>
+      </extension>
+    </extensions>  
     <plugins>
       <plugin>
         <groupId>org.scala-tools</groupId>
@@ -103,6 +119,10 @@ THE SOFTWARE.
         </executions>
         <configuration>
           <scalaVersion>${scala.version}</scalaVersion>
+          <jvmArgs>
+            <jvmArg>-Xmx512m</jvmArg>
+            <jvmArg>-Xms64m</jvmArg>
+          </jvmArgs>
         </configuration>
       </plugin>
       <plugin>
@@ -112,6 +132,27 @@ THE SOFTWARE.
           <target>${java.src.version}</target>
           <optimise>true</optimise>
           <debug>true</debug>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+           <execution>
+              <goals>
+                 <goal>jar</goal>
+                 <goal>test-jar</goal>
+              </goals>
+           </execution>
+        </executions>
+        <configuration>
         </configuration>
       </plugin>
     </plugins>
@@ -124,4 +165,27 @@ THE SOFTWARE.
       </plugin>
     </plugins>
   </reporting>
+  <distributionManagement>
+    <snapshotRepository>
+      <id>scala-tools.org</id>
+      <url>dav:http://dav.scala-tools.org/repo-snapshots</url>
+      <uniqueVersion>false</uniqueVersion>
+    </snapshotRepository>
+  </distributionManagement>
+  <profiles>
+    <profile>
+      <id>release</id>
+      <distributionManagement>
+        <repository>
+          <id>scala-tools.org</id>
+          <url>dav:http://dav.scala-tools.org/repo-releases</url>
+        </repository>
+        <site>
+          <id>scala-tools.org</id>
+          <!--url>dav:http://dav.scala-tools.org/mvnsites/specs</url-->
+          <url>file://${user.home}/.m2/mvnsites/specs/${project.version}</url>
+        </site>
+      </distributionManagement>
+    </profile>
+  </profiles>  
 </project>
