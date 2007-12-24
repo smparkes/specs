@@ -1,1 +1,1 @@
-java -cp ./target/specs-1.1-tests.jar/;./target/specs-1.1.jar;./junit-3.8.1.jar;./scalacheck-1.1.jar;./scala-library-2.6.1.jar org.specs.allRunner
+java -cp ./target/test-classes;./target/classes;./target/specs-1.1-tests.jar/;./target/specs-1.1.jar;./junit-3.8.1.jar;./scalacheck-1.1.1.jar;./scala-library-2.6.1.jar %1

@@ -49,6 +49,14 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
      def apply(g: => Gen[T]) = checkProperty(forAll(g)(a => prop))(params)
    }
 
+   /**
+    * Matches ok if the <code>property</code> is proved for any generated value<br>
+    * Usage: <code>property must pass</code>
+    */
+    def pass(implicit params: Parameters) = new Matcher[Prop](){
+     def apply(p: => Prop) = checkProperty(p)(params)
+    }
+
    def checkFunction[T](g: Gen[T])(f: T => Boolean)(p: Parameters) = {
       // create a scalacheck property which states that the function must return true
       // for each generated value
@@ -104,6 +112,8 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
        case s@Test.Stats(GenException(e), n, _) => (false, noCounterExample(n: Int), prettyTestStats(s)) 
        case s@Test.Stats(Exhausted(), n, _)     => (false, noCounterExample(n: Int), prettyTestStats(s)) 
        case Test.Stats(Failed(List(Arg(_, msg, shrinks))), n, _) => 
+         (false, noCounterExample(n: Int), "A counter-example is '"+msg+"' (" + afterNTries(n) + afterNShrinks(shrinks) + ")") 
+       case Test.Stats(Failed(Arg(_, msg, shrinks)::_), n, _) => 
          (false, noCounterExample(n: Int), "A counter-example is '"+msg+"' (" + afterNTries(n) + afterNShrinks(shrinks) + ")") 
        case Test.Stats(PropException(List(Arg(_, msg, shrinks)), FailureException(ex)), n, _) => 
          (false, noCounterExample(n: Int), "A counter-example is '"+msg+"': " + ex + " ("+afterNTries(n)+")") 
