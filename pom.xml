@@ -27,7 +27,7 @@ THE SOFTWARE.
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.specs</groupId>
   <artifactId>specs</artifactId>
-  <version>1.1</version>
+  <version>1.1.1</version>
   <packaging>jar</packaging>
   <name>${project.artifactId}</name>
   <description>specs is a Behaviour-Driven-Design framework</description>
