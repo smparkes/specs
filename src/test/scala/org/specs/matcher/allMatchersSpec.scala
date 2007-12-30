@@ -4,7 +4,7 @@ import org.specs.runner._
 import org.specs.Sugar._
 import org.specs.specification._
 
-object matchersTestSuite extends JUnit3(matchersSpec) 
+object allMatchersTestSuite extends JUnit3(matchersSpec) 
 object matchersSpec extends Specification {
   "Matchers" areSpecifiedBy (objectMatchersSpec, 
                              stringMatchersSpec, 

@@ -81,7 +81,7 @@ abstract class TestSpec extends Specification with ConsoleReporter with MockOutp
 class SpecWithOneExample(behaviours: List[(that.Value)]) extends TestSpec {
   def run = {
     "A specification" should {
-      "have example 1 ok" in {
+       "have example 1 ok" in {
         assertions(behaviours) foreach {_.apply}
       }
     }

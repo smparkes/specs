@@ -7,17 +7,17 @@ object fileSystemSpec extends Specification {
   
   "A FileSystem" should {
     "list all files in a directory with filePaths()" in {
-      fs.filePaths("./src/test/scala/scala/io") mustExistMatch "fileSystemSpec"      
+      fs.filePaths("./src/test/scala/org/specs/io") mustExistMatch "fileSystemSpec"      
     }
     "list all files in a directory assuming local directory if no point starts the path" in {
-      fs.filePaths("src/test/scala/scala/io") mustExistMatch "fileSystemSpec"      
+      fs.filePaths("src/test/scala/org/specs/io") mustExistMatch "fileSystemSpec"      
     }
     "not list directories in a directory with filePaths()" in {
-      fs.filePaths("./src/test/scala/scala") mustNotExistMatch "io$"      
+      fs.filePaths("./src/test/scala/org/specs") mustNotExistMatch "io$"      
     }
     "list all files in a directory with filePaths() using a glob pattern" in {
-      fs.filePaths("./src/test/scala/scala/io/*.*") mustExistMatch "fileSystemSpec"      
-      fs.filePaths("./src/test/scala/scala/**/*.*") mustExistMatch "fileSystemSpec"      
+      fs.filePaths("./src/test/scala/org/specs/io/*.*") mustExistMatch "fileSystemSpec"      
+      fs.filePaths("./src/test/scala/org/specs/**/*.*") mustExistMatch "fileSystemSpec"      
     }
     "list file paths using a glob pattern like /dir/**/dir2/*.*" in {
       fs.filePaths("./**/io/*.*") mustExistMatch "fileSystemSpec"      

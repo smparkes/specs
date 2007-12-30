@@ -11,7 +11,7 @@ object ExtendedList {
   def mix[T](x: T, l: List[T]): List[List[T]] = {
     l match {
       case Nil => List(List(x))
-      case y::Nil => List(x::l, l:::List(x))
+      case y::Nil => List(x::y::Nil, y::x::Nil)
       case y::rest => List(x::l):::mix(x, rest).map((s: List[T]) => y::s)
     }
   }

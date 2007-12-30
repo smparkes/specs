@@ -13,6 +13,7 @@ import org.specs.util._
 object allSpecsSuite extends JUnit3(allSpecs)
 object allSpecs extends Specification {
     "The specifications" areSpecifiedBy (
+        fileSystemSpec,  
         fileWriterSpec,  
         allUtilSpec,
         matchersSpec, 

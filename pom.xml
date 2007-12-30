@@ -27,7 +27,7 @@ THE SOFTWARE.
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.specs</groupId>
   <artifactId>specs</artifactId>
-  <version>1.1.1</version>
+  <version>1.1.2</version>
   <packaging>jar</packaging>
   <name>${project.artifactId}</name>
   <description>specs is a Behaviour-Driven-Design framework</description>
@@ -138,7 +138,15 @@ THE SOFTWARE.
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <skip>true</skip>
+         <includes>
+        <!-- this is a bit meaningless, but surefire replaces .java with .class to instantiate the tests -->
+<include>**/*Suite$.java</include>
+         </includes>
+         <excludes>
+         <!-- this is necessary otherwise surefire will exclude  this pattern: **/*$*-->
+            <excludes>!!nothing!!</excludes> 
+            <excludes>**/all*Suite*.java</excludes> 
+          </excludes>
         </configuration>
       </plugin>      
       <plugin>

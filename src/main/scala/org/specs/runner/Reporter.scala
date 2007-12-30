@@ -21,6 +21,7 @@ trait Reporter {
  * which must support <code>print</code>-like methods
  */  
 trait OutputReporter extends Reporter with Output {
+  
   /** the timer is used to display execution times */
   val timer: org.specs.util.Timer
 
