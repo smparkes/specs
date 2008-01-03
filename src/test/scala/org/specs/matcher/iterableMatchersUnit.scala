@@ -2,7 +2,7 @@ package org.specs.matcher
 import org.specs._
 import org.specs.runner._
 
-object iterableMatchersSuite extends JUnit3(iterableMatchersUnit)
+class iterableMatchersTest extends JUnit3(iterableMatchersUnit)
 object iterableMatchersUnit extends MatchersSpecification {
   "A 'contain' matcher" should {
     "be ok if an iterable contains an element" in {

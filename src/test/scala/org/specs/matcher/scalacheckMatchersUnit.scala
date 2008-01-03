@@ -8,7 +8,7 @@ import org.specs.mock._
 import org.specs.io._
 import org.specs.specification._
 
-object scalacheckMatchersSuite extends JUnit3(scalacheckMatchersUnit)
+class scalacheckMatchersUnitTest extends JUnit3(scalacheckMatchersUnit)
 object scalacheckMatchersUnit extends MatchersSpecification with ScalacheckMock {
   "The ScalacheckParameters object" should {
     "provide a 'display' value which is verbose" in {

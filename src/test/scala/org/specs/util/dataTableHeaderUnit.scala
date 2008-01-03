@@ -2,7 +2,7 @@ package org.specs.util
 import org.specs.Specification
 import org.specs.runner._
 
-object datatableHeaderSuite extends JUnit3(dataTableHeaderUnit)
+class datatableHeaderTest extends JUnit3(dataTableHeaderUnit)
 object dataTableHeaderUnit extends Specification with DataTables {
   "a data table header" should {
     "print out the column names separated by |" in {

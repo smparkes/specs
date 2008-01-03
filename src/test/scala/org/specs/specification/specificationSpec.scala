@@ -5,7 +5,7 @@ import org.specs.Sugar._
 import org.specs.matcher.MatcherUtils._
 import org.specs.specification._
 
-object specificationSuite extends JUnit3(specificationSpec)
+class specificationTest extends JUnit3(specificationSpec)
 object specificationSpec extends Specification { 
   "A specification" isSpecifiedBy (basicFeatures, advancedFeatures)
 }

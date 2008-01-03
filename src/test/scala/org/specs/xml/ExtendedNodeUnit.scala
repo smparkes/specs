@@ -5,7 +5,7 @@ import org.specs.xml.ExtendedNode._
 import org.specs.xml.NodeFunctions._
 import scala.xml.NodeSeq._
 
-object extendedNodeSuite extends JUnit3(extendedNodeUnit)
+class extendedNodeTest extends JUnit3(extendedNodeUnit)
 object extendedNodeUnit extends Specification {
   "An isSpaceNode function" should {
     "return false for a node with a simple label" in {

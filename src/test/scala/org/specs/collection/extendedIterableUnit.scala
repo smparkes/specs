@@ -7,7 +7,7 @@ import org.specs.collection.ExtendedList._
 import scalacheck.Gen._
 import org.specs.matcher.ScalacheckParameters._
 
-object extendedIterableUnitSuite extends JUnit3(extendedIterableUnit)
+class extendedIterableUnitTest extends JUnit3(extendedIterableUnit)
 object extendedIterableUnit extends Specification with Sugar {
   "A toDeepString function" should {
     "print the inside of an iterable, even if it is a Stream" in {

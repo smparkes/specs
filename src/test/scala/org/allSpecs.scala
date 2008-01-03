@@ -10,7 +10,7 @@ import org.specs.collection._
 import org.specs.util._
 
 
-object allSpecsSuite extends JUnit3(allSpecs)
+class allSpecsTest extends JUnit3(allSpecs)
 object allSpecs extends Specification {
     "The specifications" areSpecifiedBy (
         fileSystemSpec,  
@@ -45,5 +45,5 @@ object allSpecsAndUnits extends Specification {
   "The specs and unit tests for the specs project" areSpecifiedBy (allSpecs, allUnits)
 }
 object allRunner extends ConsoleRunner(allSpecsAndUnits)
-object all extends JUnit3(allSpecsAndUnits)
+class allTest extends JUnit3(allSpecsAndUnits)
 object allXml extends XmlRunner(allSpecsAndUnits)

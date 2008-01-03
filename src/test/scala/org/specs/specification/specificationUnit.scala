@@ -10,7 +10,7 @@ import scalacheck.Gen._
 import org.specs.matcher.MatcherUtils._
 
 object specificationUnitRunner extends ConsoleRunner(specificationUnit)
-object specificationUnitSuite extends JUnit3(specificationUnit)
+class specificationUnitTest extends JUnit3(specificationUnit)
 object specificationUnit extends Specification {
 
   "A specification" should {

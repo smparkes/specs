@@ -2,7 +2,7 @@ package org.specs.matcher
 import org.specs._
 import org.specs.runner._
 
-object stringMatchersSuite extends JUnit3(stringMatchersUnit)
+class stringMatchersTest extends JUnit3(stringMatchersUnit)
 object stringMatchersUnit extends MatchersSpecification {
   "An equalsIgnoreCase matcher" should {
     "be ok even with null values" in {

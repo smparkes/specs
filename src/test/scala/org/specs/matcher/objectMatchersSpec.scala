@@ -3,7 +3,7 @@ import scala.collection.mutable.Queue
 import org.specs.runner._
 import org.specs.Sugar._
 
-object objectMatchersTestSuite extends JUnit3(objectMatchersSpec) 
+class objectMatchersTest extends JUnit3(objectMatchersSpec) 
 object objectMatchersSpec extends MatchersSpecification {
   "Object matchers" should { usingBefore { () => clearExample }
     "provide a 'must_==' matcher: 'name' must_== 'name'" in {

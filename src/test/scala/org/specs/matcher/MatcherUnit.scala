@@ -9,7 +9,7 @@ import org.specs.runner._
 import org.specs.Sugar._
 import org.specs.matcher.ScalacheckParameters._
 
-object matcherUnitSuite extends JUnit3(matcherUnit)
+class matcherUnitTest extends JUnit3(matcherUnit)
 object matcherUnit extends Specification with MatcherCases {
   "A matcher" should {
     "when negated, use the ok message of the original matcher to indicate a failure" in {

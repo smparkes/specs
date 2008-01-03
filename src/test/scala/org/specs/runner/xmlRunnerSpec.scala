@@ -3,7 +3,7 @@ import org.specs.specification._
 import org.specs.util._
 import scala.xml._
 
-object xmlRunnerSuite extends JUnit3(xmlRunnerSpec)
+class xmlRunnerTest extends JUnit3(xmlRunnerSpec)
 object xmlSpecRunner extends ConsoleRunner(xmlRunnerSpec)
 object xmlRunnerSpec extends RunnerFixture { 
 

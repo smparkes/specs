@@ -6,7 +6,7 @@ import scalacheck.Gen._
 import org.specs.collection.ExtendedList._
 import org.specs.matcher.ScalacheckParameters._
 
-object inSequenceSuite extends JUnit3(inSequenceUnit)
+class inSequenceTest extends JUnit3(inSequenceUnit)
 object inSequenceUnit extends Specification with TestData {
   "A protocol type 'inSequence'" should { usingBefore {() => clearCalls }
     "consume all if exp=m and rec=m" in {

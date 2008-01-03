@@ -2,7 +2,7 @@ package org.specs.io
 import org.specs._
 import org.specs.runner._
 
-object fileSystemSuite extends JUnit3(fileSystemSpec)
+class fileSystemTest extends JUnit3(fileSystemSpec)
 object fileSystemSpec extends Specification {
   
   "A FileSystem" should {

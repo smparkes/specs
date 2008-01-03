@@ -3,7 +3,7 @@ import org.specs.specification
 import org.specs.runner._
 import org.specs.Sugar._
 
-object patternMatchersSpecSuite extends JUnit3(patternMatchersSpec) 
+class patternMatchersSpecTest extends JUnit3(patternMatchersSpec) 
 object patternMatchersSpec extends MatchersSpecification {
   "Pattern matchers" should { usingBefore { () => clearExample }
     "provide a beLike matcher using pattern matching: (1, 2) must beLike {case (1, _) => ok} " +

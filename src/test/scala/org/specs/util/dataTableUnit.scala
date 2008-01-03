@@ -3,7 +3,7 @@ import org.specs._
 import org.specs.specification._
 import org.specs.runner._
 
-object datatableSuite extends JUnit3(dataTableUnit)
+class datatableTest extends JUnit3(dataTableUnit)
 object dataTableUnit extends Specification with DataTables {
   "a data table" should {
     "be just a datarow if it has one single row" in {

@@ -3,7 +3,7 @@ import org.specs.io.mock.MockFileSystem
 import org.specs.io.ConsoleOutput
 import org.specs.runner._
 
-object specsFinderSuite extends JUnit3(specsFinderSpec)
+class specsFinderTest extends JUnit3(specsFinderSpec)
 object specsFinderSpec extends Specification with Init {
   
   "A specs finder" should { usingBefore { () => finder.reset }

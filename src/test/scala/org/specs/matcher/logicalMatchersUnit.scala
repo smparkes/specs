@@ -2,7 +2,7 @@ package org.specs.matcher
 import org.specs._
 import org.specs.runner._
 
-object logicalMatchersSuite extends JUnit3(logicalMatchersUnit)
+class logicalMatchersTest extends JUnit3(logicalMatchersUnit)
 object logicalMatchersUnit extends MatchersSpecification {
   "A 'verifyAll' matcher" should {
     "return a true matcher with an empty list" in {

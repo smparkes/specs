@@ -3,7 +3,7 @@ import org.specs._
 import org.specs.runner._
 import org.specs.Sugar._
 
-object patternMatchersSuite extends JUnit3(patternMatchersUnit)
+class patternMatchersTest extends JUnit3(patternMatchersUnit)
 object patternMatchersUnit extends MatchersSpecification {
   "A 'beLike' pattern matcher" should {
     "be ok even with a null pattern" in {

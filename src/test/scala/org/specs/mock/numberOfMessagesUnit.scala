@@ -6,7 +6,7 @@ import scalacheck.Gen._
 import org.specs.collection.ExtendedList._
 import org.specs.matcher.ScalacheckParameters._
 
-object numberOfMessagesSuite extends JUnit3(numberOfMessagesUnit)
+class numberOfMessagesTest extends JUnit3(numberOfMessagesUnit)
 object numberOfMessagesUnit extends Specification with TestData {
   "A protocol type 'numberOfMessages'" should { usingBefore {() => clearCalls }
     "exactly 2: consume all if exp=m and rec=m, m" in {

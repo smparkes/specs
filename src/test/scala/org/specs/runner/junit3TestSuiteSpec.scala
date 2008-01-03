@@ -3,10 +3,10 @@ package org.specs.runner
 import org.specs.io.mock.MockOutput
 import org.specs.runner.javaConversions._
 import org.specs.runner._
-import junit.framework._
+import _root_.junit.framework._
 
 object junit3TestSuiteRunner extends ConsoleRunner(junit3TestSuiteSpec)
-object junit3TestSuiteTestSuite extends JUnit3(junit3TestSuiteSpec)
+class junit3TestSuiteTest extends JUnit3(junit3TestSuiteSpec)
 object junit3TestSuiteSpec extends Specification {
   "A junit 3 test suite" should {
     "create a test suite containing tests suites for each specification " + 

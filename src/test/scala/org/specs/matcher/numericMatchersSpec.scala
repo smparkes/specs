@@ -1,7 +1,7 @@
 package org.specs.matcher
 import org.specs.runner._
 
-object numericTestSpecSuite extends JUnit3(numericMatchersSpec) 
+class numericTestSpecTest extends JUnit3(numericMatchersSpec) 
 object numericMatchersSpec extends MatchersSpecification {
   "Numeric matchers" should { usingBefore { () => clearExample }
     "provide a 'must beCloseTo' matcher: 1.2 must beCloseTo(1.0, 0.5)" in {

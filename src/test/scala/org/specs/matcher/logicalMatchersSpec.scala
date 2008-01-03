@@ -1,7 +1,7 @@
 package org.specs.matcher
 import org.specs.runner._
 
-object logicalMatchersSpecSuite extends JUnit3(logicalMatchersSpec) 
+class logicalMatchersSpecTest extends JUnit3(logicalMatchersSpec) 
 object logicalMatchersSpec extends MatchersSpecification {
   "Logical matchers" should { usingBefore { () => clearExample }
     "provide a 'must not + matcher' matcher: 'name' must not(beMatching('abc'))" in {

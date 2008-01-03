@@ -6,7 +6,7 @@ import org.specs.matcher.ScalacheckParameters._
 import org.specs.collection.ExtendedList._
 import scalacheck.Gen._
 
-object extendedListUnitSuite extends JUnit3(extendedListUnit)
+class extendedListUnitTest extends JUnit3(extendedListUnit)
 object extendedListUnit extends Specification with Sugar {
   "A removeFirst predicate function" should {
     "remove nothing if the list is empty" in {

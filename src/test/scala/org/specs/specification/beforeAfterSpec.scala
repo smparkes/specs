@@ -4,7 +4,7 @@ import org.specs.runner._
 import org.specs._
 import org.specs.runner._
 
-object beforeAfterSuite extends JUnit3(beforeAfterSpec) 
+class beforeAfterTest extends JUnit3(beforeAfterSpec) 
 object beforeAfterSpec extends Specification {
   "A specification with before/after clauses" should {
     "have each example using the before method before being executed" in { 

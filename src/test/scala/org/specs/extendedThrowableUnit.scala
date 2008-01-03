@@ -2,7 +2,7 @@ package org.specs
 import ExtendedThrowable._
 import org.specs.runner._
 
-object extendedThrowableUnitSuite extends JUnit3(extendedThrowableUnit)
+class extendedThrowableUnitTest extends JUnit3(extendedThrowableUnit)
 object extendedThrowableUnitRunner extends ConsoleRunner(extendedThrowableUnit)
 object extendedThrowableUnit extends Specification {
   "an extended Throwable" should {

@@ -2,7 +2,7 @@ package org.specs.matcher
 import org.specs.runner._
 import org.specs._
 
-object iterableTestSuite extends JUnit3(iterableMatchersSpec) 
+class iterableTest extends JUnit3(iterableMatchersSpec) 
 object iterableMatchersSpec extends MatchersSpecification {
   "Iterable matchers" should { usingBefore { () => clearExample }
     "provide a 'must beEmpty' matcher on iterables: List() must beEmpty" in {

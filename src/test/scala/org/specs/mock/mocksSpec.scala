@@ -5,7 +5,7 @@ import org.specs.matcher._
 import org.specs.Sugar._
 
 object mocksSpec extends Specification { "Mocks" areSpecifiedBy (mockProtocols, mockParameters) }
-object mockProtocolsSuite extends JUnit3(mockProtocols) 
+class mockProtocolsTest extends JUnit3(mockProtocols) 
 object mockProtocols extends MatchersSpecification with ButtonAndLightMock {
   "Mock protocols" should { usingBefore { () => {clearExample; button.init()} }
    "provide an 'expect inAnyOrder' protocol checking if calls have been made to mock objects" in {

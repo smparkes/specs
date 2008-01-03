@@ -3,7 +3,7 @@ import org.specs.specification._
 import org.specs.util.DataTables
 import org.specs.Sugar._
 
-object xmlRunnerUnitSuite extends JUnit3(xmlRunnerUnit)
+class xmlRunnerUnitTest extends JUnit3(xmlRunnerUnit)
 object xmlRunnerUnitRunner extends ConsoleRunner(xmlRunnerUnit)
 object xmlRunnerUnit extends LiteralSpecification with TestData {
   "An xml runner" should {

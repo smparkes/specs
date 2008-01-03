@@ -2,7 +2,7 @@ package org.specs.samples
 
 import org.specs.runner._
 
-object stackSuite extends JUnit3(stackSpecification)
+class stackTest extends JUnit3(stackSpecification)
 object stackSpecification extends Specification with Sugar {
   "A stack" isSpecifiedBy (EmptyStackSpec, FullStackSpec, NotFullStackSpec)
 }

@@ -27,7 +27,7 @@ THE SOFTWARE.
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.specs</groupId>
   <artifactId>specs</artifactId>
-  <version>1.1.2</version>
+  <version>1.1.3-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>${project.artifactId}</name>
   <description>specs is a Behaviour-Driven-Design framework</description>
@@ -87,8 +87,7 @@ THE SOFTWARE.
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.2</version>
-      <optional>true</optional>
+      <version>4.4</version>
     </dependency>
     <dependency>
       <groupId>org.scalacheck</groupId>
@@ -119,6 +118,9 @@ THE SOFTWARE.
         </executions>
         <configuration>
           <scalaVersion>${scala.version}</scalaVersion>
+          <args>
+            <arg>-target:jvm-1.5</arg>
+          </args>
           <jvmArgs>
             <jvmArg>-Xmx512m</jvmArg>
             <jvmArg>-Xms64m</jvmArg>
@@ -139,13 +141,10 @@ THE SOFTWARE.
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
          <includes>
-        <!-- this is a bit meaningless, but surefire replaces .java with .class to instantiate the tests -->
-<include>**/*Suite$.java</include>
-         </includes>
+            <include>**/*Test.java</include> 
+          </includes>
          <excludes>
-         <!-- this is necessary otherwise surefire will exclude  this pattern: **/*$*-->
-            <excludes>!!nothing!!</excludes> 
-            <excludes>**/all*Suite*.java</excludes> 
+            <exclude>**/all*Test.java</exclude> 
           </excludes>
         </configuration>
       </plugin>      

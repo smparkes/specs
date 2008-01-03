@@ -4,7 +4,7 @@ import org.specs.Sugar._
 import org.specs.matcher._
 import org.specs.runner._
 
-object mockParametersSuite extends JUnit3(mockParameters) 
+class mockParametersTest extends JUnit3(mockParameters) 
 object mockParameters extends MatchersSpecification with MovieGuardMock {
   "Mock parameters" should { usingBefore { () => {clearExample} }
     "provide a recordAndReturn method allowing to specify a stubbed return value: def mockedMethod = recordAndReturn(true)" in {

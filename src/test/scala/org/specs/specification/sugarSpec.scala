@@ -2,7 +2,7 @@ package org.specs
 import org.specs.runner._
 
 object sugarRunner extends ConsoleRunner(sugarSpec)
-object sugarSuite extends JUnit3(sugarSpec)
+class sugarTest extends JUnit3(sugarSpec)
 object sugarSpec extends Specification with Sugar {
   "A sugar trait" should {
     "allow tuples to have List methods, like (1, 2, 3).tail // List(2, 3)" in {

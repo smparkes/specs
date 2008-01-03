@@ -7,7 +7,7 @@ import org.specs._
 import org.specs.Sugar._
 import org.specs.runner._
 
-object fileSystemUnitSuite extends JUnit3(fileSystemUnit)
+class fileSystemUnitTest extends JUnit3(fileSystemUnit)
 object fileSystemUnit extends Specification with FileSystem with ConsoleOutput {
 
   "A file system" should {

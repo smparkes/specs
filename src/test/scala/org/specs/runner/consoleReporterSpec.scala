@@ -5,12 +5,11 @@ import org.specs.runner._
 import org.specs.util._
 import scala.collection.mutable._
 import org.specs.io.mock.MockOutput
-import junit.framework._
 import org.specs.Sugar._
 import org.specs.matcher.MatcherUtils._
 
 object consoleReporterRunner extends ConsoleRunner(consoleReporterSpec)
-object consoleReporterSuite extends JUnit3(consoleReporterSpec)
+class consoleReporterTest extends JUnit3(consoleReporterSpec)
 object consoleReporterSpec extends Specification {
 
   "A console reporter" should {

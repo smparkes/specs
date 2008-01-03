@@ -6,7 +6,7 @@ import scalacheck.Gen._
 import org.specs.collection.ExtendedList._
 import org.specs.matcher.ScalacheckParameters._
 
-object inAnyOrderUnitSuite extends JUnit3(inAnyOrderUnit)
+class inAnyOrderUnitTest extends JUnit3(inAnyOrderUnit)
 object inAnyOrderUnit extends Specification with TestData {
   "A protocol type 'inAnyOrder'" should { usingBefore {() => clearCalls }
     "consume nothing if exp=m and rec=nil" in {

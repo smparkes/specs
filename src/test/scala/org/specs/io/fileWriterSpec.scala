@@ -3,7 +3,7 @@ import org.specs._
 import org.specs.runner._
 import org.specs.io.mock._
 
-object fileWriterSuite extends JUnit3(fileWriterSpec)
+class fileWriterTest extends JUnit3(fileWriterSpec)
 object fileWriterSpec extends Specification {
   "A FileWriter" should {
     "write inside a file" in {

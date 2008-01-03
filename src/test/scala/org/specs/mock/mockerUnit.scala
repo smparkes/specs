@@ -3,7 +3,7 @@ import org.specs.runner._
 import org.specs.Sugar._
 import org.specs.mock._
 
-object mockerUnitSuite extends JUnit3(mockerUnit)
+class mockerUnitTest extends JUnit3(mockerUnit)
 object mockerUnit extends Specification with Sugar with ProtocolTypes {
   object mocker extends Mocker
 

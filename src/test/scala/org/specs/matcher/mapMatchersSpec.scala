@@ -1,7 +1,7 @@
 package org.specs.matcher
 import org.specs.runner._
 
-object mapMatchersSpecSuite extends JUnit3(mapMatchersSpec) 
+class mapMatchersSpecTest extends JUnit3(mapMatchersSpec) 
 object mapMatchersSpec extends MatchersSpecification {
   "Map matchers" should { usingBefore { () => clearExample }
     "provide an 'haveKey' matcher on maps: Map('one' -> 1, 'two' -> 2) must haveKey('one') [alias for not + haveKey = notHaveKey]" in {
