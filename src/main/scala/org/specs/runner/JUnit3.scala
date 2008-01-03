@@ -2,12 +2,13 @@ package org.specs.runner
 import org.specs.runner.javaConversions._
 import org.specs.specification._
 import _root_.junit.framework._
-import org.specs.collection.JavaCollectionsConversion._
 import _root_.org.junit.runner._
+import org.specs.collection.JavaCollectionsConversion._
 
 /**
  * This class is a JUnitTestSuite class with an empty test.<br>
  * JUnit 3 imposes that there is at least one test in a test suite in order to be able to run it
+ * This class can run with JUnit4 thanks to the RunWith annotation and the custom JUnit38SuiteRunner
  */
 @RunWith(classOf[JUnit38SuiteRunner])
 abstract class EmptyJUnit3TestSuite extends TestSuite { 
