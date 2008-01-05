@@ -4,10 +4,9 @@ import org.specs.runner._
 import org.specs.mock._
 import org.specs.Sugar._
 import org.specs.specification._
-import org.specs.util._
 
 class anyMatchersTest extends JUnit3(anyMatchersUnit)
-object anyMatchersUnit extends MatchersSpecification with DataTables {
+object anyMatchersUnit extends MatchersSpecification {
   "A 'be' matcher" should {
     "be ok if comparing the same object" in {
       val name = "string"

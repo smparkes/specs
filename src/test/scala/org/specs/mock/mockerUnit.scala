@@ -3,10 +3,10 @@ import org.specs.runner._
 import org.specs.Sugar._
 import org.specs.mock._
 
+object mockerUnitRunner extends ConsoleRunner(mockerUnit)
 class mockerUnitTest extends JUnit3(mockerUnit)
 object mockerUnit extends Specification with Sugar with ProtocolTypes {
   object mocker extends Mocker
-
   "A mocker" should {
     usingBefore {() => mocker.protocol.clear}
     "create a protocol when expecting calls" in {
@@ -25,7 +25,7 @@ object mockerUnit extends Specification with Sugar with ProtocolTypes {
       val mock = new Object { def method = mocker.record }
       val protocol = mocker.expect { mock.method }
       mock.method
-
+      
       protocol.receivedCalls must beLike { case List(ReceivedCall(_)) => ok }
     }
     "have a failure when not receiving an expected call" in {
