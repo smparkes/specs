@@ -11,8 +11,8 @@ trait IterableMatchers {
    * Matches if (iterable.exists(_ == a)
    */   
   def contain[T](a: T) = new Matcher[Iterable[T]](){ 
-     def apply(iterable: => Iterable[T]) = (iterable.exists(_ == a), q(iterable) + " contains " + q(a), q(iterable) + " doesn't contain " + q(a)) 
-   }
+    def apply(v: => Iterable[T]) = {val iterable = v; (iterable.exists(_ == a), q(iterable) + " contains " + q(a), q(iterable) + " doesn't contain " + q(a))} 
+  }
 
   /**
    * Matches if not(iterable.exists(_ == a)
@@ -23,7 +23,7 @@ trait IterableMatchers {
    * Matches if there is one element in the iterable verifying the <code>function</code> parameter: <code>(iterable.exists(function(_))</code>
    */   
   def exist[T](function: T => Boolean) = new Matcher[Iterable[T]](){ 
-     def apply(iterable: => Iterable[T]) = (iterable.exists{function(_)}, "at least one element verifies the property in " + q(iterable), "no element verifies the property in " + q(iterable)) 
+    def apply(v: => Iterable[T]) = {val iterable = v; (iterable.exists{function(_)}, "at least one element verifies the property in " + q(iterable), "no element verifies the property in " + q(iterable))} 
   }
 
   /**
@@ -35,7 +35,7 @@ trait IterableMatchers {
    * Matches if there is one element in the iterable[String] matching the <code>pattern</code> parameter: <code> iterable.exists(matches(pattern) _)</code>
    */   
   def existMatch(pattern: String) = new Matcher[Iterable[String]](){
-     def apply(iterable: => Iterable[String]) = (iterable.exists( matches(pattern) _), "at least one element matches " + q(pattern) + " in " + q(iterable), "no element matches " + q(pattern) + " in " + q(iterable))
+    def apply(v: => Iterable[String]) = {val iterable = v; (iterable.exists( matches(pattern) _), "at least one element matches " + q(pattern) + " in " + q(iterable), "no element matches " + q(pattern) + " in " + q(iterable))}
   }
 
   /**

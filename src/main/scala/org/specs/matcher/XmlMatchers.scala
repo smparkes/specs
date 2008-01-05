@@ -99,7 +99,7 @@ case class XmlMatcher(functions: List[PathFunction]) extends Matcher[Iterable[No
   /**
    * checks that the <code>nodes</code> satisfy the <code>functions</code>
    */
-  def apply(nodes: =>Iterable[Node]) = checkFunctions(functions, nodes, (true, nodes.toString, nodes.toString))
+  def apply(n: =>Iterable[Node]) = {val nodes = n; checkFunctions(functions, nodes, (true, nodes.toString, nodes.toString))}
   
   /**
    * checks that the <code>nodes</code> satisfy the <code>functions</code>

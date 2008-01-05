@@ -14,16 +14,16 @@ trait AnyMatchers {
    * Matches if (a eq b)
    */   
   def be[T](a: T) = new Matcher[T](){
-     def apply(b: =>T) = (a.asInstanceOf[AnyRef] eq b.asInstanceOf[AnyRef], q(b) + " is the same as " + q(a), q(b) + " is not the same as " + q(a)) 
-   } 
+    def apply(v: =>T) = {val b = v; (a.asInstanceOf[AnyRef] eq b.asInstanceOf[AnyRef], q(b) + " is the same as " + q(a), q(b) + " is not the same as " + q(a))} 
+  } 
   def notBe[T](a: T) = be(a).not
   
   /**
    * Matches if (a == b)
    */   
   def is_==(a: Any) = new Matcher[Any](){ 
-     def apply(b: =>Any) = ((a == b), q(b) + " is equal to " + q(a), q(b) + " is not equal to " + q(a))
-   }
+     def apply(v: =>Any) = {val b = v; ((a == b), q(b) + " is equal to " + q(a), q(b) + " is not equal to " + q(a))}
+  }
 
   /**
    * Alias of is_==
@@ -49,7 +49,7 @@ trait AnyMatchers {
    * Matches if b is null
    */   
   def beNull[T] = new Matcher[T](){
-     def apply(b: =>T) = (b == null, "the value is null", q(b) + " is not null") 
+     def apply(v: =>T) = {val b = v; (b == null, "the value is null", q(b) + " is not null")} 
    }  
 
   /**
@@ -61,21 +61,21 @@ trait AnyMatchers {
    * Matches if b is true
    */   
   def beTrue[T] = new Matcher[T](){
-     def apply(b: =>T) = (b == true, q(b) + " is true", q(b) + " is false") 
-   }  
+    def apply(v: =>T) = {val b = v; (b == true, q(b) + " is true", q(b) + " is false")} 
+  }  
 
   /**
    * Matches if b is false
    */   
   def beFalse[T] = new Matcher[T](){
-     def apply(b: =>T) = (b == false, q(b) + " is false", q(b) + " is true") 
+    def apply(v: =>T) = {val b = v; (b == false, q(b) + " is false", q(b) + " is true")} 
   }  
   
   /**
    * Matches if iterable.exists(_ == a)
    */   
   def beIn[T <: AnyRef](iterable: Iterable[T]) = new Matcher[T](){
-     def apply(a: => T) = (iterable.exists(_ == a), q(a) + " is in " + q(iterable), q(a) + " is not in " + q(iterable))
+    def apply(v: => T) = {val a= v; (iterable.exists(_ == a), q(a) + " is in " + q(iterable), q(a) + " is not in " + q(iterable))}
   }
 
   /**
@@ -87,7 +87,7 @@ trait AnyMatchers {
    * Matches if any object with an <code>isEmpty</code> method returns true: (Any {def isEmpty: Boolean}).isEmpty
    */   
   def beEmpty[S <: Any {def isEmpty: Boolean}] = new Matcher[S](){
-     def apply(iterable: => S) = (iterable.isEmpty, iterable + " is empty", iterable + " is not empty")
+    def apply(v: => S) = {val iterable = v; (iterable.isEmpty, iterable + " is empty", iterable + " is not empty")}
   }
 
   /**
@@ -109,7 +109,7 @@ trait AnyMatchers {
    * Matches if the function f returns true
    */   
   def verify[T](f: T => Boolean): Matcher[T] = new Matcher[T](){
-     def apply(x: => T) = (f(x), x + " verifies the property", x + " doesn't verify the expected property")
+     def apply(v: => T) = {val x = v; (f(x), x + " verifies the property", x + " doesn't verify the expected property")}
   }
   
   /**
@@ -199,5 +199,4 @@ trait AnyMatchers {
     failure.setStackTrace((failure.getStackTrace.toList.drop(2).dropWhile {x: StackTraceElement => matches(origin.getClass.getName.split("\\.").last)(x.toString)}).toArray)
     throw failure
   }
-
 }

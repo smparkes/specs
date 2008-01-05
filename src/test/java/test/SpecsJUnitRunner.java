@@ -6,7 +6,7 @@ import junit.framework.TestSuite;
 
 public class SpecsJUnitRunner extends TestCase {
 	public static Test suite() {
-		final String suiteClassName = System.getProperty("scalaSuite");
+		final String suiteClassName = System.getProperty("specs");
 		try {
 			Class<?> suiteClass = Thread.currentThread().getContextClassLoader().loadClass(suiteClassName);
 			TestSuite testSuite = (TestSuite) suiteClass.newInstance();

@@ -10,7 +10,7 @@ trait StringMatchers {
    * Matches if (a.equalsIgnoreCase(b))
    */   
   def equalIgnoreCase[T <: String](a: T) = new Matcher[T](){ 
-     def apply(b: => T) = (a != null && b != null && a.equalsIgnoreCase(b), q(b) + " is equal ignoring case to " + q(a), q(b) + " is not equal ignoring case to " + q(a)) 
+    def apply(v: => T) = {val b = v; (a != null && b != null && a.equalsIgnoreCase(b), q(b) + " is equal ignoring case to " + q(a), q(b) + " is not equal ignoring case to " + q(a))} 
   }
 
   /**
@@ -22,7 +22,7 @@ trait StringMatchers {
    * Matches if (b.indexOf(a) >= 0)
    */   
   def include[T <: String](a: String) = new Matcher[T](){ 
-    def apply(b: => T) = (a != null && b != null && b.indexOf(a) >= 0, q(b) + " includes " + q(a), q(b) + " doesn't include " + q(a)) 
+    def apply(v: => T) = {val b = v; (a != null && b != null && b.indexOf(a) >= 0, q(b) + " includes " + q(a), q(b) + " doesn't include " + q(a))} 
   }
 
   /**
@@ -34,7 +34,7 @@ trait StringMatchers {
    * Matches if b matches the regular expression a
    */   
   def beMatching[T <: String](a: T) = new Matcher[T](){
-    def apply(b: => T) = (matches(a)(b), q(b) + " matches " + q(a), q(b) + " doesn't match " + q(a))
+    def apply(v: => T) = {val b = v; (matches(a)(b), q(b) + " matches " + q(a), q(b) + " doesn't match " + q(a))}
   }
 
   /**
@@ -46,7 +46,7 @@ trait StringMatchers {
    * Matches if b.startsWith(a)
    */   
   def startWith[T <: String](a: T) = new Matcher[T](){ 
-     def apply(b: => T) = (b!= null && a!= null && b.startsWith(a), q(b) + " starts with " + q(a), q(b) + " doesn't start with " + q(a)) 
+     def apply(v: => T) = {val b = v; (b!= null && a!= null && b.startsWith(a), q(b) + " starts with " + q(a), q(b) + " doesn't start with " + q(a))} 
   }
   /**
    * Matches if !b.startsWith(a)
@@ -57,7 +57,7 @@ trait StringMatchers {
    * Matches if b.endsWith(a)
    */   
   def endWith[T <: String](a: T) = new Matcher[T](){ 
-     def apply(b: => T) = (a != null && b != null && b.endsWith(a), q(b) + " ends with " + q(a), q(b) + " doesn't end with " + q(a)) 
+     def apply(v: => T) = {val b = v; (a != null && b != null && b.endsWith(a), q(b) + " ends with " + q(a), q(b) + " doesn't end with " + q(a))} 
   }
 
   /**

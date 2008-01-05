@@ -20,41 +20,47 @@ trait PatternMatchers {
    * @param pattern a case expression
    */  
   def beLike(pattern: => (Any => Boolean)) = new Matcher[Any](){
-     def apply(value: => Any) = ( 
-      try {
-        if (value == null)
-          false
-        else
-          Some(value).map(pattern).get 
+     def apply(v: => Any) = {
+       val value = v
+      (
+       try {
+        if (value == null)  false  else  Some(value).map(pattern).get 
       } catch { case e: scala.MatchError => false }, 
       q(value) + " matches the given pattern", 
       q(value) + " doesn't match the expected pattern")
+     }
   }
   
   /**
    * Matches if the value <code>v</code> is None
    */
   def beNone[T] = new Matcher[Option[T]](){
-     def apply(value: => Option[T]) = ( 
-      value match { 
+     def apply(v: => Option[T]) = { 
+       val value = v
+       ( 
+       value match { 
         case None => true
         case _ => false 
       }, 
       q(value) + " is None", 
       q(value) + " is not None")
+    }
   }
 
   /**
    * Matches if the value <code>v</code> is Some(x)
    */
   def beSome[T] = new CaseMatcher[T](){
-     def someApply(value: => Option[T]) = ( 
+     def someApply(v: => Option[T]) = {
+       val value = v
+       ( 
        value match {
           case Some(x) => true 
           case _ => false
         },
         q(value) + " is Some(x)", 
         q(value) + " is not Some(x)")
+     }
    }
 
   /**
