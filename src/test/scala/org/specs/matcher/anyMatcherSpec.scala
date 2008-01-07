@@ -1,7 +1,9 @@
 package org.specs.matcher
 import org.specs.runner._
+import org.specs.specification._
 
-class anyMatcherSpecTest extends JUnit3(anyMatcherSpec) 
+class anyMatcherSpecTest extends JUnit3(anyMatcherSpec)
+object anyMatcherRunner extends ConsoleRunner(anyMatcherSpec)
 object anyMatcherSpec extends MatchersSpecification {
   "A matcher" can {
     "be created as a case class" in {
@@ -22,6 +24,9 @@ object anyMatcherSpec extends MatchersSpecification {
       }
       10 must divide(100)
       3 must not(divide(100))
+    }
+    "be skipped" in {
+      assertion( 1 must be(2).orSkipExample ) must throwA(SkippedException("'1' is not '2'"))
     }
   }
 

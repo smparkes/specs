@@ -85,6 +85,7 @@ class XmlRunner(val specification: Specification, var outputDir: String) extends
   def asXml(e: Example): Elem = 
     <example description={e.description} assertions={e.assertionsNb.toString} failures={e.failures.size.toString} errors={e.errors.size.toString}>{
       e.failures map (asXml(_))}{
+      e.skipped map (asXml(_))}{
       e.errors map (asXml(_))}{
       e.subExamples map (asXml(_))
     }</example>
@@ -99,4 +100,8 @@ class XmlRunner(val specification: Specification, var outputDir: String) extends
    */
   def asXml(failure: FailureException): Elem = <failure location={failure.location}>{failure.message}</failure>
 
+  /**
+   * @returns a skipped example translated as to xml 
+   */
+  def asXml(skipped: SkippedException): Elem = <skipped location={skipped.location}>{skipped.message}</skipped>
 }

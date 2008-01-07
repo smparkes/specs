@@ -53,33 +53,33 @@ trait OutputReporter extends Reporter with Output {
   }
    
   /** utility implicit definition to be able to add tuples */ 
-  implicit def toAddableTuple(t1: Tuple4[Int, Int, Int, Int]) = new AddableTuple(t1)
-  class AddableTuple(t1: Tuple4[Int, Int, Int, Int]) {  def +(t2: Tuple4[Int, Int, Int, Int]) = (t1._1 + t2._1, t1._2 + t2._2, t1._3 + t2._3, t1._4 + t2._4) }
+  implicit def toAddableTuple(t1: Tuple5[Int, Int, Int, Int, Int]) = new AddableTuple(t1)
+  class AddableTuple(t1: Tuple5[Int, Int, Int, Int, Int]) {  def +(t2: Tuple5[Int, Int, Int, Int, Int]) = (t1._1 + t2._1, t1._2 + t2._2, t1._3 + t2._3, t1._4 + t2._4, t1._5 + t2._5) }
   
   /**
    * @return the number of examples, assertions, failures and errors for a specification
    * by collecting those numbers on sub-specifications and suts
    */
-  def stats(spec: Specification): (Int, Int, Int, Int) = {
-    spec.suts.foldLeft((0, 0, 0, 0))(_ + stats(_)) +
-    spec.subSpecifications.foldLeft((0, 0, 0, 0))(_ + stats(_))
+  def stats(spec: Specification): (Int, Int, Int, Int, Int) = {
+    spec.suts.foldLeft((0, 0, 0, 0, 0))(_ + stats(_)) +
+    spec.subSpecifications.foldLeft((0, 0, 0, 0, 0))(_ + stats(_))
   }
   
   /**
    * @return the number of examples, assertions, failures and errors for a sut
    * by collecting those numbers on examples
    */
-  def stats(sut: Sut): (Int, Int, Int, Int)  = {
-    sut.examples.foldLeft((0, 0, 0, 0))(_ + stats(_))
+  def stats(sut: Sut): (Int, Int, Int, Int, Int)  = {
+    sut.examples.foldLeft((0, 0, 0, 0, 0))(_ + stats(_))
   }
 
   /**
    * @return the number of examples, assertions, failures and errors for an example
    * by collecting those numbers on this example and on sub-examples
    */
-  def stats(example: Example): (Int, Int, Int, Int) = {
-    (if (example.subExamples.isEmpty) 1 else 0, example.assertionsNb, example.failures.size, example.errors.size) +
-    example.subExamples.foldLeft((0, 0, 0, 0))(_ + stats(_))
+  def stats(example: Example): (Int, Int, Int, Int, Int) = {
+    (if (example.subExamples.isEmpty) 1 else 0, example.assertionsNb, example.failures.size, example.errors.size, example.skipped.size) +
+    example.subExamples.foldLeft((0, 0, 0, 0, 0))(_ + stats(_))
   }
 
   /**
@@ -103,7 +103,7 @@ trait OutputReporter extends Reporter with Output {
    * prints one sut specification
    */
   def printSut(sut: Sut, padding: String) = {
-    println(padding + sut.description + " " + sut.verb)
+    println(padding + sut.description + " " + sut.verb + sut.skippedSut.map(" (skipped: " + _ + ")").getOrElse(""))
     sut.literalDescription foreach {s => println(padding + s)}
     reportExamples(sut.examples, padding)
     println("")
@@ -119,14 +119,17 @@ trait OutputReporter extends Reporter with Output {
   /**
    * prints the statistics for a specification
    */
-  def printStats(stat: (Int, Int, Int, Int), padding: String) = {
-    val (examplesNb, assertionsNb,  failuresNb, errorsNb) = stat
+  def printStats(stat: (Int, Int, Int, Int, Int), padding: String) = {
+    val (examplesNb, assertionsNb,  failuresNb, errorsNb, skippedNb) = stat
     def plural[T](nb: int) = if (nb > 1) "s" else ""
     println(padding + "Finished in " + timer.stop)
-    println(padding + examplesNb + " example" + plural(examplesNb) + ", " +
+    println(padding + 
+            examplesNb + " example" + plural(examplesNb) +
+            (if (skippedNb > 0) " (" + skippedNb + " skipped)" else "") + ", " +
             assertionsNb + " assertion" + plural(assertionsNb) + ", " +
             failuresNb + " failure" + plural(failuresNb) + ", " +
-            errorsNb + " error" + plural(errorsNb))
+            errorsNb + " error" + plural(errorsNb)
+            )
     println("")
   }
 
@@ -144,12 +147,21 @@ trait OutputReporter extends Reporter with Output {
    * reports one example: + if it succeeds, x if it fails, its description, its failures or errors 
    */
   def reportExample(example: Example, padding: String) = {
-    def status(example: Example) = if (example.errors.size + example.failures.size > 0) "x " else "+ "
+    def status(example: Example) = {
+      if (example.errors.size + example.failures.size > 0) 
+        "x " 
+      else if (example.skipped.size > 0)
+        "o "
+      else
+        "+ "
+    }
+
     println(padding + status(example) + example.description)
-    // if the failure or the error message has linefeeds they must be padded too
+    // if the failure, skip or the error message has linefeeds they must be padded too
     def parens(f: Throwable) = " (" + f.location + ")"
-    example.failures.foreach {f: Throwable => println(padding + "  " + f.getMessage.replaceAll("\n", "\n" + padding + "  ") + parens(f)) }
-    example.errors.foreach {f: Throwable => println(padding + "  " + f.getMessage.replaceAll("\n", "\n" + padding + "  ") + parens(f)) }
+    example.skipped.toList ::: example.failures.toList ::: example.errors.toList foreach { f: Throwable => 
+      println(padding + "  " + f.getMessage.replaceAll("\n", "\n" + padding + "  ") + parens(f)) 
+    }
   }
 }
 

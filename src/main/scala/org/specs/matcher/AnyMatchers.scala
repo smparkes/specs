@@ -191,12 +191,18 @@ trait AnyMatchers {
    * <li>drop the lines corresponding to the object having created the exception (an Assert object)
    *  in order to start the stacktrace where the failure happened
    * </ul>
-   * @param origin object which is supposed to thrown the <code>FailureException</code> 
+   * @param origin object which has been called to throw the <code>FailureException</code> 
    * @param failureMessage exception message 
    */
-  def throwFailure(origin: Object, failureMessage: String) = {
-    val failure = FailureException(failureMessage)
-    failure.setStackTrace((failure.getStackTrace.toList.drop(2).dropWhile {x: StackTraceElement => matches(origin.getClass.getName.split("\\.").last)(x.toString)}).toArray)
-    throw failure
+  def throwFailure(origin: Object, failureMessage: String) = throwException(origin, FailureException(failureMessage))
+
+  /**
+   * Throws an exception removing the traces of the object wanting to throw this exception
+   * @param origin object which has be called to throw the <code>Exception</code> 
+   * @param exception the exception to throw 
+   */
+  def throwException(origin: Object, e: Exception) = {
+    e.setStackTrace((e.getStackTrace.toList.drop(2).dropWhile {x: StackTraceElement => matches(origin.getClass.getName.split("\\.").last)(x.toString)}).toArray)
+    throw e
   }
 }

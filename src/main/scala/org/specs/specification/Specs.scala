@@ -30,6 +30,9 @@ abstract class Specification extends Matchers with SpecificationStructure {
   /** @return the failures of each sut */
   def failures: List[FailureException] = subSpecifications.flatMap{_.failures} ::: suts.flatMap {_.failures}
 
+  /** @return the skipped of each sut */
+  def skipped: List[SkippedException] = subSpecifications.flatMap{_.skipped} ::: suts.flatMap {_.skipped}
+
   /** @return the errors of each sut */
   def errors: List[Throwable] = subSpecifications.flatMap{_.errors} ::: suts.flatMap {_.errors}
 
@@ -43,7 +46,13 @@ abstract class Specification extends Matchers with SpecificationStructure {
    * Convenience method: adds a new failure to the latest example<br>
    * Usage: <code>fail("this code should fail anyway")</code>
    */
-  def fail(m: String) = lastExample.addFailure(FailureException(m))
+  def fail(m: String) = throwFailure(this, m)
+
+  /** 
+   * Convenience method: adds a new skippedException to the latest example<br>
+   * Usage: <code>skip("this example should be skipped")</code>
+   */
+  def skip(m: String) = throwException(this, SkippedException(m))
 }
 
 /**
@@ -74,9 +83,18 @@ case class Sut(description: String, cycle: ExampleLifeCycle) extends ExampleLife
   
   /** the after function will be invoked after each example */
   var after: Option[() => Unit] = None
+  
+  var skippedSut: Option[String] = None
+  var failedSut: Option[String] = None
 
   /** default way of defining the behaviour of a sut */
-  def should(ex: Example) = this
+  def should(ex: =>Example) = {
+    try { ex } catch {
+      case SkippedException(m) => skippedSut = Some(m)
+      case FailureException(m) => failedSut = Some(m)
+    }
+    this
+  }
 
   /** alternately there may be no example given yet */
   def should(noExampleGiven: Unit) = this
@@ -88,10 +106,13 @@ case class Sut(description: String, cycle: ExampleLifeCycle) extends ExampleLife
   }
 
   /** Alias method to describe more advanced or optional behaviour. This will change the verb used to report the sut behavior */
-  def can(ex: Example) = {verb = "can"; this}
+  def can(ex: =>Example) = {verb = "can"; should(ex)}
 
   /** @return all examples failures */
   def failures = examples.flatMap {_.failures}
+
+  /** @return all examples skipped messages */
+  def skipped = examples.flatMap {_.skipped}
 
   /** @return all examples errors */
   def errors = examples.flatMap {_.errors}
@@ -138,6 +159,9 @@ case class Example(description: String, cycle: ExampleLifeCycle) {
   /** failures created by Assert objects inside the <code>in<code> method */
   var thisFailures = new Queue[FailureException]
 
+  /** skipped created by Assert objects inside the <code>in<code> method */
+  var thisSkipped = new Queue[SkippedException]
+
   /** errors created by Assert objects inside the <code>in<code> method */
   var thisErrors = new Queue[Throwable]
 
@@ -177,7 +201,9 @@ case class Example(description: String, cycle: ExampleLifeCycle) {
       cycle.afterTest(this)
       } catch { 
       // failed assertions will launch a FailureException
+      // skipped assertions will launch a SkippedException
       case f: FailureException => addFailure(f)
+      case s: SkippedException => addSkipped(s)
       case t: Throwable => {t.printStackTrace; addError(t)}
     }
     // try the "after" methods. If there is an exception, add an error and return the current example
@@ -194,8 +220,14 @@ case class Example(description: String, cycle: ExampleLifeCycle) {
   /** creates and adds a failure exception */
   def addFailure(failure: FailureException) = thisFailures += failure
 
+  /** creates and adds a skipped exception */
+  def addSkipped(skip: SkippedException) = thisSkipped += skip
+
   /** @return the failures of this example and its subexamples */
   def failures: Seq[FailureException] = thisFailures ++ subExamples.flatMap { _.failures }
+
+  /** @return the skipped messages for this example and its subexamples */
+  def skipped: Seq[SkippedException] = thisSkipped ++ subExamples.flatMap { _.skipped }
 
   /** @return the errors of this example and its subexamples */
   def errors: Seq[Throwable] = thisErrors ++ subExamples.flatMap {_.errors}

@@ -112,10 +112,28 @@ abstract class Matcher[T] extends AbstractMatcher[T] with MatcherResult {
           (if (condition) result.success else true, result.okMessage, result.koMessage)
       }}
   }
-   /**
-    *  The <code>unless</code> operator returns a matcher which will be ok only if a condition is false
-    */   
-   def unless(condition : => Boolean) = when(!condition) 
+  /**
+   *  The <code>unless</code> operator returns a matcher which will be ok only if a condition is false
+   */   
+  def unless(condition : => Boolean) = when(!condition)
+  
+  /**
+   *  The <code>orSkipExample</code> operator throws a SkippedException if the matcher fails
+   */   
+  def orSkipExample = { 
+    val outer = this;
+    new Matcher[T]() {
+     def apply(a: => T) = {
+          val result = outer(a)
+          if (!result.success) throw new SkippedException("skipped because " + result.okMessage)
+          (result.success, result.okMessage, result.koMessage)
+      }}
+  }
+
+  /**
+   *  Alias for orSkipExample
+   */   
+  def orSkip = orSkipExample
 }
 /**
  *  Result of <code>Matcher.apply</code>. Provides a success flag and status messages

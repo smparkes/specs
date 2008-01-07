@@ -6,6 +6,7 @@ import org.specs.matcher.MatcherUtils._
 import org.specs.specification._
 
 class specificationTest extends JUnit3(specificationSpec)
+object specificationRunner extends ConsoleRunner(specificationSpec)
 object specificationSpec extends Specification { 
   "A specification" isSpecifiedBy (basicFeatures, advancedFeatures)
 }
@@ -49,7 +50,23 @@ object basicFeatures extends SpecificationWithSamples {
      failMethodSpec.failures must beLike {case Seq(FailureException(msg)) => 
                                                  msg must_== "failure with the fail method"} 
    }
-  }
+   "provide a 'skip' method skipping the current example" in {
+     object skipSpec extends oneEx(List(that.isSkipped, that.isOk))
+     skipSpec.skipped must beLike {case Seq(SkippedException(msg)) => 
+                                        msg must_== "skipped with the skip method"} 
+     skipSpec.assertionsNb mustBe 0
+   } 
+   "provide a 'skip' method skipping the sut if positioned before all examples" in {
+     object skipAll extends Specification {
+       "a system" should {
+         skip("be skipped")
+         "for all its examples" in { 1 mustBe 1 }
+       }
+     }
+     skipAll.suts must exist { s: Sut => s.skippedSut != None } 
+     skipAll.assertionsNb mustBe 0
+   } 
+ }
 }
 object advancedFeatures extends SpecificationWithSamples {
   "A specification " can {
@@ -66,7 +83,7 @@ object advancedFeatures extends SpecificationWithSamples {
        compositeSpec.description must_== "A complex system is specified by"
        compositeSpec.subSpecifications must_== List(okSpec, koSpec)
     }
-    "share examples with another specficiation.\n" +
+    "share examples with another specification.\n" +
     "Declare an example to be a collection of examples coming from another spec. " +
     "The specified example will have the other examples as sub-examples" in {
       trait SharedExamples extends Specification {
@@ -93,9 +110,11 @@ trait SpecificationWithSamples extends Specification {
     val failure1 = () => "ok" mustBe "first failure"
     val failure2 = () => "ok" mustBe "second failure"
     val failMethod = () => fail("failure with the fail method")
+    val skipMethod = () => skip("skipped with the skip method")
     val exception = () => error("new Error")
     def assertions(behaviours: List[that.Value]) = behaviours map { case that.isOk => success
                                       case that.isKo => failure1
+                                      case that.isSkipped => skipMethod
                                       case that.isKoTwice => () => {failure1(); failure2()} 
                                       case that.isKoWithTheFailMethod => failMethod 
                                       case that.throwsAnException => exception }
@@ -142,7 +161,7 @@ trait SpecificationWithSamples extends Specification {
   }
 }
 object that extends Enumeration {
-  val isKo, isOk, isKoTwice, isKoWithTheFailMethod, throwsAnException = Value
+  val isKo, isOk, isSkipped, isKoTwice, isKoWithTheFailMethod, throwsAnException = Value
 }
 
 

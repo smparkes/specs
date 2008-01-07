@@ -60,6 +60,9 @@ class Assert[+T](value: => T, example: Example) {
 /** RuntimeException carrying a matcher ko message */
 case class FailureException(message: String) extends RuntimeException(message)
 
+/** RuntimeException carrying a matcher skip message */
+case class SkippedException(message: String) extends RuntimeException(message)
+
 /** Specialized assert class with string matchers aliases */
 class AssertString[A <: String](value: => A, example: Example) extends Assert[A](value, example) {
   /** alias for <code>must(beMatching(a))</code> */
