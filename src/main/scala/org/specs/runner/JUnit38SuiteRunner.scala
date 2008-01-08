@@ -11,7 +11,6 @@ import _root_.junit.framework.TestResult;
 import _root_.junit.framework.TestSuite;
 import org.junit.runner.Description;
 import org.junit.runner.Description._;
-import org.junit.runner.Runner;
 import org.junit.runner.manipulation.Filter;
 import org.junit.runner.manipulation.Filterable;
 import org.junit.runner.manipulation.NoTestsRemainException;
@@ -24,7 +23,7 @@ import org.junit.runner.notification.RunNotifier;
  * This class is a direct copy of the JUnit38ClassRunner class which only accepts a TestCase class.<br>
  * It is used to run JUnit3 TestSuite with the JUnit 4 library 
  */
-class JUnit38SuiteRunner(klass: Class) extends Runner with Filterable with Sortable {
+class JUnit38SuiteRunner(klass: Class) extends org.junit.runner.Runner with Filterable with Sortable {
   var fTest: Test = new TestSuite(klass.asSubclass(classOf[TestSuite]))
   
   class OldTestClassAdaptingListener(fNotifier: RunNotifier)  extends TestListener {
