@@ -57,7 +57,7 @@ THE SOFTWARE.
     </developer>
   </developers>
   <properties>
-    <scala.version>2.6.0</scala.version>
+    <scala.version>2.6.1</scala.version>
     <java.src.version>1.5</java.src.version>
   </properties>
 
