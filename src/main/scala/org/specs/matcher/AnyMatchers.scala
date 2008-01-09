@@ -132,7 +132,8 @@ trait AnyMatchers {
            beLike(f)(thrown.get)
        }
      }
-   }  /**
+   }  
+  /**
    * Alias for throwException
    */   
   def throwA[E <: Throwable](e: E) = throwException[E](e)

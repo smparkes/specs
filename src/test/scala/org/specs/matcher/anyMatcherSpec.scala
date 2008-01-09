@@ -26,7 +26,7 @@ object anyMatcherSpec extends MatchersSpecification {
       3 must not(divide(100))
     }
     "be skipped" in {
-      assertion( 1 must be(2).orSkipExample ) must throwA(SkippedException("'1' is not '2'"))
+      assertion( 1 must be_==(2).orSkipExample ) must throwThis(SkippedException("skipped because '1' is not equal to '2'"))
     }
   }
 

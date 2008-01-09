@@ -125,7 +125,7 @@ abstract class Matcher[T] extends AbstractMatcher[T] with MatcherResult {
     new Matcher[T]() {
      def apply(a: => T) = {
           val result = outer(a)
-          if (!result.success) throw new SkippedException("skipped because " + result.okMessage)
+          if (!result.success) throw new SkippedException("skipped because " + result.koMessage)
           (result.success, result.okMessage, result.koMessage)
       }}
   }
