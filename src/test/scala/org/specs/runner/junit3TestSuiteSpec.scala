@@ -4,6 +4,8 @@ import org.specs.io.mock.MockOutput
 import org.specs.runner.javaConversions._
 import org.specs.runner._
 import _root_.junit.framework._
+import org.junit.runner.notification.RunNotifier
+import org.junit.runner.Description
 
 object junit3TestSuiteRunner extends ConsoleRunner(junit3TestSuiteSpec)
 class junit3TestSuiteTest extends JUnit3(junit3TestSuiteSpec)
@@ -41,6 +43,16 @@ object junit3TestSuiteSpec extends Specification {
       error.exceptionMessage must_== "new Error"
       error.trace.split("\n")(0) must include(error.exceptionMessage)
       error.trace.split("\n")(1) must (beMatching("TestSpec") and beMatching("consoleReporterSpec.scala:\\d"))
+    }
+    "report an skipped test" in {
+      val result = new TestResult
+      val listener = new RunNotifier { 
+        var desc: Option[Description] = None 
+        override def fireTestIgnored(d: Description) = desc = Some(d) 
+      }
+      result.addListener(new OldTestClassAdaptingListener(listener))
+      suite(that.isSkipped).run(result)
+      listener.desc must beSome[Description]
     }
   }
   def suite(behaviours: that.Value*) = new JUnit3(new SimpleSpec(behaviours.toList))

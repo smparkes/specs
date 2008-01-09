@@ -26,30 +26,6 @@ import org.junit.runner.notification.RunNotifier;
 class JUnit38SuiteRunner(klass: Class) extends org.junit.runner.Runner with Filterable with Sortable {
   var fTest: Test = new TestSuite(klass.asSubclass(classOf[TestSuite]))
   
-  class OldTestClassAdaptingListener(fNotifier: RunNotifier)  extends TestListener {
-    def endTest(test: Test) = {
-	  fNotifier.fireTestFinished(asDescription(test))
-	}
-
-	def startTest(test: Test) = {
-	  fNotifier.fireTestStarted(asDescription(test));
-	}
-
-	// Implement junit.framework.TestListener
-	def addError(test: Test, t: Throwable) = fNotifier.fireTestFailure(new Failure(asDescription(test), t))
-	
-	def asDescription(test: Test): Description = Description.createTestDescription(test.getClass(), getName(test))
-
-	def getName(test: Test) = {
-	  if (test.isInstanceOf[TestCase])
-		 test.asInstanceOf[TestCase].getName()
-	  else
-		test.toString()
-	}
-
-	def addFailure(test: Test, t: AssertionFailedError) = addError(test, t)
-  }
-
   override def run(notifier: RunNotifier) = {
 	val result= new TestResult();
 	result.addListener(createAdaptingListener(notifier));
@@ -83,3 +59,36 @@ class JUnit38SuiteRunner(klass: Class) extends org.junit.runner.Runner with Filt
 	fTest.asInstanceOf[JUnit4TestAdapter].sort(sorter);
   }
 }
+
+class OldTestClassAdaptingListener(fNotifier: RunNotifier)  extends TestListener {
+  def endTest(test: Test) = {
+    fNotifier.fireTestFinished(asDescription(test))
+  }
+
+  def startTest(test: Test) = {
+	fNotifier.fireTestStarted(asDescription(test));
+  }
+
+  // Implement junit.framework.TestListener
+  def addError(test: Test, t: Throwable) = fNotifier.fireTestFailure(new Failure(asDescription(test), t))
+	
+  def asDescription(test: Test): Description = Description.createTestDescription(test.getClass(), getName(test))
+  def asDescription(test: Test, skipped: SkippedAssertionError): Description = {
+    Description.createTestDescription(test.getClass(), getName(test) + " (" + skipped.getMessage + ")")
+  }
+
+  def getName(test: Test) = {
+	if (test.isInstanceOf[TestCase])
+	  test.asInstanceOf[TestCase].getName()
+	else
+	  test.toString()
+  }
+
+  def addFailure(test: Test, t: AssertionFailedError) = {
+    t match {
+      case skipped: SkippedAssertionError => fNotifier.fireTestIgnored(asDescription(test, skipped))
+      case _ => addError(test, t)
+    }
+  }
+}
+

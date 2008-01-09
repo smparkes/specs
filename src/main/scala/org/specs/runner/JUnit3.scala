@@ -82,6 +82,7 @@ class ExampleTestCase(example: Example) extends TestCase(example.description.rep
   override def run(result: TestResult) = {
       result.startTest(this)
       example.failures foreach {failure: FailureException => result.addFailure(this, new SpecAssertionFailedError(failure))}
+      example.skipped foreach {skipped: SkippedException => result.addFailure(this, new SkippedAssertionError(skipped)) }
       example.errors foreach {error: Throwable => result.addError(this, new SpecAssertionFailedError(error)) }
       result.endTest(this)
   }
@@ -97,3 +98,4 @@ class SpecAssertionFailedError(t: Throwable) extends AssertionFailedError(t.getM
   override def printStackTrace(w: java.io.PrintStream) = t.printStackTrace(w)
   override def printStackTrace(w: java.io.PrintWriter) = t.printStackTrace(w)
 }
+class SkippedAssertionError(t: Throwable) extends SpecAssertionFailedError(t)
