@@ -44,7 +44,7 @@ object junit3TestSuiteSpec extends Specification {
       error.trace.split("\n")(0) must include(error.exceptionMessage)
       error.trace.split("\n")(1) must (beMatching("TestSpec") and beMatching("consoleReporterSpec.scala:\\d"))
     }
-    "report an skipped test" in {
+    "report a skipped test" in {
       val result = new TestResult
       val listener = new RunNotifier { 
         var desc: Option[Description] = None 
