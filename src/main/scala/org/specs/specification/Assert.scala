@@ -10,7 +10,7 @@ import org.specs.matcher.Matchers._
  * and errors if a matcher is not ok 
  *
  */
-class Assert[+T](value: => T, example: Example) {
+class Assert[T](value: => T, example: Example) {
   /** increments the number of assertions of the example when this object is created */
   example.assertionsNb += 1
   
