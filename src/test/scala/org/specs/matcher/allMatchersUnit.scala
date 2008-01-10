@@ -10,6 +10,7 @@ object allMatchersUnit extends Specification {
                                         logicalMatchersUnit,
                                         stringMatchersUnit,
                                         numericMatchersUnit,
+                                        mapMatchersUnit,
                                         patternMatchersUnit,
                                         scalacheckMatchersUnit,
                                         xmlMatchersUnit)

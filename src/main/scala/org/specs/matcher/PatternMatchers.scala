@@ -37,9 +37,10 @@ trait PatternMatchers {
   def beNone[T] = new Matcher[Option[T]](){
      def apply(v: => Option[T]) = { 
        val value = v
+       val none: Option[T] = None
        ( 
        value match { 
-        case None => true
+        case n if (n == none) => true
         case _ => false 
       }, 
       q(value) + " is None", 

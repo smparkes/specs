@@ -28,4 +28,22 @@ object iterableMatchersUnit extends MatchersSpecification {
       assertion(List("aaa", "bbb", "ccc") must containMatch("z+")) must failWith("no element matches 'z+' in 'List(aaa, bbb, ccc)'")
     }
   }
+  "Iterable matchers" should {
+     val nil: Iterable[String] = Nil
+    "not evaluate the expressions twice: existMatch" in {
+      existMatch("") must evalOnce(exp(nil))
+    }
+    "not evaluate the expressions twice: beEmpty" in {
+      beEmpty[Iterable[String]] must evalOnce(exp(nil))
+    }
+    "not evaluate the expressions twice: beIn" in {
+      beIn(List("")) must evalOnce(exp(""))
+    }
+    "not evaluate the expressions twice: contain" in {
+      contain("") must evalOnce(exp(nil))
+    }
+    "not evaluate the expressions twice: exist" in {
+      exist((x:String) => x.size > 0) must evalOnce(exp(nil))
+    }
+  }
 }

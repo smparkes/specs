@@ -17,4 +17,21 @@ object numericMatchersUnit extends MatchersSpecification {
       }
     }
   }
+  "Numeric matchers" should {
+    "not evaluate the expressions twice: be_>" in {
+      be_>(1) must evalOnce(exp(1))
+    }
+    "not evaluate the expressions twice: be_>=" in {
+      be_>=(1) must evalOnce(exp(1))
+    }
+    "not evaluate the expressions twice: be_<" in {
+      be_<(1) must evalOnce(exp(1))
+    }
+    "not evaluate the expressions twice: be_<=" in {
+      be_<=(1) must evalOnce(exp(1))
+    }
+    "not evaluate the expressions twice: be_closeTo" in {
+      beCloseTo(1, 0) must evalOnce(exp(1))
+    }
+  }
 }

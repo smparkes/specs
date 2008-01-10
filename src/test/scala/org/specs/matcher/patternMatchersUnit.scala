@@ -14,8 +14,12 @@ object patternMatchersUnit extends MatchersSpecification {
       val name : String = null
       assertion(name must beLike {case s: String => ok}) must failWith("'null' doesn't match the expected pattern")
     }
+    "not evaluate the expressions twice" in {
+      val anyValue: Any = 1
+      beLike { case 1 => ok } must evalOnce(exp(anyValue))
+    }
   }
-  "A 'beSome' pattern matcher" should {
+  "A 'beSome' option matcher" should {
     "be ok even with a null value" in {
       val value : Option[String] = null
       assertion(value must beSome[String]) must failWith("'null' is not Some(x)")
@@ -23,6 +27,16 @@ object patternMatchersUnit extends MatchersSpecification {
     "be ok even with a null pattern for the which function" in {
       val pattern : (Any => Boolean) = null
       assertion(Some("name") must beSome[String].which(pattern)) must failWith("the 'which' property is a null function")
+    }
+    "not evaluate the expressions twice" in {
+      val some: Option[Int] = Some(1)
+      beSome[Int] must evalOnce(exp(some))
+    }
+  }
+  "A 'beNone' option matcher" should {
+    "not evaluate the expressions twice" in {
+      val nothing: Option[Nothing] = None
+      beNone must evalOnce(exp(nothing))
     }
   }
 }

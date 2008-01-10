@@ -27,4 +27,11 @@ class MatchersSpecification extends Specification {
     }
     return "this assertion has not failed"
   }
+  // an expression which knows how much time is had been evaluated
+  case class exp[T](var a: T) { var evaluationsNb: Int= 0; def evaluate = {evaluationsNb += 1; a} }
+
+  // a matcher which checks that a matcher is not evaluating twice the value to evaluate
+  def evalOnce[T](a : exp[T]) = new Matcher[Matcher[T] ] {
+    def apply(m: =>Matcher[T]) = ({m.apply(a.evaluate); a.evaluationsNb == 1}, "ok", "ko")
+  }
 }

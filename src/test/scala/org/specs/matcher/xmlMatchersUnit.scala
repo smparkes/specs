@@ -54,6 +54,10 @@ object xmlMatchersUnit extends MatchersSpecification with XmlMatchers {
     "not match a node <b><d></d></b> not contained in the node a" in {
       assertion(<a><b><c></c></b></a> must \(<b><d></d></b>)) must failWith("<a><b><c></c></b></a> doesn't contain <b><d></d></b>")
     }
+    "not evaluate the expressions twice" in {
+      val nodes: Iterable[scala.xml.Node] = <c/>
+      \("c") must evalOnce(exp(nodes))
+    }
   }
   "A \\\\ matcher" should {
     "match a node with its own label" in {
@@ -95,6 +99,11 @@ object xmlMatchersUnit extends MatchersSpecification with XmlMatchers {
     "not match a node <c><e></e></c> not deeply contained in the node a" in {
       assertion(<a><b><c><d></d></c></b></a> must \\(<c><e></e></c>)) must failWith("<a><b><c><d></d></c></b></a> doesn't contain <c><e></e></c>")
     }
+    "not evaluate the expressions twice" in {
+      val nodes: Iterable[scala.xml.Node] = <c/>
+      \\("c") must evalOnce(exp(nodes))
+    }
+
   }
   "\\ and \\\\ matchers" can {
     "be chained with \\ to provide full path searches" in {

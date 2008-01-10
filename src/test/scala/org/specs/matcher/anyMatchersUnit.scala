@@ -6,6 +6,7 @@ import org.specs.Sugar._
 import org.specs.specification._
 
 class anyMatchersTest extends JUnit3(anyMatchersUnit)
+object anyMatchersRunner extends ConsoleRunner(anyMatchersUnit)
 object anyMatchersUnit extends MatchersSpecification {
   "A 'be' matcher" should {
     "be ok if comparing the same object" in {
@@ -111,39 +112,30 @@ object anyMatchersUnit extends MatchersSpecification {
           throw new SimpleException("Message")) must beLike {case (true, _, _) => ok} 
     }
   }
-  "Matchers" should {
-    "not evaluate the expressions twice" in {
-      case class exp[T](var a: T) { var evaluationsNb: Int= 0; def evaluate = {evaluationsNb += 1; a} }
-      def mustEvalOnce[T <: S, S](a: exp[T], m: Matcher[S]) = { m.apply(a.evaluate); a.evaluationsNb mustBe 1 }
-      mustEvalOnce(exp(Nil), beEmpty) 
-      mustEvalOnce(exp(null), beNull)
-      mustEvalOnce(exp(true), beTrue)
-      mustEvalOnce(exp(false), beFalse)
+  "Any matchers" should {
+    val anyValue: Any = 1
+    val boolValue: Boolean = true
 
-      mustEvalOnce(exp(1), be_==(1))
-      mustEvalOnce(exp(1), be(1))
-      mustEvalOnce(exp(""), beIn(List(""))) 
-      mustEvalOnce(exp(1), verify((x:Int) => x == 1))
-      mustEvalOnce(exp(List(1)), contain(1))
-      mustEvalOnce(exp(List(1)), exist((x:Int) => x > 0))
-      mustEvalOnce(exp(List("")), existMatch(""))
-      mustEvalOnce(exp(Map("" -> 1)), haveKey(""))
-      mustEvalOnce(exp(Map("" -> 1)), haveValue(1))
-      mustEvalOnce(exp(Map("" -> 1)), havePair("" -> 1))
-      mustEvalOnce(exp(1), be_<(1))
-      mustEvalOnce(exp(1), be_<=(1))
-      mustEvalOnce(exp(1), be_>(1))
-      mustEvalOnce(exp(1), be_>=(1))
-      mustEvalOnce(exp(1), beCloseTo(1, 0))
-      mustEvalOnce(exp(1), beLike { case 1 => ok })
-      mustEvalOnce(exp(None), beNone)
-      mustEvalOnce(exp(Some(1)), beSome[Int])
-      mustEvalOnce(exp(""), equalIgnoreCase(""))
-      mustEvalOnce(exp(""), beMatching(""))
-      mustEvalOnce(exp(""), include(""))
-      mustEvalOnce(exp(""), startWith(""))
-      mustEvalOnce(exp(""), endWith(""))
-      mustEvalOnce(exp(<b/>), \\("b"))
+    "not evaluate the expressions twice: be_!=" in {
+      be_!=(1) must evalOnce(exp(anyValue))
+    }
+    "not evaluate the expressions twice: be_==" in {
+      be_==(1) must evalOnce(exp(anyValue))
+    }
+    "not evaluate the expressions twice: be" in {
+      be(1) must evalOnce(exp(1))
+    }
+    "not evaluate the expressions twice: beNull" in {
+      beNull[Any] must evalOnce(exp(anyValue))
+    }
+    "not evaluate the expressions twice: verify" in {
+      verify((x:Int) => x == 1) must evalOnce(exp(1)) 
+    }
+    "not evaluate the expressions twice: beTrue" in {
+      beTrue[Boolean] must evalOnce(exp(boolValue))
+    }
+    "not evaluate the expressions twice: beFalse" in {
+      beFalse[Boolean] must evalOnce(exp(boolValue))
     }
   }
 }
