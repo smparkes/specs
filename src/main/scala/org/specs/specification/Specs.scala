@@ -84,13 +84,13 @@ case class Sut(description: String, cycle: ExampleLifeCycle) extends ExampleLife
   /** the after function will be invoked after each example */
   var after: Option[() => Unit] = None
   
-  var skippedSut: Option[String] = None
+  var skippedSut: Option[Throwable] = None
   var failedSut: Option[String] = None
 
   /** default way of defining the behaviour of a sut */
   def should(ex: =>Example) = {
     try { ex } catch {
-      case SkippedException(m) => skippedSut = Some(m)
+      case e: SkippedException => skippedSut = Some(e)
       case FailureException(m) => failedSut = Some(m)
     }
     this

@@ -13,7 +13,6 @@ class consoleReporterTest extends JUnit3(consoleReporterSpec)
 object consoleReporterSpec extends Specification {
 
   "A console reporter" should {
-    skip("the whole stuff")
     "report the name of the specification: 'A specification should'" in {
       specWithOneExample(that.isOk) must containMatch("A specification should")
     }

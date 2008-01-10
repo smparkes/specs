@@ -45,7 +45,7 @@ class JUnit3(val specifications : Specification*) extends EmptyJUnit3TestSuite {
     if (specification.suts.size > 1) 
       addTest(new SpecificationTestSuite(specification)) 
     else  
-      specification.suts foreach {sut => addTest(new ExamplesTestSuite(sut.description + " " + sut.verb, sut.examples))}
+      specification.suts foreach {sut => addTest(new ExamplesTestSuite(sut.description + " " + sut.verb, sut.examples, sut.skippedSut))}
   }
   
 }
@@ -57,20 +57,26 @@ class JUnit3(val specifications : Specification*) extends EmptyJUnit3TestSuite {
  */
 class SpecificationTestSuite(specification: Specification) extends EmptyJUnit3TestSuite {
   setName(specification.description)
-  specification.suts foreach {sut => addTest(new ExamplesTestSuite(sut.description + " " + sut.verb, sut.examples))}
+  specification.suts foreach {sut => addTest(new ExamplesTestSuite(sut.description + " " + sut.verb, sut.examples, sut.skippedSut))}
 } 
 
 /**
  * A <code>SpecificationTestSuite</code> is a junit TestSuite reporting the results of 
  * a list of examples. If an example has subExamples, they are reported with a separate <code>ExamplesTestSuite</code>
  */
-class ExamplesTestSuite(description: String, examples: Iterable[Example]) extends EmptyJUnit3TestSuite {
+class ExamplesTestSuite(description: String, examples: Iterable[Example], skipped: Option[Throwable]) extends EmptyJUnit3TestSuite {
   setName(description)
   examples foreach { example =>
     if (example.subExamples.isEmpty)
       addTest(new ExampleTestCase(example))
     else
-      addTest(new ExamplesTestSuite(example.description, example.subExamples))
+      addTest(new ExamplesTestSuite(example.description, example.subExamples, skipped))
+  }
+  override def run(result: TestResult) = {
+      skipped match {
+         case Some(skipException) => result.addFailure(this, new SkippedAssertionError(skipException))
+         case None => super.run(result)                                    
+      }                                    
   }
 }
 /**
