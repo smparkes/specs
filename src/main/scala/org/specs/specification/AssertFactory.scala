@@ -59,8 +59,8 @@ trait AssertFactory {
   }
           
   /** implicit transformation of a String into an object supporting String matchers */
-  implicit def theString[A <: String](value: => A) = {
-    new AssertString[String](value, lastExample)
+  implicit def theString[A >: String](value: => A) = {
+    new AssertString[String](value.toString, lastExample)
   }
 
   /** implicit transformation of an object into one supporting AnyMatcher matchers */
