@@ -168,7 +168,7 @@ trait AnyMatchers {
   /** evaluates a value and return any exception that is thrown */
   private def getException[E <: Throwable](value: => Any): Option[Throwable] = {
     try { value } 
-    catch { case e => return Some(e) }
+    catch { case e => { return Some(e)} }
     return None
   }
 

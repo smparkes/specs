@@ -10,12 +10,12 @@ import org.junit.runner.notification._;
  * This class is a direct copy of the JUnit38ClassRunner class which only accepts a TestCase class.<br>
  * It is used to run a JUnit3 TestSuite with the JUnit 4 library 
  */
-class JUnit38SuiteRunner(klass: Class) extends org.junit.runner.Runner with Filterable with Sortable {
+class JUnit38SuiteRunner(klass: java.lang.Class[T] forSome {type T <: TestCase}) extends org.junit.runner.Runner with Filterable with Sortable {
   
   /**
    * Aggregated test representing the whole test suite
    */
-  var fTest: Test = new TestSuite(klass.asSubclass(classOf[TestSuite]))
+  var fTest: Test = new TestSuite(klass)
   
   /**
    * Runs the test suite by passing a JUnit4 RunNotifier which is wrapped in a JUnit3 TestListener to be able to run JUnit3 tests
