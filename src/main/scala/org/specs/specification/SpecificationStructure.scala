@@ -127,5 +127,6 @@ trait ExampleLifeCycle {
   def beforeExample(ex: Example) = {} 
   def beforeTest(ex: Example)= {}
   def afterTest(ex: Example) = {}
+  def executeTest(t: =>Any) = t
   def afterExample(ex: Example) = {}
 }

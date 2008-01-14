@@ -7,6 +7,7 @@ import org.specs.runner._
 import org.specs.matcher.MatcherUtils._
 import org.specs.SpecUtils._
 import org.specs.specification._
+import org.specs.ExtendedThrowable._
 
 /**
  * This class is the main class for declaring a new specification<br>
@@ -52,7 +53,7 @@ abstract class Specification extends Matchers with SpecificationStructure {
    * Convenience method: adds a new skippedException to the latest example<br>
    * Usage: <code>skip("this example should be skipped")</code>
    */
-  def skip(m: String) = throwException(this, SkippedException(m))
+  def skip(m: String) = SkippedException(m).rethrowFrom(this)
 }
 
 /**
@@ -131,6 +132,10 @@ case class Sut(description: String, cycle: ExampleLifeCycle) extends ExampleLife
 
   /** forwards the call to the "parent" cycle */
   override def beforeTest(ex: Example) = { cycle.beforeTest(ex) }
+
+  /** forwards the call to the "parent" cycle */
+  override def executeTest(t: =>Any) = { cycle.executeTest(t) }
+
   /** forwards the call to the "parent" cycle */
   override def afterTest(ex: Example) = { cycle.afterTest(ex) }
 
@@ -197,7 +202,7 @@ case class Example(description: String, cycle: ExampleLifeCycle) {
     // execute the <code>test</code> parameter. If it contains assertions they will be automatically executed
     try {
       cycle.beforeTest(this)
-      test
+      cycle.executeTest(test)
       cycle.afterTest(this)
       } catch { 
       // failed assertions will launch a FailureException

@@ -26,7 +26,8 @@ object allSpecs extends Specification {
         stackSpecification,
         junit3TestSuiteSpec,
         xmlRunnerSpec,
-        mocksSpec)
+        mocksSpec,
+        jmockSpec)
 }
 
 object allUnits extends Specification {

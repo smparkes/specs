@@ -8,6 +8,7 @@ object protocolsUnit extends Specification {
   "Mocks protocols" areSpecifiedBy (inAnyOrderUnit,
                                     inSequenceUnit,
                                     numberOfMessagesUnit,
-                                    mockerUnit)
+                                    mockerUnit,
+                                    jmockUnit)
 }
 

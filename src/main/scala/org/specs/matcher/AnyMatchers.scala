@@ -3,6 +3,7 @@ package org.specs.matcher
 import org.specs.specification._
 import org.specs.matcher.MatcherUtils.{q, matches}
 import org.specs.matcher.PatternMatchers._
+import org.specs.ExtendedThrowable._
 
 object AnyMatchers extends AnyMatchers
 /**
@@ -195,15 +196,6 @@ trait AnyMatchers {
    * @param origin object which has been called to throw the <code>FailureException</code> 
    * @param failureMessage exception message 
    */
-  def throwFailure(origin: Object, failureMessage: String) = throwException(origin, FailureException(failureMessage))
+  def throwFailure(origin: Object, failureMessage: String) = FailureException(failureMessage).rethrowFrom(origin)
 
-  /**
-   * Throws an exception removing the traces of the object wanting to throw this exception
-   * @param origin object which has be called to throw the <code>Exception</code> 
-   * @param exception the exception to throw 
-   */
-  def throwException(origin: Object, e: Exception) = {
-    e.setStackTrace((e.getStackTrace.toList.drop(2).dropWhile {x: StackTraceElement => matches(origin.getClass.getName.split("\\.").last)(x.toString)}).toArray)
-    throw e
-  }
 }
