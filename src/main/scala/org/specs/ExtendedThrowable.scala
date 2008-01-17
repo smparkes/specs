@@ -11,12 +11,13 @@ object ExtendedThrowable {
      * @param exception the exception to throw 
      */
     def rethrowFrom(origin: Object) = {
-      t.setStackTrace((t.getStackTrace.toList.drop(2).dropWhile {x: StackTraceElement => origin.getClass.getName.split("\\.").last.matches(x.toString)}).toArray)
+      setStackTrace(t, t, origin.getClass.getName.split("\\.").last)
       throw t
     }
     def rethrowFrom(origin: Object, other: Throwable) = {
-      other.setStackTrace((t.getStackTrace.toList.drop(2).dropWhile {x: StackTraceElement => origin.getClass.getName.split("\\.").last.matches(x.toString)}).toArray)
+      setStackTrace(other, t, origin.getClass.getName.split("\\.").last)
       throw other
     }
+    def setStackTrace(other: Throwable, t: Throwable, name: String) = other.setStackTrace((t.getStackTrace.toList.drop(1).dropWhile {x: StackTraceElement => x.toString.matches(".*" + name + ".*") }).toArray) 
   }
 }

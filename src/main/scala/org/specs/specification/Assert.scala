@@ -1,6 +1,7 @@
 package org.specs.specification
 import org.specs.matcher._
 import org.specs.matcher.Matchers._
+import org.specs.ExtendedThrowable._
 
 /**
  * The assert class adds matcher methods to objects which are being specified<br>
@@ -20,7 +21,7 @@ class Assert[T](value: => T, example: Example) {
   def must[S >: T](m: => Matcher[S]): Boolean =  {
     val (result, _, koMessage) = m.apply(value) 
     result match {
-      case false => throwFailure(this, koMessage)
+      case false => FailureException(koMessage).rethrowFrom(this)
       case _ => true
     }
   }

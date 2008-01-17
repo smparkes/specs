@@ -47,7 +47,7 @@ abstract class Specification extends Matchers with SpecificationStructure {
    * Convenience method: adds a new failure to the latest example<br>
    * Usage: <code>fail("this code should fail anyway")</code>
    */
-  def fail(m: String) = throwFailure(this, m)
+  def fail(m: String) = FailureException(m).rethrowFrom(this)
 
   /** 
    * Convenience method: adds a new skippedException to the latest example<br>

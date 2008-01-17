@@ -113,7 +113,7 @@ object anyMatchersUnit extends MatchersSpecification {
     }
   }
   "Any matchers" should {
-    val anyValue: Any = 1
+    val anyValue: Int = 1
     val boolValue: Boolean = true
 
     "not evaluate the expressions twice: be_!=" in {
@@ -126,7 +126,7 @@ object anyMatchersUnit extends MatchersSpecification {
       be(1) must evalOnce(exp(1))
     }
     "not evaluate the expressions twice: beNull" in {
-      beNull[Any] must evalOnce(exp(anyValue))
+      beNull[Int] must evalOnce(exp(anyValue))
     }
     "not evaluate the expressions twice: verify" in {
       verify((x:Int) => x == 1) must evalOnce(exp(1)) 

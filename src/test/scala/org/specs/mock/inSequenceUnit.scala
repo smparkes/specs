@@ -34,8 +34,11 @@ object inSequenceUnit extends Specification with TestData {
   }
   "consume all received calls if it is a the same list of calls in the same order" in {
     val sameReceivedCalls = receivedSizeIs(_ == _)
+    val emptyExpected: List[SpecifiedCall] = Nil
+    val emptyReceived: List[ReceivedCall] = Nil
+
     sameReceivedCalls must pass { t: (List[ExpectedCall], List[ReceivedCall]) => val (expected, received) = t
-      inSequence.consume(expected, received) must be_==((Nil, Nil)).when(expected == received) 
+      inSequence.consume(expected, received) must be_==((emptyExpected, emptyReceived)).when(expected == received) 
     }(set(maxSize->5))
   }
   "consume all expected calls if they are a prefix of received calls" in {

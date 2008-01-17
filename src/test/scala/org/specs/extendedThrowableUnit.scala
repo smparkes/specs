@@ -8,6 +8,6 @@ object extendedThrowableUnit extends Specification {
   "an extended Throwable" should {
     "provide a location method extracting the name of the file and the line from an exception" in {
       new Exception("hello").location must beMatching("extendedThrowableUnit.scala:\\d")
-     }
+    }
   }
 }

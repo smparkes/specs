@@ -22,18 +22,18 @@ trait AnyMatchers {
   /**
    * Matches if (a == b)
    */   
-  def is_==(a: Any) = new Matcher[Any](){ 
-     def apply(v: =>Any) = {val b = v; ((a == b), q(b) + " is equal to " + q(a), q(b) + " is not equal to " + q(a))}
+  def is_==[T](a: T) = new Matcher[T](){ 
+     def apply(v: =>T) = {val b = v; ((a == b), q(b) + " is equal to " + q(a), q(b) + " is not equal to " + q(a))}
   }
 
   /**
    * Alias of is_==
    */   
-  def be_==(a: Any) = is_==(a)
+  def be_==[T](a: T) = is_==(a)
 
   /**
    * Matches if (a neq b)
-   */   
+   */  
   def notEq[T](a: T) = be(a).not 
 
   /**
@@ -182,20 +182,7 @@ trait AnyMatchers {
    */
   def throwFailure(e: Throwable, failureMessage: String) = {
     val failure = FailureException(failureMessage) 
-    failure.setStackTrace((e.getStackTrace.toList.dropWhile {x: StackTraceElement => matches("AnyMatchers")(x.toString)}).toArray)
+    failure.setStackTrace((e.getStackTrace.toList.dropWhile {x: StackTraceElement => x.toString.matches("AnyMatchers") || x.toString.matches("Assert")}).toArray)
     throw failure
   }
-
-  /**
-   * Creates a FailureException corresponding to a thrown exception<br>	 
-   * Sets the stacktrace of the Failure exception so that:
-   * <ul><li>it drops 2 lines corresponding to place where the failure exception was created
-   * <li>drop the lines corresponding to the object having created the exception (an Assert object)
-   *  in order to start the stacktrace where the failure happened
-   * </ul>
-   * @param origin object which has been called to throw the <code>FailureException</code> 
-   * @param failureMessage exception message 
-   */
-  def throwFailure(origin: Object, failureMessage: String) = FailureException(failureMessage).rethrowFrom(origin)
-
 }
