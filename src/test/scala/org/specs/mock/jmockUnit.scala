@@ -86,7 +86,7 @@ object jmockGoodUnit extends Mocked {
       val expected = List[String]("hey")
       expect { 1.of(scalaList).elements willReturnIterator expected }
       scalaList.elements.next must_== "hey"
-    } 
+    }
     "provide a willReturnIterable method to specify a returned iterable" in {
       expect { 1.of(scalaList).take(anyInt) willReturnIterable List("hey") }
       val matcher: Matcher[Iterable[String]] = be_==(List("hey"))
@@ -94,19 +94,46 @@ object jmockGoodUnit extends Mocked {
     }
     "provide a willReturn method accepting a block to return another mock and specify it too" in {
       case class Module(name: String)
-      case class Project(modules: List[Module], name: String)
+      case class Project(module: Module, name: String)
       case class Workspace(project: Project)
       val workspace = mock(classOf[Workspace])
  
       expect { 
-        1.of(workspace).project.willReturn(willBe(classOf[Project]){
-p: Project => 
-"here".pln;p.pln
-one(p).name willReturn "hi"
-})
+        1.atLeastOf(workspace).project.willReturn(as(classOf[Project]){p: Project => 
+           1.atLeastOf(p).name willReturn "hi"
+           1.atLeastOf(p).module willReturn as(classOf[Module]) { m: Module =>
+             1.of(m).name willReturn "module"
+           }
+        })
       }
-      val p = workspace.project
-      println(workspace.project.name)
+      workspace.project.name must_== "hi"
+      workspace.project.module.name must_== "module"
+    } 
+    "provide a willReturn method returning iterables and accepting a block to return another mock and specify it too" in {
+      case class Project(name: String)
+      case class Workspace(projects: List[Project])
+      val workspace = mock(classOf[Workspace]) 
+      expect { 
+        one(workspace).projects.willReturn(
+          as(classOf[Project], "p1"){p: Project => 
+            one(p).name willReturn "p1" },
+          as(classOf[Project], "p2"){p: Project => 
+            one(p).name willReturn "p2" }
+        )
+      }
+      workspace.projects.map(_.name) must_== List("p1", "p2")
+    } 
+    "provide a willReturn method returning iterables and accepting a block to return another mock and specify it too - 2" in {
+      case class Project(name: String)
+      case class Workspace(projects: List[Project])
+      val workspace = mock(classOf[Workspace]) 
+      expect { 
+        one(workspace).projects.willReturn(classOf[Project])( 
+           {p: Project => one(p).name willReturn "p1" },
+           {p: Project => one(p).name willReturn "p2" }
+        )
+      }
+      workspace.projects.map(_.name) must_== List("p1", "p2")
     } 
   }
 }

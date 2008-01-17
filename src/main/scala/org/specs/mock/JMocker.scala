@@ -33,10 +33,19 @@ trait JMocker extends ExampleLifeCycle with Imposterizer {
    */
   def mock[T](c: java.lang.Class[T]): T =  context.mock(c).asInstanceOf[T]
   def mock[T](c: java.lang.Class[T], name: String) =  context.mock(c, name).asInstanceOf[T]
-  private[this] var nestedExpectations: Option[() => Any] = None
-  def willBe[T](c: java.lang.Class[T])(expects: Function1[T, Any]: T = { 
-    nestedExpectations = Some(() => expects.apply(mocked))
-    context.mock(c).asInstanceOf[T]
+  def as[T](c: java.lang.Class[T], expects: Function1[T, Any]*) = {
+    expects.toList.zipWithIndex map { x =>
+      val (block, i) = x
+      (context.mock(c, c.getName + "_" + i).asInstanceOf[T], block)
+    }
+  }
+  def as[T](c: java.lang.Class[T], name: String)(expects: Function1[T, Any]) = {
+    val mocked = context.mock(c, name).asInstanceOf[T]
+    (mocked, expects) 
+  }
+  def as[T](c: java.lang.Class[T])(expects: Function1[T, Any]) = {
+    val mocked = context.mock(c).asInstanceOf[T]
+    (mocked, expects) 
   }
 
   /** 
@@ -223,9 +232,24 @@ trait JMocker extends ExampleLifeCycle with Imposterizer {
     private[this] def wrap[T](collection: java.util.Collection[T]) = collection.toArray
 
     /** sets a value to be returned by the mock */
-    def willReturn(result: T) = {
-      expectations.will(new ReturnValueAction(result))
-      nestedExpectations.foreach(_.apply()) 
+    def willReturn(result: T) = expectations.will(new ReturnValueAction(result))
+    def willReturn(result: (T, Function1[T, Any])) = {
+      expectations.will(new ReturnValueAction(result._1))
+      result._2.apply(result._1)
+    }
+    
+    def willReturn[S, T <: Iterable[S]](c: java.lang.Class[S])(results: Function1[S, Any]*): Unit = {
+      willReturn(results.toList.zipWithIndex map { x =>
+        val (block, i) = x
+        (context.mock(c, c.getName + "_" + i).asInstanceOf[S], block)
+      })
+    }
+    def willReturn[S, T <: Iterable[S]](results: (S, Function1[S, Any])*): Unit = willReturn(results.toList)
+    def willReturn[S, T <: Iterable[S]](results: List[(S, Function1[S, Any])]): Unit = {
+      expectations.will(new ReturnValueAction(results.map(_._1).toList))
+      results foreach { result =>
+        result._2.apply(result._1)
+      }
     }
 
     /** sets an exception to be thrown by the mock */
