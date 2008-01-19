@@ -18,34 +18,56 @@ import org.specs.collection.JavaCollectionsConversion._
 /** 
  * The JMocker trait is used to give access to the mocking functionalities of the JMock library 
  */
-trait JMocker extends ExampleLifeCycle with Imposterizer {
-  /** the context holds the mocks, the expectations so is able to get the calls and check them */
-  var context = createMockery
+trait JMocker extends JMockerExampleLifeCycle with JMockMatchers with JMockActions {
 
-  /** call expectations with optional constraints on the number of calls, on parameters, return values,... */
-  var expectations = new Expectations()
-
-  /** 
+  /**
    * the mock method is used to create a mock object
    * Usage:<pre>val mocked = mock(classOf[InterfaceToMock])</pre><br/>
    * Classes can be mocked too, but the ClassImposterizer trait has to be added to the extensions
    * @returns the mocked object
    */
   def mock[T](c: java.lang.Class[T]): T =  context.mock(c).asInstanceOf[T]
+
+  /** 
+   * mocks a class and give the resulting mock a name. jMock expects mocks of the same class to have different names
+   * @returns the mocked object
+   */
   def mock[T](c: java.lang.Class[T], name: String) =  context.mock(c, name).asInstanceOf[T]
+
+  /** 
+   * mocks a class and add expectations. Usage <code>willReturn(as(classOf[MyInterface]){m: MyInterface => one(m).method })<code>
+   * @returns the mocked object and the evaluation of the block of expectations
+   */
+  def as[T](c: java.lang.Class[T])(expects: Function1[T, Any]) = {
+    val mocked = context.mock(c).asInstanceOf[T]
+    (mocked, expects) 
+  }
+
+  /** 
+   * mocks a class and add expectations, specifying the mock with a name
+   * @returns the mocked object and the evaluation of the block of expectations
+   */
+  def as[T](c: java.lang.Class[T], name: String)(expects: Function1[T, Any]) = {
+    val mocked = context.mock(c, name).asInstanceOf[T]
+    (mocked, expects) 
+  }
+
+  /** 
+   * mocks a class several times and add expectations for each mock. Usage <code>willReturn(as(classOf[MyInterface])
+   *   {m1: MyInterface => one(m1).method },
+   *   {m2: MyInterface => one(m2).method },
+   * )<code>
+   * However, it is shorter to use <code>willReturnIterable:
+   * one(workspace).projects willReturnIterable(classOf[Project], 
+           {p: Project => one(p).name willReturn "p1" },
+           {p: Project => one(p).name willReturn "p2" })<code>
+   * @returns the mocked object and the evaluation of the block of expectations
+   */
   def as[T](c: java.lang.Class[T], expects: Function1[T, Any]*) = {
     expects.toList.zipWithIndex map { x =>
       val (block, i) = x
       (context.mock(c, c.getName + "_" + i).asInstanceOf[T], block)
     }
-  }
-  def as[T](c: java.lang.Class[T], name: String)(expects: Function1[T, Any]) = {
-    val mocked = context.mock(c, name).asInstanceOf[T]
-    (mocked, expects) 
-  }
-  def as[T](c: java.lang.Class[T])(expects: Function1[T, Any]) = {
-    val mocked = context.mock(c).asInstanceOf[T]
-    (mocked, expects) 
   }
 
   /** 
@@ -58,34 +80,6 @@ trait JMocker extends ExampleLifeCycle with Imposterizer {
     context.checking(expectations);
     result
   }
-
-  /** 
-   * before any example, a new context and new expecations should be created
-   */
-  override def beforeExample(ex: Example) = {
-    context = createMockery
-    expectations = new Expectations()
-  }
-
-  /** 
-   * An expectation error may be thrown during the execution of a test
-   * In that case, it is transformed to a failure exception
-   */
-  override def executeTest(t: => Any) = try { t } catch { case e: ExpectationError => throw createFailure(e) }
-
-  /** 
-   * After a test the context is verified. If some more expectations are not met an ExpectationError is thrown
-   * In that case, it is transformed to a failure exception
-   */
-  override def afterTest(ex: Example) = {
-    try {
-      context.assertIsSatisfied
-    } catch {
-      case e: ExpectationError => throw createFailure(e)
-    }
-  }
-                         
-  private[this] def createFailure(e: ExpectationError) = FailureException(e.toString)
 
   /** 
    * Adds call constraint method to integers to express the exactly, atLeast, atMost
@@ -124,7 +118,7 @@ trait JMocker extends ExampleLifeCycle with Imposterizer {
   def allowing[T](mockObjectMatcher: Matcher[T]) = expectations.allowing(mockObjectMatcher)
     
   /** allowing any calls to the mock with method names like the passed parameter, returning default values */
-  def allowingMethodsLike(methodName: String) = expectations.allowing(anything).method(withName(methodName))
+  def allowingMatching(methodName: String) = expectations.allowing(anything).method(withName(methodName))
 
   /** allowing any calls to the mock */
   def allowing[T](mockObject: T) = expectations.allowing(mockObject)
@@ -136,7 +130,7 @@ trait JMocker extends ExampleLifeCycle with Imposterizer {
   def ignoring[T](mockObjectMatcher: Matcher[T]) = expectations.ignoring(mockObjectMatcher)
     
   /** ignoring any calls to the mock with method names like the passed parameter, returning default values */
-  def ignoringMethodsLike(methodName: String) = expectations.ignoring(anything).method(withName(methodName))
+  def ignoringMatching(methodName: String) = expectations.ignoring(anything).method(withName(methodName))
 
   /** forbidding any calls to the mock */
   def never[T](mockObject: T) = expectations.never(mockObject)
@@ -170,9 +164,6 @@ trait JMocker extends ExampleLifeCycle with Imposterizer {
 
   /** shortcut for expectations.`with`(new IsAnything[String]) */
   def anyString = any(classOf[String]) 
-
-  /** shortcut for new IsAnything[T] */
-  def anything[T] = new IsAnything[T]
 
   /** shortcut for expectations.`with`(new IsAnything[T]) */
   def any[T](t: java.lang.Class[T]) = expectations.`with`(anything[T])
@@ -226,19 +217,34 @@ trait JMocker extends ExampleLifeCycle with Imposterizer {
   /** allow the return value of the method to be more precisely specified with a JMock action, like a returnValue action */
   implicit def toAction[T](v: T) = new JMockAction(v)
 
-  /** allow the return value of the method to be more precisely specified with a JMock action */
+  /** 
+   * This class allows a block of code to be followed by some actions like returning a value or throwing an exception
+   * When we wish to return a mock and define expectations at the same time:
+   * <code>willReturn(classOf[MyInterface]) { m1: MyInterface =>
+   *    one(m1).method }
+   * <code>
+   * It is necessary to first create the mock, set it as a returned object through a ReturnValueAction
+   * then to trigger the block containing the expectations for that mock
+   */
   class JMockAction[T](v: T) {
 
     private[this] def wrap[T](collection: java.util.Collection[T]) = collection.toArray
 
     /** sets a value to be returned by the mock */
     def willReturn(result: T) = expectations.will(new ReturnValueAction(result))
+
+    /** sets an action which will return a mock of type Class[T] and being specified by a function triggering expectations */
     def willReturn(c: java.lang.Class[T])(f: Function1[T, Any]): Unit = {
       val mocked = context.mock(c).asInstanceOf[T]
       expectations.will(new ReturnValueAction(mocked))
       f(mocked)
     }
     
+    /** 
+     * sets an action which will return a mock of type Class[T] and being specified by a function triggering expectations.
+     * It is supposed to be used in conjunction with the <code>as</code> method which mocks an object and creates a function
+     * defining the mock expectations
+     */
     def willReturn(result: (T, Function1[T, Any])) = {
       expectations.will(new ReturnValueAction(result._1))
       result._2.apply(result._1)
@@ -248,13 +254,38 @@ trait JMocker extends ExampleLifeCycle with Imposterizer {
       will(new ActionSequence((values map { x: T => returnValue(x) }).toArray))
     }
 
+   /** 
+    * will return a list of mocks from the same class several times and add expectations for each mock. 
+    * Usage <code>willReturnIterable(as(classOf[MyInterface])
+    *   {m1: MyInterface => one(m1).method },
+    *   {m2: MyInterface => one(m2).method },
+    * )<code>
+    * However, it is shorter to use <code>willReturnIterable:
+    * one(workspace).projects willReturnIterable(classOf[Project], 
+            {p: Project => one(p).name willReturn "p1" },
+            {p: Project => one(p).name willReturn "p2" })<code>
+    */
     def willReturnIterable[S, T <: Iterable[S]](c: java.lang.Class[S], results: Function1[S, Any]*): Unit = {
       willReturn(results.toList.zipWithIndex map { x =>
         val (block, i) = x
         (context.mock(c, c.getName + "_" + i).asInstanceOf[S], block)
       })
     }
+ 
+   /** 
+    * will return a list of values of type S, and containing some associated blocks to set expectations for those values which may be mocks 
+    * Usage <code>willReturnIterable(as(classOf[MyInterface]){m1: MyInterface => one(m1).method },
+    *   as(classOf[MyInterface]){m2: MyInterface => one(m2).method })
+    * <code>
+    */
     def willReturnIterable[S, T <: Iterable[S]](results: (S, Function1[S, Any])*): Unit = willReturn(results.toList)
+
+   /** 
+    * will return a list of values of type S, and containing some associated blocks to set expectations for those values which may be mocks 
+    * Usage <code>willReturnIterable(List(as(classOf[MyInterface]){m1: MyInterface => one(m1).method },
+    *   as(classOf[MyInterface]){m2: MyInterface => one(m2).method }))
+    * <code>
+    */
     def willReturn[S, T <: Iterable[S]](results: List[(S, Function1[S, Any])]): Unit = {
       expectations.will(new ReturnValueAction(results.map(_._1).toList))
       results foreach { result =>
@@ -269,9 +300,54 @@ trait JMocker extends ExampleLifeCycle with Imposterizer {
     def will(action: Action) = expectations.will(action)
   }
   
-  /** set up a JMock action to be executed */
+  /** set up a jMock action to be executed */
   def will(action: Action) = expectations.will(action)
     
+  /** @returns a state with name <code>name<code>, creating a new one if necessary */
+  def state(name: String) = context.states(name)
+
+  /** specifies that a call can only occur following the specific condition on a state */
+  def when(predicate: StatePredicate) = expectations.when(predicate)
+    
+  /** specifies that after a call, a State obj can only occur following the specific condition on a state */
+  def then(state: State) = expectations.then(state)
+  implicit def afterCall(v: Any) = new StateConstraint(v)
+  class StateConstraint(expectation: Any) {
+    def set(state: State) = expectations.then(state)
+    def when(predicate: StatePredicate) = expectations.when(predicate)
+  }
+
+  def inSequence(sequence: Sequence) = expectations.inSequence(sequence)
+  implicit def after(v: =>Any) = new InSequenceThen(v)
+  class InSequenceThen(firstExpectation: =>Any) {
+    val sequence = {
+      val s = context.sequence("s")
+      firstExpectation; inSequence(s)
+      s
+    }  
+    def then(otherExpectation: =>Any) = {
+      otherExpectation
+      inSequence(sequence)
+    }
+  }
+  
+}
+
+/**
+ * This trait provide methods to build Hamcrest matchers
+ */
+trait JMockMatchers {
+  /** shortcut for new IsAnything[T] */
+  def anything[T] = new IsAnything[T]
+
+  /** @returns a MethodNameMatcher to use in conjunction with allowing(mock) */
+  def withName(nameRegex: String) = new MethodNameMatcher(nameRegex)
+}
+
+/**
+ * This trait provide methods to build jMock actions
+ */
+trait JMockActions {
   /** action returning a value */
   def returnValue[T](result: T) = new ReturnValueAction(result)
 
@@ -281,25 +357,62 @@ trait JMocker extends ExampleLifeCycle with Imposterizer {
   /** action executing several other actions */
   def doAll(actions: Action*) = new DoAllAction(actions.toArray)
     
+  /** @returns a sequence of actions where the first action is executed after the first call, the second action
+   * after the second call, and so on */
   def onConsecutiveCalls(actions: Action*) = new ActionSequence(actions.toArray)
-    
-  def when(predicate: StatePredicate) = expectations.when(predicate)
-    
-  def then(state: State) = expectations.then(state)
+}
 
-  def inSequence(sequence: Sequence) = expectations.inSequence(sequence)
-  def inSequence(calls: Any*) = {
-    val sequence = context.sequence("s")
-    calls foreach { call: Any =>
-      call
-      expectations.inSequence(sequence)
+/** 
+ * This trait defines when a jMock context will be created and expectations checked.
+ * The context and expectations are always created at the beginning of an Example, then checked just after the test has been executed. Executing a test can also trigger an ExpectationError (from the jMock library). This error will be transformed into a FailureException
+ */
+trait JMockerExampleLifeCycle extends ExampleLifeCycle with JMockerContext {
+
+  /** 
+   * before any example, a new context and new exptecations should be created
+   */
+  override def beforeExample(ex: Example) = {
+    super.beforeExample(ex)
+    context = createMockery
+    expectations = new Expectations()
+  }
+
+  /** 
+   * An expectation error may be thrown during the execution of a test
+   * In that case, it is transformed to a failure exception
+   */
+  override def executeTest(t: => Any) = {
+    try { t } catch { case e: ExpectationError => throw createFailure(e) }
+  }
+
+  /** 
+   * After a test the context is verified. If some more expectations are not met an ExpectationError is thrown
+   * In that case, it is transformed to a failure exception
+   */
+  override def afterTest(ex: Example) = {
+    try {
+      context.assertIsSatisfied
+    } catch {
+      case e: ExpectationError => throw createFailure(e)
     }
-  }  
-  
-  /** @returns a MethodNameMatcher to use in conjunction with allowing(mock) */
-  def withName(nameRegex: String) = new MethodNameMatcher(nameRegex)
+    super.afterTest(ex)
+  }
+                         
+  private[this] def createFailure(e: ExpectationError) = FailureException(e.toString)
 
 }
+
+/** 
+ * This trait contains the jMock Mockery object and current expectations
+ */
+trait JMockerContext extends Imposterizer {
+  /** the context holds the mocks, the expectations so is able to get the calls and check them */
+  var context = createMockery
+
+  /** call expectations with optional constraints on the number of calls, on parameters, return values,... */
+  var expectations = new Expectations()
+}
+
 
 /** 
  * This trait allows to mock classes instead of interfaces only. This will require the cglib and objenesis libraries on the path. 

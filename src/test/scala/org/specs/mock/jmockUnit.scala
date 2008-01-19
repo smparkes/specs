@@ -38,8 +38,8 @@ object jmockGoodUnit extends Mocked {
       expect { allowing(list).size }
       2 times {i => list.size}
     } 
-    "provide an 'allowingMethodsLike' method succeeding if calls match a method pattern" in {
-      expect { allowingMethodsLike("size") }
+    "provide an 'allowingMatching' method succeeding if calls match a method pattern" in {
+      expect { allowingMatching("size") }
       list.size
     } 
     "provide an 'ignoring' method accepting any call and returning default values" in {
@@ -50,8 +50,8 @@ object jmockGoodUnit extends Mocked {
       expect { ignoring(list) }
       list.toString must_== "list"
     } 
-    "provide an 'ignoringMethodsLike' method accepting any call matching a method pattern and returning default values" in {
-      expect { ignoringMethodsLike("size") }
+    "provide an 'ignoringMatching' method accepting any call matching a method pattern and returning default values" in {
+      expect { ignoringMatching("size") }
       list.size must_== 0
     } 
     "provide a 'never' method succeeding if no call is made to the mock" in {
@@ -88,8 +88,7 @@ object jmockGoodUnit extends Mocked {
     }
     "provide a willReturn method to specify a returned iterable" in {
       expect { 1.of(scalaList).take(anyInt) willReturn List("hey") }
-      val matcher: Matcher[Iterable[String]] = be_==(List("hey"))
-      scalaList.take(1) must(matcher)
+      scalaList.take(1) must existMatch("hey")
     }
     "provide a willReturn method accepting a block to return another mock and specify it too" in {
       case class Module(name: String)
@@ -144,12 +143,20 @@ object jmockGoodUnit extends Mocked {
       list.get(0) must_== "a"
       list.get(0) must_== "b"
     } 
-    "provide a inSequence method to constraint call to occur in sequence" in {
+    "provide a then method to constraint calls to occur in sequence" in {
       expect { 
-        inSequence(
-          {println("size");one(list).size},
-          {println("get");one(list).get(anyInt)}
-        )
+        one(list).size then 
+        one(list).get(anyInt)
+      }
+      list.size
+      list.get(0)
+    } 
+    "provide a when/set methods to constraint calls to occur in specific states" in {
+      val readiness = state("readiness")
+      readiness.startsAs("not ready")
+      expect { 
+        one(list).size set readiness.is("ready") 
+        allowing(list).get(anyInt) when readiness.is("ready")
       }
       list.size
       list.get(0)
@@ -197,14 +204,20 @@ object jmockBadUnit extends BadMocked {
       expect { 1.of(list).get(equal(0)) }
       list.get(1)
     } 
-    "provide a inSequence method failing if calls are not made in sequence" in {
+    "provide a then method failing if calls are not made in sequence" in {
       expect { 
-        inSequence(
-          one(list).size,
-          one(list).get(anyInt)
-        )
+        one(list).size then 
+        one(list).get(anyInt)
       }
+      list.get(0)
       list.size
+    } 
+    "provide a when/set methods failing if method calls don't occur in proper states" in {
+      val readiness = state("readiness")
+      readiness.startsAs("not ready")
+      expect { 
+        allowing(list).get(anyInt) when readiness.is("ready")
+      }
       list.get(0)
     } 
   }
