@@ -233,18 +233,28 @@ trait JMocker extends ExampleLifeCycle with Imposterizer {
 
     /** sets a value to be returned by the mock */
     def willReturn(result: T) = expectations.will(new ReturnValueAction(result))
+    def willReturn(c: java.lang.Class[T])(f: Function1[T, Any]): Unit = {
+      val mocked = context.mock(c).asInstanceOf[T]
+      expectations.will(new ReturnValueAction(mocked))
+      f(mocked)
+    }
+    
     def willReturn(result: (T, Function1[T, Any])) = {
       expectations.will(new ReturnValueAction(result._1))
       result._2.apply(result._1)
     }
-    
-    def willReturn[S, T <: Iterable[S]](c: java.lang.Class[S])(results: Function1[S, Any]*): Unit = {
+
+    def willReturnEach(values: T*) = {
+      will(new ActionSequence((values map { x: T => returnValue(x) }).toArray))
+    }
+
+    def willReturnIterable[S, T <: Iterable[S]](c: java.lang.Class[S], results: Function1[S, Any]*): Unit = {
       willReturn(results.toList.zipWithIndex map { x =>
         val (block, i) = x
         (context.mock(c, c.getName + "_" + i).asInstanceOf[S], block)
       })
     }
-    def willReturn[S, T <: Iterable[S]](results: (S, Function1[S, Any])*): Unit = willReturn(results.toList)
+    def willReturnIterable[S, T <: Iterable[S]](results: (S, Function1[S, Any])*): Unit = willReturn(results.toList)
     def willReturn[S, T <: Iterable[S]](results: List[(S, Function1[S, Any])]): Unit = {
       expectations.will(new ReturnValueAction(results.map(_._1).toList))
       results foreach { result =>
@@ -255,31 +265,10 @@ trait JMocker extends ExampleLifeCycle with Imposterizer {
     /** sets an exception to be thrown by the mock */
     def willThrow[X <: Throwable](t: X) = expectations.will(new ThrowAction(t))
 
-    /** sets an iterator to be returned by the mock */
-    def willReturnIterator[X](iterable: Iterable[X]) = expectations.will(new ReturnIteratorAction(iterable))
-
-    /** sets an iterable to be returned by the mock */
-    def willReturnIterable[X](iterable: Iterable[X]) = expectations.will(new ReturnIterableAction(iterable))
-
-    /** sets an iterator to be returned by the mock */
-    def willReturnIterator[X](collection: java.util.Collection[X]) = expectations.will(new ReturnIteratorAction(wrap(collection)))
-
-    /** sets an iterable to be returned by the mock */
-    def willReturnIterable[X](collection: java.util.Collection[X]) = expectations.will(new ReturnIterableAction(wrap(collection)))
+    /** set up a JMock action to be executed */
+    def will(action: Action) = expectations.will(action)
   }
   
-  /** JMock action to specify scala iterators to be returned */
-  class ReturnIteratorAction[X](iterable: Iterable[X]) extends Action {
-    def invoke(invocation: Invocation ) = iterable.elements
-    def describeTo(description: Description) = description.appendText("return iterator " + iterable.mkString(", "));
-  }
-  
-  /** JMock action to specify scala iterables to be returned */
-  class ReturnIterableAction[X](iterable: Iterable[X]) extends Action {
-    def invoke(invocation: Invocation ) = iterable.toList
-    def describeTo(description: Description) = description.appendText("return list " + iterable.mkString(", "));
-  }
-
   /** set up a JMock action to be executed */
   def will(action: Action) = expectations.will(action)
     
@@ -288,12 +277,6 @@ trait JMocker extends ExampleLifeCycle with Imposterizer {
 
   /** action throwing an exception of type T*/
   def throwEx[T <: Throwable](t: T) = new ThrowAction(t)
-    
-  /** action returning a java.util.Iterator */
-  def returnIterator[T](iterable: Iterable[T]) = new ReturnIteratorAction(iterable)
-    
-  /** action returning a java.util.Iterator */
-  def returnIterator(collection: Object*) = new ReturnIteratorAction(collection.toArray)
     
   /** action executing several other actions */
   def doAll(actions: Action*) = new DoAllAction(actions.toArray)
@@ -305,6 +288,13 @@ trait JMocker extends ExampleLifeCycle with Imposterizer {
   def then(state: State) = expectations.then(state)
 
   def inSequence(sequence: Sequence) = expectations.inSequence(sequence)
+  def inSequence(calls: Any*) = {
+    val sequence = context.sequence("s")
+    calls foreach { call: Any =>
+      call
+      expectations.inSequence(sequence)
+    }
+  }  
   
   /** @returns a MethodNameMatcher to use in conjunction with allowing(mock) */
   def withName(nameRegex: String) = new MethodNameMatcher(nameRegex)

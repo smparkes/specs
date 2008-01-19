@@ -2,7 +2,6 @@ package org.specs.mock
 import org.specs.runner._
 import org.specs.mock._
 import org.specs.Sugar._
-import org.specs.Products._
 import org.specs.specification._
 import org.specs.runner._
 import org.hamcrest.core._
@@ -82,13 +81,13 @@ object jmockGoodUnit extends Mocked {
       expect { 1.of(list).get(will(be_==(0))) willThrow new java.lang.Exception("ouch") }
       list.get(0) must throwA(new Exception)
     } 
-    "provide a willReturnIterator method to specify the a returned iterator" in {
+    "provide a willReturn method to specify the a returned iterator" in {
       val expected = List[String]("hey")
-      expect { 1.of(scalaList).elements willReturnIterator expected }
+      expect { 1.of(scalaList).elements willReturn expected.elements }
       scalaList.elements.next must_== "hey"
     }
-    "provide a willReturnIterable method to specify a returned iterable" in {
-      expect { 1.of(scalaList).take(anyInt) willReturnIterable List("hey") }
+    "provide a willReturn method to specify a returned iterable" in {
+      expect { 1.of(scalaList).take(anyInt) willReturn List("hey") }
       val matcher: Matcher[Iterable[String]] = be_==(List("hey"))
       scalaList.take(1) must(matcher)
     }
@@ -99,12 +98,10 @@ object jmockGoodUnit extends Mocked {
       val workspace = mock(classOf[Workspace])
  
       expect { 
-        1.atLeastOf(workspace).project.willReturn(as(classOf[Project]){p: Project => 
+        1.atLeastOf(workspace).project.willReturn(classOf[Project]) {p: Project => 
            1.atLeastOf(p).name willReturn "hi"
-           1.atLeastOf(p).module willReturn as(classOf[Module]) { m: Module =>
-             1.of(m).name willReturn "module"
-           }
-        })
+           1.atLeastOf(p).module.willReturn(classOf[Module]){m: Module => 1.of(m).name willReturn "module"}
+        }
       }
       workspace.project.name must_== "hi"
       workspace.project.module.name must_== "module"
@@ -114,7 +111,7 @@ object jmockGoodUnit extends Mocked {
       case class Workspace(projects: List[Project])
       val workspace = mock(classOf[Workspace]) 
       expect { 
-        one(workspace).projects.willReturn(
+        one(workspace).projects willReturnIterable(
           as(classOf[Project], "p1"){p: Project => 
             one(p).name willReturn "p1" },
           as(classOf[Project], "p2"){p: Project => 
@@ -128,12 +125,34 @@ object jmockGoodUnit extends Mocked {
       case class Workspace(projects: List[Project])
       val workspace = mock(classOf[Workspace]) 
       expect { 
-        one(workspace).projects.willReturn(classOf[Project])( 
+        one(workspace).projects willReturnIterable(classOf[Project], 
            {p: Project => one(p).name willReturn "p1" },
-           {p: Project => one(p).name willReturn "p2" }
-        )
+           {p: Project => one(p).name willReturn "p2" })
       }
       workspace.projects.map(_.name) must_== List("p1", "p2")
+    } 
+    "provide a will method to add any action to an expectation" in {
+      expect { 
+        one(list).get(anyInt) will(returnValue("hey")) 
+      }
+      list.get(0) must_== "hey"
+    } 
+    "provide a will method to return different values on consecutive calls" in {
+      expect { 
+        1.atLeastOf(list).get(anyInt).willReturnEach("a", "b")
+      }
+      list.get(0) must_== "a"
+      list.get(0) must_== "b"
+    } 
+    "provide a inSequence method to constraint call to occur in sequence" in {
+      expect { 
+        inSequence(
+          {println("size");one(list).size},
+          {println("get");one(list).get(anyInt)}
+        )
+      }
+      list.size
+      list.get(0)
     } 
   }
 }
@@ -177,6 +196,16 @@ object jmockBadUnit extends BadMocked {
     "provide an equal matcher failing if the passed parameter is not equal to the specified one" in {
       expect { 1.of(list).get(equal(0)) }
       list.get(1)
+    } 
+    "provide a inSequence method failing if calls are not made in sequence" in {
+      expect { 
+        inSequence(
+          one(list).size,
+          one(list).get(anyInt)
+        )
+      }
+      list.size
+      list.get(0)
     } 
   }
 }
