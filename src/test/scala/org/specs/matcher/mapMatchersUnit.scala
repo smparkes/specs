@@ -1,8 +1,15 @@
 package org.specs.matcher
 import org.specs.runner._
+import org.scalacheck.Gen._
+import org.specs.matcher.ScalacheckParameters._
+import org.scalacheck._
+import Arbitrary._
+import Gen._
+import Prop._
 
 class mapMatchersTest extends JUnit3(mapMatchersUnit)
-object mapMatchersUnit extends MatchersSpecification {
+object mapMatchersUnitRunner extends ConsoleRunner(mapMatchersUnit)
+object mapMatchersUnit extends MatchersSpecification with PartialFunctionGen {
   "Map matchers" should {
     "not evaluate the expressions twice: haveKey" in {
       val map: Iterable[(String, Any)] = Map("" -> 1)
@@ -15,6 +22,55 @@ object mapMatchersUnit extends MatchersSpecification {
     "not evaluate the expressions twice: havePair" in {
       val map3: Iterable[(String, Int)] = Map("" -> 1)
       havePair("" ->1) must evalOnce(exp(map3))
+    }
+  }
+  "Partial Functions matchers" should {
+    val f = new PartialFunction[Int, String] {
+      def isDefinedAt(i: Int) = i % 2 == 0
+      def apply(i: Int) = (i*2).toString
+    }
+    "provide a beDefinedAt matcher checking if a PartialFunction is defined at specific values" in {
+      val beDefinedAtAValue = (f: PartialFunction[Int, String], list: List[Int]) => {
+        beDefinedAt(list: _*)(f) match {
+          case (true, _, _) => list forall {x:Int => f.isDefinedAt(x)}
+          case (false, _, ko) => { list forall {x:Int => ko.contains(x.toString) || f.isDefinedAt(x)} }
+        }
+      }
+      property(beDefinedAtAValue) must pass
+    }
+    "provide a beDefinedBy matcher checking if a PartialFunction is defined at specific values and returns appropriate results" in {
+      val beDefinedByValueAndResult = (f: PartialFunction[Int, String], map: Map[Int, String]) => {
+        beDefinedBy(map.toList : _*)(f) match {
+          case (true, _, _) => map forall {x:(Int, String) => f.isDefinedAt(x._1) && f(x._1) == x._2}
+          case (false, _, ko) => { map forall {x:(Int, String) => ko.contains(x.toString) || (f.isDefinedAt(x._1) && f(x._1) == x._2)} }
+        }
+      }
+      property(beDefinedByValueAndResult) must pass
+    }
+  }
+}
+trait PartialFunctionGen {
+  implicit def listInt(dummy: Arb[List[Int]]): Arbitrary[List[Int]] = new Arbitrary[List[Int]] {
+    def getArbitrary = {
+      for {length <- choose(1, 4)
+           l <- vectorOf(length, choose(1, 4))
+      } yield l.toList
+    }
+  }
+  implicit def genPartialFunction(dummy: Arb[PartialFunction[Int, String]]): Arbitrary[PartialFunction[Int, String]] = new Arbitrary[PartialFunction[Int, String]] {
+    def getArbitrary = {
+      for {length <- choose(0, 4)
+           keys <- vectorOf(length, choose(1, 4))
+           values <- vectorOf(length, arbitrary[String])
+      } yield Map(keys.toList zip values.toList map {kv => kv._1 -> kv._2} : _*)
+    }
+  }
+  implicit def genMap(dummy: Arb[Map[Int, String]]): Arbitrary[Map[Int, String]] = new Arbitrary[Map[Int, String]] {
+    def getArbitrary = {
+      for {length <- choose(0, 4)
+           keys <- vectorOf(length, choose(1, 4))
+           values <- vectorOf(length, arbitrary[String])
+      } yield Map(keys.toList zip values.toList map {kv => kv._1 -> kv._2} : _*)
     }
   }
 }

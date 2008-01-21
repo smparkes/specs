@@ -18,7 +18,7 @@ import org.specs.collection.JavaCollectionsConversion._
 /** 
  * The JMocker trait is used to give access to the mocking functionalities of the JMock library 
  */
-trait JMocker extends JMockerExampleLifeCycle with JMockMatchers with JMockActions {
+trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockActions {
 
   /**
    * the mock method is used to create a mock object
@@ -309,34 +309,45 @@ trait JMocker extends JMockerExampleLifeCycle with JMockMatchers with JMockActio
   /** specifies that a call can only occur following the specific condition on a state */
   def when(predicate: StatePredicate) = expectations.when(predicate)
     
-  /** specifies that after a call, a State obj can only occur following the specific condition on a state */
+  /** specifies that after a call, a State object will be in a specific state */
   def then(state: State) = expectations.then(state)
+
+  /** allows any block of expectations to be followed by state actions and expectations */
   implicit def afterCall(v: Any) = new StateConstraint(v)
+
+  /** this class allows any block of expectations to be followed by state actions and expectations */
   class StateConstraint(expectation: Any) {
     def set(state: State) = expectations.then(state)
     def when(predicate: StatePredicate) = expectations.when(predicate)
   }
 
+  /** adds a constraint to the expectations to declare that an expected call must happen in sequence */
   def inSequence(sequence: Sequence) = expectations.inSequence(sequence)
+
+  /** this class allows an expectation to declare that another expectation should follow */
   implicit def after(v: =>Any) = new InSequenceThen(v)
+
+  /** this class allows an expectation to declare that another expectation should follow */
   class InSequenceThen(firstExpectation: =>Any) {
     val sequence = {
       val s = context.sequence("s")
       firstExpectation; inSequence(s)
       s
     }  
-    def then(otherExpectation: =>Any) = {
+    def then(otherExpectation: Any) = {
       otherExpectation
       inSequence(sequence)
+      this
     }
   }
   
 }
 
 /**
- * This trait provide methods to build Hamcrest matchers
+ * This trait provide methods to build Hamcrest matchers. It actually contains only 2 methods since all Hamcrest matchers can
+ * be created by static methods in the Hamcrest library classes
  */
-trait JMockMatchers {
+trait HamcrestMatchers {
   /** shortcut for new IsAnything[T] */
   def anything[T] = new IsAnything[T]
 

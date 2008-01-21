@@ -39,6 +39,13 @@ object anyMatchersUnit extends MatchersSpecification {
       val (o1, o2) = (MyObject(1), MyObject(1))
       o1 must be_==(o2)
     }
+    "be ok when comparing a list of ints" in {
+      List(1) must be_==(List(1))
+    }
+    "be ok when comparing a list of strings" in {
+      val l: Iterable[String] = List("a")
+      List("a") must be_==(l)
+    }
     "display a failure message if comparing different objects" in {
       assertion("name" must be_==("name2")) must failWith("'name' is not equal to 'name2'")
     }
