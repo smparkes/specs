@@ -45,7 +45,10 @@ class JUnit38SuiteRunner(klass: java.lang.Class[T] forSome {type T <: TestCase})
 	  createTestDescription(tc.getClass(), tc.getName());
 	} else if (test.isInstanceOf[TestSuite]) {
 	  val ts = test.asInstanceOf[TestSuite];
-	  val description= createSuiteDescription(classOf[TestSuite]);
+      var name = ts.getName;
+      if (name == null)
+        name = "";
+      val description= createSuiteDescription(name, null);
       for (i <- 0 to ts.testCount()-1)
 		description.addChild(makeDescription(ts.testAt(i)));
 	  description;

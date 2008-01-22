@@ -33,7 +33,8 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
   <version>1.1.6-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>${project.artifactId}</name>
-  <description>specs is a Behaviour-Driven-Design framework</description>
+  <description>specs is a Behaviour-Driven-Design
+  framework</description>
   <url>http://code.google.com/p/specs/</url>
   <inceptionYear>2007</inceptionYear>
   <licenses>
@@ -120,6 +121,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
     </dependency>
   </dependencies>
   <build>
+    <sourceDirectory>src/main/scala</sourceDirectory>
     <extensions>
       <extension>
         <groupId>org.apache.maven.wagon</groupId>
@@ -140,7 +142,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
           </execution>
         </executions>
         <configuration>
-         <!-- <scalaClassName>scala.tools.nsc.CompileClient</scalaClassName>-->
+          <!-- <scalaClassName>scala.tools.nsc.CompileClient</scalaClassName>-->
           <scalaVersion>${scala.version}</scalaVersion>
           <args>
             <arg>-Ygenerics</arg>
@@ -185,6 +187,19 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
           </execution>
         </executions>
         <configuration></configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
