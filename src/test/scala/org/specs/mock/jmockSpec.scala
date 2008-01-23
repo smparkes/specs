@@ -38,8 +38,12 @@ object jmockGoodSpec extends Mocked {
       expect { allowing(list).size }
       2 times {i => list.size}
     } 
-    "provide an 'allowingMatching' method succeeding if calls match a method pattern" in {
-      expect { allowingMatching("size") }
+    "provide an 'allowingMatch' method succeeding if calls match a method pattern" in {
+      expect { allowingMatch("size") }
+      list.size
+    } 
+    "provide an 'allowingMatch' method succeeding if calls match a method pattern on a specific mock" in {
+      expect { allowingMatch(list, "size") }
       list.size
     } 
     "provide an 'ignoring' method accepting any call and returning default values" in {
@@ -50,8 +54,8 @@ object jmockGoodSpec extends Mocked {
       expect { ignoring(list) }
       list.toString must_== "list"
     } 
-    "provide an 'ignoringMatching' method accepting any call matching a method pattern and returning default values" in {
-      expect { ignoringMatching("size") }
+    "provide an 'ignoringMatch' method accepting any call matching a method pattern and returning default values" in {
+      expect { ignoringMatch("size") }
       list.size must_== 0
     } 
     "provide a 'never' method succeeding if no call is made to the mock" in {

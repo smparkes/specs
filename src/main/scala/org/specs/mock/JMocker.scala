@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import org.hamcrest._;
 import org.hamcrest.core._;
+import org.hamcrest.core.AnyOf._;
 import org.jmock._
 import org.specs.specification._
 import org.specs.util.Property
@@ -117,8 +118,11 @@ trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockAc
   /** allowing any calls to mocks */
   def allowing[T](mockObjectMatcher: Matcher[T]) = expectations.allowing(mockObjectMatcher)
     
-  /** allowing any calls to the mock with method names like the passed parameter, returning default values */
-  def allowingMatching(methodName: String) = expectations.allowing(anything).method(withName(methodName))
+  /** allowing any calls to a mock with method names like the passed parameter, returning default values */
+  def allowingMatch[T](mock: T, methodName: String) = expectations.allowing(new IsSame(mock)).method(withName(methodName))
+
+  /** allowing any calls to any mock with method names like the passed parameter, returning default values */
+  def allowingMatch(methodName: String) = expectations.allowing(anything).method(withName(methodName))
 
   /** allowing any calls to the mock */
   def allowing[T](mockObject: T) = expectations.allowing(mockObject)
@@ -130,8 +134,11 @@ trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockAc
   def ignoring[T](mockObjectMatcher: Matcher[T]) = expectations.ignoring(mockObjectMatcher)
     
   /** ignoring any calls to the mock with method names like the passed parameter, returning default values */
-  def ignoringMatching(methodName: String) = expectations.ignoring(anything).method(withName(methodName))
+  def ignoringMatch(methodName: String) = expectations.ignoring(anything).method(withName(methodName))
 
+  /** ignoring any calls to a mock with method names like the passed parameter, returning default values */
+  def ignoringMatch[T](mock: T, methodName: String) = expectations.ignoring(new IsSame(mock)).method(withName(methodName))
+ 
   /** forbidding any calls to the mock */
   def never[T](mockObject: T) = expectations.never(mockObject)
 
