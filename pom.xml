@@ -207,6 +207,12 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
       <plugin>
         <groupId>org.scala-tools</groupId>
         <artifactId>maven-scala-plugin</artifactId>
+        <configuration>
+          <args>
+            <arg>-Ygenerics</arg>
+            <arg>-target:jvm-1.5</arg>
+          </args>
+        </configuration>
       </plugin>
     </plugins>
   </reporting>
