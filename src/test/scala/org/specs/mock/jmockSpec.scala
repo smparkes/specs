@@ -9,6 +9,7 @@ import org.specs.matcher._
 
 class jmockSpecTest extends JUnit3(jmockSpec)
 object jmockSpecRunner extends ConsoleRunner(jmockSpec)
+
 object jmockSpec extends Specification {
   "The jMock integration".isSpecifiedBy(jmockGoodSpec, jmockBadSpec)
 }
