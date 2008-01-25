@@ -23,7 +23,7 @@ trait AnyMatchers {
    * Matches if (a == b)
    */   
   def beEqual[T](a: T) = new Matcher[T](){
-    def apply(v: =>T) = {val b = v; (a == b, q(b) + " is the same as " + q(a), q(b) + " is not the same as " + q(a))} 
+    def apply(v: =>T) = {val b = v; (a == b, q(b) + " is equal to as " + q(a), q(b) + " is not equal to " + q(a))} 
   } 
 
   /**
