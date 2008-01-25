@@ -14,37 +14,49 @@ trait AnyMatchers {
   /**
    * Matches if (a eq b)
    */   
-  def be[T](a: T) = new Matcher[T](){
-    def apply(v: =>T) = {val b = v; (a.asInstanceOf[AnyRef] eq b.asInstanceOf[AnyRef], q(b) + " is the same as " + q(a), q(b) + " is not the same as " + q(a))} 
+  def be(a: Any) = new Matcher[Any](){
+    def apply(v: =>Any) = {val b = v; (a.asInstanceOf[AnyRef] eq b.asInstanceOf[AnyRef], q(b) + " is the same as " + q(a), q(b) + " is not the same as " + q(a))} 
   } 
-  def notBe[T](a: T) = be(a).not
-  
+  def notBe(a: Any) = be(a).not
+
   /**
    * Matches if (a == b)
    */   
-  def is_==[T](a: T) = new Matcher[T](){ 
-     def apply(v: =>T) = {val b = v; ((a == b), q(b) + " is equal to " + q(a), q(b) + " is not equal to " + q(a))}
+  def beEqual[T](a: T) = new Matcher[T](){
+    def apply(v: =>T) = {val b = v; (a == b, q(b) + " is the same as " + q(a), q(b) + " is not the same as " + q(a))} 
+  } 
+
+  /**
+   * Matches if (a != b)
+   */   
+  def beDifferent[T](a: T) = beEqual[T](a).not
+
+  /**
+   * Matches if (a == b)
+   */   
+  def is_==(a: Any) = new Matcher[Any](){ 
+     def apply(v: =>Any) = {val b = v; ((a == b), q(b) + " is equal to " + q(a), q(b) + " is not equal to " + q(a))}
   }
 
   /**
    * Alias of is_==
    */   
-  def be_==[T](a: T) = is_==(a)
+  def be_==(a: Any) = is_==(a)
 
   /**
    * Matches if (a neq b)
    */  
-  def notEq[T](a: T) = be(a).not 
+  def notEq(a: Any) = be(a).not 
 
   /**
    * Matches if (a != b)
    */   
-  def is_!=[T](a: T) = (is_==(a)).not 
+  def is_!=(a: Any) = (is_==(a)).not 
   
   /**
    * Matches if (a != b)
    */   
-  def be_!=[T](a: T) = (is_==(a)).not 
+  def be_!=(a: Any) = (is_==(a)).not 
 
   /**
    * Matches if b is null

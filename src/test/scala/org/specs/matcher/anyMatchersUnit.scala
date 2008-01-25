@@ -43,8 +43,7 @@ object anyMatchersUnit extends MatchersSpecification {
       List(1) must be_==(List(1))
     }
     "be ok when comparing a list of strings" in {
-      val l: Iterable[String] = List("a")
-      List("a") must be_==(l)
+      List("a") must be_==(List("a"))
     }
     "display a failure message if comparing different objects" in {
       assertion("name" must be_==("name2")) must failWith("'name' is not equal to 'name2'")
@@ -120,7 +119,8 @@ object anyMatchersUnit extends MatchersSpecification {
     }
   }
   "Any matchers" should {
-    val anyValue: Int = 1
+    val anyValue: Any = 1
+    val nullValue: Int = null.asInstanceOf[Int]
     val boolValue: Boolean = true
 
     "not evaluate the expressions twice: be_!=" in {
@@ -130,10 +130,10 @@ object anyMatchersUnit extends MatchersSpecification {
       be_==(1) must evalOnce(exp(anyValue))
     }
     "not evaluate the expressions twice: be" in {
-      be(1) must evalOnce(exp(1))
+      be(1) must evalOnce(exp(anyValue))
     }
     "not evaluate the expressions twice: beNull" in {
-      beNull[Int] must evalOnce(exp(anyValue))
+      beNull[Int] must evalOnce(exp(nullValue))
     }
     "not evaluate the expressions twice: verify" in {
       verify((x:Int) => x == 1) must evalOnce(exp(1)) 
