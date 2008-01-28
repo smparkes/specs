@@ -32,7 +32,7 @@ object consoleReporterSpec extends Specification {
       specWithOneExample(that.isKo, that.isKo) must existMatch("first failure") 
       specWithOneExample(that.isKo, that.isKo) must notExistMatch("second failure")
     } 
-    "display '1 error' if one example throws an exception" in { 
+    "display '1 error' if one example throws an exception" in {
       specWithOneExample(that.throwsAnException) must existMatch("1 error") 
     } 
     "display '1 skipped' if one example is skipped" in { 
@@ -86,7 +86,7 @@ abstract class TestSpec extends Specification with ConsoleReporter with MockOutp
   val failure1 = () => "ok" mustBe "first failure"
   val failure2 = () => "ok" mustBe "second failure"
   val failMethod = () => fail("failure with the fail method")
-  val exception = () => throw new Error("new Error")
+  val exception = () => throw new Exception("new Error")
   def assertions(behaviours: List[that.Value]) = behaviours map { 
                                     case that.isOk => success
                                     case that.isSkipped => isSkipped

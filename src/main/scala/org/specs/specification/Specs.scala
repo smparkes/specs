@@ -22,11 +22,25 @@ import org.specs.ExtendedThrowable._
  *
  */
 abstract class Specification extends Matchers with SpecificationStructure {
-  /** adds a "before" function to the last sut being defined */
+  /** 
+   * @deprecated
+   * adds a "before" function to the last sut being defined 
+   */
   def usingBefore(beforeFunction: () => Unit) = { suts.last.before = Some(beforeFunction) } 
 
-  /** adds an "after" function to the last sut being defined */
+  /** adds a "before" function to the last sut being defined */
+  def doBefore(actions: =>Any) = { suts.last.before = Some(() => actions) } 
+
+  /** 
+   * @deprecated
+   * adds an "after" function to the last sut being defined 
+   */
   def usingAfter(afterFunction: () => Unit) = { suts.last.after = Some(afterFunction) }
+
+  /** 
+   * adds an "after" function to the last sut being defined 
+   */
+  def doAfter(actions: =>Any) = { suts.last.before = Some(() => actions) } 
 
   /** @return the failures of each sut */
   def failures: List[FailureException] = subSpecifications.flatMap{_.failures} ::: suts.flatMap {_.failures}
