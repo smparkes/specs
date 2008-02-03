@@ -9,7 +9,6 @@ import org.specs.io._
 import org.specs.collection._
 import org.specs.util._
 
-
 class allSpecsTest extends JUnit3(allSpecs)
 object allSpecs extends Specification {
     "The specifications" areSpecifiedBy (
@@ -26,6 +25,7 @@ object allSpecs extends Specification {
         stackSpecification,
         junit3TestSuiteSpec,
         xmlRunnerSpec,
+        scalaTestSpec,
         mocksSpec,
         jmockSpec)
 }
@@ -46,5 +46,6 @@ object allSpecsAndUnits extends Specification {
   "The specs and unit tests for the specs project" areSpecifiedBy (allSpecs, allUnits)
 }
 object allRunner extends ConsoleRunner(allSpecsAndUnits)
+class allSuite extends ScalaTestSuite(allSpecsAndUnits)
 class allTest extends JUnit3(allSpecsAndUnits)
 object allXml extends XmlRunner(allSpecsAndUnits)

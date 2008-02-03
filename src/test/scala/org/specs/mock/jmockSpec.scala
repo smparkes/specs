@@ -66,6 +66,16 @@ object jmockGoodSpec extends Mocked {
       expect { 1.of(list).get(anyInt) }
       list.get(0)
     } 
+    "provide an a(classOf[X]) matcher which can be used to specify that an instance of class X will be used as a parameter" in {
+      val listString: List[String] = mock(classOf[List[String]], "list of strings")
+      expect { 1.of(listString).mkString(a(classOf[String])) }
+      listString.mkString(",")
+    } 
+    "provide an aNull(classOf[X]) matcher which can be used to specify that a null value of class X will be used as a parameter" in {
+      val listString: List[String] = mock(classOf[List[String]], "list of strings")
+      expect { 1.of(listString).mkString(aNull(classOf[String])) }
+      listString.mkString(null)
+    } 
     "provide an equal matcher which can be used to specify that a specific value will be used as a parameter" in {
       expect { 1.of(list).get(equal(0)) }
       list.get(0)

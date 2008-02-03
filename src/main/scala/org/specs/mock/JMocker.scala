@@ -176,22 +176,22 @@ trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockAc
   def any[T](t: java.lang.Class[T]) = expectations.`with`(anything[T])
 
   /** shortcut for expectations.`with`(new IsInstanceOf[T]) */
-  def a[T](t: java.lang.Class[T]) = expectations.`with`(new IsInstanceOf(t))
+  def a[T](t: java.lang.Class[T]) = {expectations.`with`(new IsInstanceOf(t)); null.asInstanceOf[T]}
 
   /** shortcut for expectations.`with`(new IsInstanceOf[T]) */
-  def an[T](t: java.lang.Class[T]) = expectations.`with`(new IsInstanceOf(t))
+  def an[T](t: java.lang.Class[T]) = a(t)
 
   /** shortcut for expectations.`with`(new IsNull[T]) */
-  def aNull[T](t: java.lang.Class[T]) = expectations.`with`(new IsNull[T])
+  def aNull[T](t: java.lang.Class[T]) = {expectations.`with`(new IsNull[T]); null.asInstanceOf[T]}
 
   /** shortcut for expectations.`with`(new IsNot(IsNull[T])) */
-  def aNonNull[T](t: java.lang.Class[T]) = expectations.`with`(new IsNot(new IsNull[T]))
+  def aNonNull[T](t: java.lang.Class[T]) = {expectations.`with`(new IsNot(new IsNull[T])); null.asInstanceOf[T]}
 
   /** shortcut for expectations.`with`(new IsEqual[T](value)) */
-  def equal[T](value: T)  = expectations.`with`(new IsEqual[T](value))
+  def equal[T](value: T)  = {expectations.`with`(new IsEqual[T](value)); value}
 
   /** shortcut for expectations.`with`(new IsSame[T](value)) */
-  def same[T](value: T)  = expectations.`with`(new IsSame[T](value))
+  def same[T](value: T)  = {expectations.`with`(new IsSame[T](value)); value}
   
   /** Adapter class to use specs matchers as Hamcrest matchers */
   class HamcrestMatcherAdapter[T](m: org.specs.matcher.Matcher[T]) extends org.hamcrest.TypeSafeMatcher[T] {
