@@ -42,8 +42,9 @@ object basicFeatures extends SpecificationWithSamples {
      errorSpec.errors must beLike {case Seq(x: Throwable) => x.getMessage must_== "new Error"} 
    } 
    "provide the number of assertions" in { 
-     twoSuts(that.isOk, List(that.isOk, that.isOk)).suts.map {_.assertionsNb} must_== List(1, 2)
-     twoSuts(that.isOk, List(that.isOk, that.isOk)).assertionsNb mustBe 3
+     val spec = twoSuts(that.isOk, List(that.isOk, that.isOk))
+     spec.suts.map {_.assertionsNb} must_== List(1, 2)
+     spec.assertionsNb mustBe 3
    } 
    "provide a 'fail' method adding a new failure to the current example" in {
      object failMethodSpec extends oneEx(List(that.isOk, that.isKoWithTheFailMethod))

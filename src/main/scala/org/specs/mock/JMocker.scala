@@ -399,8 +399,8 @@ trait JMockerExampleLifeCycle extends ExampleLifeCycle with JMockerContext {
    * An expectation error may be thrown during the execution of a test
    * In that case, it is transformed to a failure exception
    */
-  override def executeTest(t: => Any) = {
-    try { t } catch { case e: ExpectationError => throw createFailure(e) }
+  override def executeTest(ex: Example, t: => Any) = {
+    try { super.executeTest(ex, t) } catch { case e: ExpectationError => throw createFailure(e) }
   }
 
   /** 

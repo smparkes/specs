@@ -31,7 +31,7 @@ class ScalaTestSuite(specifications: Specification*) extends org.scalatest.Suite
       specification.subSpecifications.foreach { s: Specification => result = new ScalaTestSuite(s)::result }
       specification.suts foreach {sut => result = new SutSuite(sut)::result }
     }
-    result
+    result.reverse
   }
 }
 

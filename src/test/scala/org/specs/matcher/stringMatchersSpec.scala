@@ -2,6 +2,8 @@ package org.specs.matcher
 import org.specs.runner._
 
 class stringMatchersSpecTest extends JUnit3(stringMatchersSpec) 
+class stringMatchersSpecSuite extends ScalaTestSuite(stringMatchersSpec) 
+object stringMatchersSpecRunner extends ConsoleRunner(stringMatchersSpec) 
 object stringMatchersSpec extends MatchersSpecification {
   "String matchers" should { usingBefore { () => clearExample }
     "provide a 'must_==/' matcher: 'hello' must_==/ 'HeLLo' " + 

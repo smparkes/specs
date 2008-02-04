@@ -242,8 +242,9 @@ object jmockBadSpec extends BadMocked {
 }
 trait BadMocked extends Mocked {
   var checkAfterTest = true
-  override def executeTest(t: => Any) = {
+  override def executeTest(ex: Example, t: => Any) = {
     try {
+      example = Some(ex)
       t
     } catch {
       case e: org.jmock.api.ExpectationError => {checkAfterTest = false}

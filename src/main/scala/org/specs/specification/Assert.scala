@@ -11,9 +11,7 @@ import org.specs.ExtendedThrowable._
  * and errors if a matcher is not ok 
  *
  */
-class Assert[T](value: => T, example: Example) {
-  /** increments the number of assertions of the example when this object is created */
-  example.assertionsNb += 1
+class Assert[T](value: => T) {
   
   /**
    * applies a matcher to the current value and throw a failure is the result is not true 
@@ -65,7 +63,7 @@ case class FailureException(message: String) extends RuntimeException(message)
 case class SkippedException(message: String) extends RuntimeException(message)
 
 /** Specialized assert class with string matchers aliases */
-class AssertString[A <: String](value: => A, example: Example) extends Assert[A](value, example) {
+class AssertString[A <: String](value: => A) extends Assert[A](value) {
   /** alias for <code>must(beMatching(a))</code> */
   def mustMatch(a: String) = must(beMatching(a))
 
@@ -79,7 +77,7 @@ class AssertString[A <: String](value: => A, example: Example) extends Assert[A]
   def must_!=/(a: String) = must(notEqualIgnoreCase(a))
 }
 /** Specialized assert class with iterable matchers aliases */
-class AssertIterable[I <: AnyRef](value: Iterable[I], example: Example) extends Assert[Iterable[I]](value, example) {
+class AssertIterable[I <: AnyRef](value: Iterable[I]) extends Assert[Iterable[I]](value) {
 
   /** alias for <code>must(exist(function(_))</code> */
   def mustExist(function: I => Boolean) = must(exist {x:I => function(x)})
@@ -94,7 +92,7 @@ class AssertIterable[I <: AnyRef](value: Iterable[I], example: Example) extends 
   def mustNotContain(elem: I) = must(notContain(elem))
 }
 /** Specialized assert class with iterable[String] matchers aliases */
-class AssertIterableString(value: Iterable[String], example: Example) extends AssertIterable[String](value, example) {
+class AssertIterableString(value: Iterable[String]) extends AssertIterable[String](value) {
 
   /** alias for <code>must(existMatch(pattern))</code> */
   def mustHaveMatch(pattern: String) = must(existMatch(pattern))

@@ -35,7 +35,7 @@ import org.specs.SpecUtils._
  * a test inside an example. This is used to plug setup/teardown behaviour at the sut level and to plug
  * mock expectations checking when a specification is using the Mocker trait: <code>mySpec extends Specification with Mocker</code>
  */
-trait SpecificationStructure extends ExampleLifeCycle with AssertFactory {
+trait SpecificationStructure extends ExampleLifeCycle {
 
   /** description of the specification */ 
   var description = createDescription(getClass.getName)
@@ -90,6 +90,8 @@ trait SpecificationStructure extends ExampleLifeCycle with AssertFactory {
    */
   implicit def specify(desc: String): Sut = { 
     suts = suts:::List(new Sut(desc, this))
+    if (this.isSequential)
+      suts.last.setSequential
     suts.last
   }
 
@@ -104,29 +106,31 @@ trait SpecificationStructure extends ExampleLifeCycle with AssertFactory {
    */
   implicit def forExample(desc: String): Example = {
     val newExample = new Example(desc, currentSut)
-    currentExamplesList += newExample 
-    lastCreatedExample = newExample
+    exampleContainer.addExample(newExample) 
     newExample
   }
   
-  /** utility function to track the last example being currently defined, in order to be able to add assertions to it */ 
-  protected[this] def lastExample: Example = if (lastCreatedExample == null) forExample("example") else lastCreatedExample
-  protected[this] var lastCreatedExample: Example = _
-
   /** 
    * utility method to track the last example list being currently defined.<br>
    * It is either the list of examples associated with the current sut, or
    * the list of subexamples of the current example being defined 
    */ 
-  protected[this] def currentExamplesList = currentSut.examples.find { _.isInsideDefinition } match {
-    case Some(parentExample) => parentExample.subExamples
-    case None => currentSut.examples
+  protected[this] def exampleContainer: Any {def addExample(e: Example)} = {
+    example match {
+      case Some(e) => e
+      case None => currentSut 
+    }
   }
 }
 trait ExampleLifeCycle {
+  protected var sequential = false
+  def isSequential = sequential
+  def setSequential = sequential = true
+  
+  protected[this] var example: Option[Example] = None
   def beforeExample(ex: Example) = {} 
   def beforeTest(ex: Example)= {}
   def afterTest(ex: Example) = {}
-  def executeTest(t: =>Any) = t
-  def afterExample(ex: Example) = {}
+  def executeTest(ex: Example, t: =>Any) = {example  = Some(ex); t}
+  def afterExample(ex: Example) = { example = None }
 }

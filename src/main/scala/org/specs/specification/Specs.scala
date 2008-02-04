@@ -21,7 +21,7 @@ import org.specs.ExtendedThrowable._
  * be collected with the corresponding methods
  *
  */
-abstract class Specification extends Matchers with SpecificationStructure {
+abstract class Specification extends Matchers with SpecificationStructure with AssertFactory {
   /** 
    * @deprecated
    * adds a "before" function to the last sut being defined 
@@ -92,6 +92,7 @@ case class Sut(description: String, cycle: ExampleLifeCycle) extends ExampleLife
 
   /** examples describing the sut behaviour */
   var examples = new Queue[Example]
+  def addExample(e: Example) = examples += e
 
   /** the before function will be invoked before each example */
   var before: Option[() => Unit] = None
@@ -148,7 +149,7 @@ case class Sut(description: String, cycle: ExampleLifeCycle) extends ExampleLife
   override def beforeTest(ex: Example) = { cycle.beforeTest(ex) }
 
   /** forwards the call to the "parent" cycle */
-  override def executeTest(t: =>Any) = { cycle.executeTest(t) }
+  override def executeTest(ex: Example, t: =>Any) = { cycle.executeTest(ex, t) }
 
   /** forwards the call to the "parent" cycle */
   override def afterTest(ex: Example) = { cycle.afterTest(ex) }
@@ -175,6 +176,9 @@ case class Sut(description: String, cycle: ExampleLifeCycle) extends ExampleLife
  * When assertions have been evaluated inside an example they register their failures and errors for later reporting 
  */
 case class Example(description: String, cycle: ExampleLifeCycle) {
+  private[this] var toRun: () => Any = () => ()
+  private[this] var executed = false
+  
   /** failures created by Assert objects inside the <code>in<code> method */
   var thisFailures = new Queue[FailureException]
 
@@ -185,16 +189,14 @@ case class Example(description: String, cycle: ExampleLifeCycle) {
   var thisErrors = new Queue[Throwable]
 
   /** number of <code>Assert</code> objects which refer to that Example */
-  var assertionsNb = 0
-
-  /**
-   * utility variable used to keep track if an example is being defined in another one. In that case, it will be
-   * created as a subexample
-   */
-  var isInsideDefinition = false
+  private[this] var assertionsNumber = 0
+  def assertionsNb = { execute; assertionsNumber }
+  def addAssertion = { assertionsNumber += 1 }
 
   /** sub-examples created inside the <code>in</code> method */
-  var subExamples = new Queue[Example]
+  private[this] var subExs = new Queue[Example]
+  def addExample(e: Example) = subExs += e
+  def subExamples = {execute; subExs}
 
   /**
    * creates a new Example object and, in the process of doing so, evaluates the <code>test</code>
@@ -203,33 +205,45 @@ case class Example(description: String, cycle: ExampleLifeCycle) {
    * @return a new <code>Example</code>
    */
   def in (test: => Any): Example = {
-    isInsideDefinition = true
-    
-    // try the "before" methods. If there is an exception, add an error and return the current example
-    try { cycle.beforeExample(this) } catch {
-      case t: Throwable => { 
-        addError(t) 
-        isInsideDefinition = false
-        return this 
+    toRun = () => {
+      var failed = false
+      // try the "before" methods. If there is an exception, add an error and return the current example
+      try { cycle.beforeExample(this) } catch {
+        case t: Throwable => { 
+          addError(t) 
+          failed = true
+        }
       }
-    }
-    // execute the <code>test</code> parameter. If it contains assertions they will be automatically executed
-    try {
-      cycle.beforeTest(this)
-      cycle.executeTest(test)
-      cycle.afterTest(this)
+      // execute the <code>test</code> parameter. If it contains assertions they will be automatically executed
+      try {
+        if (!failed) {
+          cycle.beforeTest(this)
+          cycle.executeTest(this, test)
+          cycle.afterTest(this)
+        }
       } catch { 
-      // failed assertions will launch a FailureException
-      // skipped assertions will launch a SkippedException
-      case f: FailureException => addFailure(f)
-      case s: SkippedException => addSkipped(s)
-      case t: Throwable => {t.printStackTrace; addError(t)}
+        // failed assertions will launch a FailureException
+        // skipped assertions will launch a SkippedException
+        case f: FailureException => addFailure(f)
+        case s: SkippedException => addSkipped(s)
+        case t: Throwable => {t.printStackTrace; addError(t)}
+      }
+      // try the "after" methods. If there is an exception, add an error and return the current example
+      try { if (!failed) cycle.afterExample(this) } catch { case t: Throwable => addError(t) }
+      this
     }
-    // try the "after" methods. If there is an exception, add an error and return the current example
-    try { cycle.afterExample(this) } catch { case t: Throwable => addError(t) }
-    isInsideDefinition = false
+    if (cycle.isSequential)
+      execute
     this
   }
+  
+  private[this] def execute = {
+    if (!executed){
+      toRun()
+      executed = true
+    }
+  }
+  
   /** alias for the <code>in</code> method */
   def >> (test: => Any) = in(test)
   
@@ -243,13 +257,13 @@ case class Example(description: String, cycle: ExampleLifeCycle) {
   def addSkipped(skip: SkippedException) = thisSkipped += skip
 
   /** @return the failures of this example and its subexamples */
-  def failures: Seq[FailureException] = thisFailures ++ subExamples.flatMap { _.failures }
+  def failures: Seq[FailureException] = {execute; thisFailures ++ subExamples.flatMap { _.failures }}
 
   /** @return the skipped messages for this example and its subexamples */
-  def skipped: Seq[SkippedException] = thisSkipped ++ subExamples.flatMap { _.skipped }
+  def skipped: Seq[SkippedException] = {execute; thisSkipped ++ subExamples.flatMap { _.skipped }}
 
   /** @return the errors of this example and its subexamples */
-  def errors: Seq[Throwable] = thisErrors ++ subExamples.flatMap {_.errors}
+  def errors: Seq[Throwable] = {execute; thisErrors ++ subExamples.flatMap {_.errors}}
 
   /** @return a user message with failures and messages, addSpaceed with a specific tab string (used in ConsoleReport) */
   def pretty(tab: String) = tab + description + failures.foldLeft("") {_ + addSpace(tab) + _.message} + 

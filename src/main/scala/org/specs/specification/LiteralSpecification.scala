@@ -13,6 +13,7 @@ import org.specs.Sugar._
  * </ul>
  */
 trait LiteralSpecification  extends Specification with DataTables {
+  setSequential
   
   /**
    * This method is used to silence the result of a call in an action. For example: <pre>

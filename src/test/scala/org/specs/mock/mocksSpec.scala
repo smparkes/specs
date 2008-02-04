@@ -6,8 +6,10 @@ import org.specs.Sugar._
 
 object mocksSpec extends Specification { "Mocks" areSpecifiedBy (mockProtocols, mockParameters) }
 class mockProtocolsTest extends JUnit3(mockProtocols) 
+class mockProtocolsSuite extends ScalaTestSuite(mockProtocols) 
+object mockProtocolsRunner extends ConsoleRunner(mockProtocols) 
 object mockProtocols extends MatchersSpecification with ButtonAndLightMock {
-  "Mock protocols" should { usingBefore { () => {clearExample; button.init()} }
+  "Mock protocols" should { doBefore { clearExample; button.init() }
    "provide an 'expect inAnyOrder' protocol checking if calls have been made to mock objects" in {
       // by default, the calls can be made in any order
       val protocol = expect(inAnyOrder){mock.on; mock.off}
@@ -86,7 +88,7 @@ object mockProtocols extends MatchersSpecification with ButtonAndLightMock {
       2.times {i => button.push}
     }
   }
-  "Mock protocols" can { usingBefore { () => {clearExample; button.init()} }
+  "Mock protocols" can { doBefore { clearExample; button.init() }
   "be nested to allow complex expectations: expect, inAnyOrder 1 'on' and 2 'off'" in {
       val protocol = expect(inAnyOrder) { 
         expect(oneOf){mock.on; mock.off; mock.on}
