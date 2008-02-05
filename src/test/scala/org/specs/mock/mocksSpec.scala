@@ -1,6 +1,5 @@
 package org.specs.mock
 import org.specs.runner._
-import org.specs.mock._
 import org.specs.matcher._
 import org.specs.Sugar._
 
@@ -10,7 +9,23 @@ class mockProtocolsSuite extends ScalaTestSuite(mockProtocols)
 object mockProtocolsRunner extends ConsoleRunner(mockProtocols) 
 object mockProtocols extends MatchersSpecification with ButtonAndLightMock {
   "Mock protocols" should { doBefore { clearExample; button.init() }
-   "provide an 'expect inAnyOrder' protocol checking if calls have been made to mock objects" in {
+   "provide an 'expect oneOf' protocol checking if one call exactly has been made" in {
+     var protocol = expect(oneOf) { mock.on; mock.off }
+     assertion(protocol must beMet) must failWithMatch("Expected in any order \\[on\\(.*\\); off\\(.*\\)\\]. Received none")
+     protocol.clear                                                                                                   
+
+     protocol = expect(oneOf) { mock.on; mock.off }
+     2.times {i => button.push}
+     protocol must beMet
+     protocol.clear
+
+     protocol = expect(oneOf, exclusively) { mock.on; mock.off }
+     3.times {i => button.push}
+     assertion(protocol must beMet) must failWithMatch("Expected in any order \\[on\\(.*\\); off\\(.*\\)\\]. Received:\n  on\\(.*\\)\n  off\\(.*\\)\n  on\\(.*\\)")
+     protocol.clear
+  }
+
+  "provide an 'expect inAnyOrder' protocol checking if calls have been made to mock objects" in {
       // by default, the calls can be made in any order
       val protocol = expect(inAnyOrder){mock.on; mock.off}
       assertion(protocol must beMet) must (failWithMatch("Expected in any order \\[on\\(.*\\); off\\(.*\\)\\]"))
@@ -19,10 +34,6 @@ object mockProtocols extends MatchersSpecification with ButtonAndLightMock {
       assertion(protocol must beMet) must failWithMatch("Expected in any order \\[on\\(.*\\); off\\(.*\\)\\]")
 
       button.push  // the protocol is always checked at the end of an example
-    }
-   "provide an 'expect inAnyOrder' protocol which is, by default, discarding unexpected messages" in {
-     val protocol = expect(inAnyOrder){mock.on; mock.off}
-     3.times {i => button.push}
    }
    "provide an 'expect exclusively' argument checking if more calls have been made" in {
       // by default, the calls can be made in any order
@@ -38,19 +49,7 @@ object mockProtocols extends MatchersSpecification with ButtonAndLightMock {
      var protocol = expect(anyOf) { mock.destroy }
      button.pound
    }
-   "provide an 'expect oneOf' protocol checking if one call exactly has been made" in {
-     var protocol = expect(oneOf) { mock.on; mock.off }
-     assertion(protocol must beMet) must failWithMatch("Expected in any order \\[on\\(.*\\); off\\(.*\\)\\]. Received none")
-
-     protocol = expect(oneOf) { mock.on; mock.off }
-     3.times {i => button.push}
-     assertion(protocol must beMet) must failWithMatch("Expected in any order \\[on\\(.*\\); off\\(.*\\)\\]. Received:\n  on\\(.*\\)\n  off\\(.*\\)\n  on\\(.*\\)")
-
-     button.init()
-     protocol = expect(oneOf) { mock.on; mock.off }
-     2.times {i => button.push}
-   }
-   "provide an 'expect n.of' protocol checking if exactly n calls have been made" in {
+  "provide an 'expect n.of' protocol checking if exactly n calls have been made" in {
      var protocol = expect(2.of) { mock.on; mock.off }
      assertion(protocol must beMet) must failWithMatch("Expected 2 of: \\[on\\(.*\\); off\\(.*\\)\\]. Received none")
 
@@ -89,13 +88,12 @@ object mockProtocols extends MatchersSpecification with ButtonAndLightMock {
     }
   }
   "Mock protocols" can { doBefore { clearExample; button.init() }
-  "be nested to allow complex expectations: expect, inAnyOrder 1 'on' and 2 'off'" in {
-      val protocol = expect(inAnyOrder) { 
+     "be nested to allow complex expectations: expect, inAnyOrder 1 'on' and 2 'off'" in {
+     val protocol = expect(inAnyOrder) { 
         expect(oneOf){mock.on; mock.off; mock.on}
         expect(oneOf){mock.off}
       } 
-      
-    
+
       assertion(protocol must beMet) must failWithMatch(".*Expected in any order \\[in any order \\[on\\(.*\\); off\\(.*\\); on\\(.*\\)]; in any order \\[off\\(.*\\)\\]\\]. Received none")
 
       2.times {i => button.push}

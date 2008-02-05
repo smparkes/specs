@@ -17,6 +17,12 @@ import org.jmock.internal.matcher.MethodNameMatcher;
 import org.specs.collection.JavaCollectionsConversion._
 
 /** 
+ * This object can be used to import and rename some functions in case of a conflict with some other trait.
+ * For example the trait Suite in ScalaTest uses an expect method too
+ */
+object JMocker extends JMocker
+
+/** 
  * The JMocker trait is used to give access to the mocking functionalities of the JMock library 
  */
 trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockActions {

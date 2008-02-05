@@ -97,6 +97,7 @@ trait Mocker extends ProtocolTypes with ExampleLifeCycle with MockMatchers {
    * clears the protocol before each example to start with new expectations
    */
   override def beforeExample(ex: Example) = {
+    super.beforeExample(ex)
     protocol.clear
   } 
   /**
@@ -104,6 +105,7 @@ trait Mocker extends ProtocolTypes with ExampleLifeCycle with MockMatchers {
    */
   override def afterExample(ex: Example) = {
     protocol.clear
+    super.afterExample(ex)
   }
 
   /**
@@ -114,7 +116,7 @@ trait Mocker extends ProtocolTypes with ExampleLifeCycle with MockMatchers {
       ex.addAssertion
       (new Assert[Protocol](protocol)) must beMet
     } 
-    protocol.clear
+    super.afterTest(ex)
   }
   
   /**

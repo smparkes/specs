@@ -176,7 +176,11 @@ case class Sut(description: String, cycle: ExampleLifeCycle) extends ExampleLife
  * When assertions have been evaluated inside an example they register their failures and errors for later reporting 
  */
 case class Example(description: String, cycle: ExampleLifeCycle) {
+
+  /** function containing the test to be run */
   private[this] var toRun: () => Any = () => ()
+
+  /** flag used to memorize if the example has already been executed once. In that case, it will not be re-executed */
   private[this] var executed = false
   
   /** failures created by Assert objects inside the <code>in<code> method */
@@ -190,18 +194,27 @@ case class Example(description: String, cycle: ExampleLifeCycle) {
 
   /** number of <code>Assert</code> objects which refer to that Example */
   private[this] var assertionsNumber = 0
+
+  /** @return the number of assertions, executing the example if necessary */
   def assertionsNb = { execute; assertionsNumber }
+
+  /** increment the number of assertions in this example */
   def addAssertion = { assertionsNumber += 1 }
 
   /** sub-examples created inside the <code>in</code> method */
   private[this] var subExs = new Queue[Example]
+
+  /** add a new sub-example to this example */
   def addExample(e: Example) = subExs += e
+
+  /** @return the subexamples, executing the example if necessary */
   def subExamples = {execute; subExs}
 
   /**
-   * creates a new Example object and, in the process of doing so, evaluates the <code>test</code>
-   * value which may contain assertions. Errors and failures are then attached to the current example
+   * creates a new Example object and store as a function the test to be executed. This <code>test</code>
+   * is a value which may contain assertions. Upon execution, errors and failures will be attached to the current example
    * by calling the <code>addFailure</code> and <code>addError</code> methods
+   * Execution will be triggered when requesting status information on that example: failures, errors, assertions number, subexamples
    * @return a new <code>Example</code>
    */
   def in (test: => Any): Example = {
@@ -237,6 +250,7 @@ case class Example(description: String, cycle: ExampleLifeCycle) {
     this
   }
   
+  /** execute the example, setting a flag to make sure that it is only executed once */
   private[this] def execute = {
     if (!executed){
       toRun()
@@ -256,16 +270,16 @@ case class Example(description: String, cycle: ExampleLifeCycle) {
   /** creates and adds a skipped exception */
   def addSkipped(skip: SkippedException) = thisSkipped += skip
 
-  /** @return the failures of this example and its subexamples */
+  /** @return the failures of this example and its subexamples, executing the example if necessary */
   def failures: Seq[FailureException] = {execute; thisFailures ++ subExamples.flatMap { _.failures }}
 
-  /** @return the skipped messages for this example and its subexamples */
+  /** @return the skipped messages for this example and its subexamples, executing the example if necessary  */
   def skipped: Seq[SkippedException] = {execute; thisSkipped ++ subExamples.flatMap { _.skipped }}
 
-  /** @return the errors of this example and its subexamples */
+  /** @return the errors of this example and its subexamples, executing the example if necessary  */
   def errors: Seq[Throwable] = {execute; thisErrors ++ subExamples.flatMap {_.errors}}
 
-  /** @return a user message with failures and messages, addSpaceed with a specific tab string (used in ConsoleReport) */
+  /** @return a user message with failures and messages, spaced with a specific tab string (used in ConsoleReport) */
   def pretty(tab: String) = tab + description + failures.foldLeft("") {_ + addSpace(tab) + _.message} + 
                                                 errors.foldLeft("") {_ + addSpace(tab) + _.getMessage}
   /** @return the example description */

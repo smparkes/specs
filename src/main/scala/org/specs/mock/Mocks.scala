@@ -79,7 +79,6 @@ class Protocol extends ProtocolTypes {
    */
   def failures: String = {
     val f = definition.failures(receivedCalls, exclusive)
-    
     // if there are no failures that are the result of unmatched calls
     // and if the protocol is defined as exclusive, return a message with unexpected calls if there are some
     if (exclusive && f.isEmpty)
