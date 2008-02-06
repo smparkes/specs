@@ -393,12 +393,11 @@ trait JMockActions {
 trait JMockerExampleLifeCycle extends ExampleLifeCycle with JMockerContext {
 
   /** 
-   * before any example, a new context and new exptecations should be created
+   * before any example, a new context and new expetcations should be created
    */
   override def beforeExample(ex: Example) = {
     super.beforeExample(ex)
-    context = createMockery
-    expectations = new Expectations()
+    restart
   }
 
   /** 
@@ -417,13 +416,13 @@ trait JMockerExampleLifeCycle extends ExampleLifeCycle with JMockerContext {
     try {
       context.assertIsSatisfied
     } catch {
-      case e: ExpectationError => throw createFailure(e)
+      case e: ExpectationError => {restart; throw createFailure(e)}
     }
+    restart
     super.afterTest(ex)
   }
-                         
+  
   private[this] def createFailure(e: ExpectationError) = FailureException(e.toString)
-
 }
 
 /** 
@@ -435,6 +434,22 @@ trait JMockerContext extends Imposterizer {
 
   /** call expectations with optional constraints on the number of calls, on parameters, return values,... */
   var expectations = new Expectations()
+  
+  /** creates a new context and a new Expectations object */
+  def restart = { context = createMockery; expectations = new Expectations() }
+
+  /** 
+   * This method can be used to check the context. It will always restart the context, even if there is an ExpectationError
+   * In that case, it is transformed to a failure exception
+   */
+  def checkContext = {
+    try {
+      context.assertIsSatisfied
+    } catch {
+      case e: ExpectationError => {restart; throw e}
+    }
+    restart
+  }
 }
 
 

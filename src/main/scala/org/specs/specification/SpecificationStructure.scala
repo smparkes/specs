@@ -122,6 +122,14 @@ trait SpecificationStructure extends ExampleLifeCycle {
     }
   }
 }
+
+/** 
+ * This abstract trait is used to represent how examples should be executed:<ul>
+ * <li>sequentially or not ("not" is the default)
+ * <li>with functions being executed before / after the example
+ * <li>with functions being executed before / after the example tests
+ * </ul>
+ */ 
 trait ExampleLifeCycle {
   protected var sequential = false
   def isSequential = sequential
