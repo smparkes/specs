@@ -12,7 +12,7 @@ import org.specs.collection.JavaCollectionsConversion._
  */
 class EmptyJUnit3TestSuite extends TestSuite
 
-trait JUnit3TestSuite { 
+trait JUnit3TestSuite extends Test { 
   val testSuite = new EmptyJUnit3TestSuite
   def setName(n: java.lang.String): Unit = testSuite.setName(n)
   def getName: java.lang.String = testSuite.getName
@@ -59,6 +59,8 @@ trait JUnit extends JUnit3TestSuite with SpecsHolder {
   override def tests: java.util.Enumeration[Test] = {init; super.tests}
   override def suites = {init; super.suites}
   override def countTestCases = {init; super.countTestCases}
+  override def testCases = {init; super.testCases}
+  override def addTest(t: Test) = {init; super.addTest(t)}
 
   private def init = { 
     if (!initialized) {

@@ -40,21 +40,46 @@ class JUnit38SuiteRunner(klass: java.lang.Class[T] forSome {type T <: TestCase})
    * Create a Description from a TestCase or a TestSuite object
    */
   def makeDescription(test: Test): Description = {
+    println("class is " + test.getClass.getName)
 	if (test.isInstanceOf[TestCase]) {
 	  val tc = test.asInstanceOf[TestCase];
-	  createTestDescription(tc.getClass(), tc.getName());
-	} else if (test.isInstanceOf[TestSuite]) {
+    println("doing test case " + tc.getName)
+      println("creating a description for " + tc.getName + " " + 
+                createTestDescription(tc.getClass, tc.getName, null))
+	  createTestDescription(tc.getClass, tc.getName, null);
+	}
+    else  if (test.isInstanceOf[TestSuite]) {
 	  val ts = test.asInstanceOf[TestSuite];
       var name = ts.getName;
       if (name == null)
         name = "";
+    println("doing test suite " + ts.getName)
       val description= createSuiteDescription(name, null);
-      for (i <- 0 to ts.testCount()-1)
-		description.addChild(makeDescription(ts.testAt(i)));
-	  description;
-	 } else
-	    // This is the best we can do in this case
-		createSuiteDescription(test.getClass());
+      for (i <- 0 to ts.testCount -1) {
+		description.addChild(makeDescription(ts.testAt(i)));        
+      }
+      println("desc is " + description.getDisplayName)
+      println("children are " + description.getChildren)
+	  description
+	 } 
+	 else if (test.isInstanceOf[JUnit3TestSuite]) {
+  	   val ts = test.asInstanceOf[JUnit3TestSuite];
+       var name = ts.getName;
+       if (name == null) name = "";
+    println("doing Jtest suite " + ts.getName)
+       val description= createSuiteDescription(name, null);
+       for (t <- ts.testCases) {
+         description.addChild(makeDescription(t));
+       }
+       for (suite <- ts.suites) {
+		 description.addChild(makeDescription(suite));
+       }
+	   description;
+	 } 
+     else {
+	   // This is the best we can do in this case
+	   createSuiteDescription(test.getClass());
+     }
   }
 
   /**
