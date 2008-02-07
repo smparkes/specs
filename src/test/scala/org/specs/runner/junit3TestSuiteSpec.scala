@@ -1,14 +1,14 @@
 package org.specs.runner
 
 import org.specs.io.mock.MockOutput
+import org.specs.collection.JavaCollectionsConversion._
 import org.specs.runner.javaConversions._
 import org.specs.runner._
 import _root_.junit.framework._
 import org.junit.runner.notification.RunNotifier
 import org.junit.runner.Description
 
-object junit3TestSuiteRunner extends ConsoleRunner(junit3TestSuiteSpec)
-class junit3TestSuiteTest extends JUnit3(junit3TestSuiteSpec)
+class JUnit3TestRunner extends Runner(junit3TestSuiteSpec) with JUnit with Console with ScalaTest
 object junit3TestSuiteSpec extends Specification {
   "A junit 3 test suite" should {
     "create a test suite containing tests suites for each specification " + 
@@ -16,12 +16,12 @@ object junit3TestSuiteSpec extends Specification {
       suite(that.isOk).getName must beMatching("SimpleSpec")
       suite(that.isOk).suites match {
         case List() => fail("there should be a test suite")
-        case ts::List() => {
+        case (ts: TestSuite)::List() => {
           ts.getName mustMatch "A specification"
-          ts.testCases match {
+          enumerationToList(ts.tests) match {
             case List() => fail("there should be a test case")
-            case tc::List() => 
-              tc.getName mustMatch "have example 1 ok"
+            case (tc: TestCase)::List() => 
+              tc.getName() mustMatch "have example 1 ok"
           }
         }
       }

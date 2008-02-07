@@ -9,44 +9,70 @@ import org.specs.specification._
 import org.specs.ExtendedThrowable._
 
 /**
- * The <code>XmlRunner</code> class is used to create an xml file, in a specified output directory
- * with the results of a specification execution.
+ * Concrete class for the Xml trait. It allows to select a specification to run and an output path
  * Usage: <code>object runner extends XmlRunner(mySpec, "./results/specs")</code>
+ *
  * The name of the generated file is specification.name by default but can be overriden:<pre>
- * object runner extends XmlRunner(mySpec, "./results/specs"){override val fileName="result"}</pre>
+ * object runner extends XmlRunner(mySpec, "./results/specs"){override def fileName="result"}</pre>
+ */
+class XmlRunner(val specification: Specification, path: String) extends Xml {
+  outputDirPath = path
+  val specs: Seq[Specification] = List(specification)
+  
+  /** alternate constructor with the specification only. The output dir is the current directory */
+  def this(specification: Specification) = this(specification, ".")
+}
+
+/**
+ * The <code>XmlRunner</code> trait is used to create an xml file, in a specified output directory
+ * with the results of a specification execution.
+ * 
  * If the output directory is not specified <pre>object runner extends XmlRunner(mySpec)</pre> then the
  * current directory will be used
+ *
+ * Usage:<code>
+ * class mySpecRunner extends Runner(mySpec) with Xml
+ * <code>
+ * 
+ * The output directory can be overriden if necessary:<pre>
+ * class mySpecRunner extends Runner(mySpec) with Xml { override def outputDir = "./results/specs" }</pre>
  */
-class XmlRunner(val specification: Specification, var outputDir: String) extends FileSystem with ConsoleLog with FileWriter with ConsoleReporter {
+trait Xml extends FileSystem with ConsoleLog with FileWriter with ConsoleReporter with SpecsHolder with Application {
+  /** private variable storing the output directory path */
+  protected var outputDirPath = "."
+  
+  /** set the output directory path */
+  def outputDir_=(path: String) = outputDirPath = path
 
-  /**
-   * Alternate constructor with the specification only. The output dir is the current directory
-   */
-  def this(specification: Specification) = this(specification, ".")
-
+  /** @return the output directory path */
+  def outputDir = outputDirPath
+  
+  /** @return the first and only spec to execute from the SpecsHolder trait */
+  def spec = specs(0)
+  
   /**
    * the default name of the file is the specification name 
    */
-  val fileName = specification.name
+  def fileName = spec.name
   
   /**
    * the default path is the output dir + specification name + .xml 
    */
-  def filePath = normalize(outputDir) + fileName + ".xml"
+  def filePath = {normalize(outputDirPath) + fileName + ".xml"}
 
   /**
    * calling main should execute the runner 
    */
-  def main(args: Array[String]): Unit = execute
+  override def main(args: Array[String]): Unit = reportSpec
   
   /**
    * creates the file and write the xml result of the specification execution 
    */
-  def execute = {
-    report(List(specification))
+  def reportSpec = {
+    report(List(spec))
     createFile(filePath)
     write(filePath) { out: Writer =>
-      out.write(new PrettyPrinter(200, 2).format(asXml(specification)))
+      out.write(new PrettyPrinter(200, 2).format(asXml(spec)))
     }
   }
 

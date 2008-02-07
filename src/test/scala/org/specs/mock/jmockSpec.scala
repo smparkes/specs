@@ -7,8 +7,7 @@ import org.specs.runner._
 import org.hamcrest.core._
 import org.specs.matcher._
 
-class jmockSpecTest extends JUnit3(jmockSpec)
-object jmockSpecRunner extends ConsoleRunner(jmockSpec)
+class JMockSpecRunner extends Runner(jmockSpec) with ScalaTest with Console with JUnit with Xml 
 
 object jmockSpec extends Specification {
   "The jMock integration".isSpecifiedBy(jmockGoodSpec, jmockBadSpec)

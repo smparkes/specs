@@ -1,6 +1,7 @@
 package org.specs.util
 import org.specs.Products._
 import scala._
+import org.specs.specification.FailureException
 
 /**
  * The Datatables trait provides implicit methods to start table headers 
@@ -188,7 +189,7 @@ case class DataTable[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13,
   /**
    * This function can be overriden to provide another behaviour upon table failure
    */  
-  def failureFunction(table: DataTable[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]) : Unit = throw new Exception(table.results) 
+  def failureFunction(table: DataTable[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]) : Unit = throw new FailureException(table.results) 
   
   /**
    * @returns the result of the function execution on each row: the string representation of the row and an optional error message in case of a failure

@@ -3,17 +3,16 @@ import org.specs.specification._
 import org.specs.util.DataTables
 import org.specs.Sugar._
 
-class xmlRunnerUnitTest extends JUnit3(xmlRunnerUnit)
-object xmlRunnerUnitRunner extends ConsoleRunner(xmlRunnerUnit)
+class xmlRunnerUnitRunner extends Runner(xmlRunnerUnit) with JUnit with Console
 object xmlRunnerUnit extends LiteralSpecification with TestData {
   "An xml runner" should {
     "create an xml file in the default directory if nothing is specified" in {
-       xmlRunner.execute
+       xmlRunner.reportSpec
        xmlRunner.files must haveKey("./spec1.xml")
     }
     "create an xml file in the specified output directory, handling file separators" in {
        "output dir" | 	"spec name" | 	"file path"  				|>
-       "" 		! 	"spec1" 	!	"./spec1.xml"				|  
+       "" 		    ! 	"spec1" 	!	"./spec1.xml"				|  
        "result" 	!	"spec1" 	!	"./result/spec1.xml" 		|  
        "result/" 	!	"spec1" 	!	"./result/spec1.xml" 		|  
        "result\\" 	!	"spec1" 	!	"./result/spec1.xml" 		|  
@@ -22,8 +21,9 @@ object xmlRunnerUnit extends LiteralSpecification with TestData {
        "result/xml" ! 	"spec1"     !	"./result/xml/spec1.xml"	| {
        (dir: String, 	spec: String, 	result: String) => {
            xmlRunner.reset
-           xmlRunner.outputDir = dir; spec1.name = spec; xmlRunner.execute
-           xmlRunner.files must haveKey(result)
+           xmlRunner.outputDir = dir; spec1.name = spec;
+           xmlRunner.reportSpec
+           xmlRunner.files.keySet must contain(result)
          }
        }
        

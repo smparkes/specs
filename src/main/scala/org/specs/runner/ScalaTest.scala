@@ -2,37 +2,56 @@ package org.specs.runner
 import org.scalatest._
 
 /**
- * This class is a ScalaTest suite which is build from a specification and return as nested suites
- * its subspecifications or its systems under test (sut)
+ * Concrete class for the ScalaTest trait.
+ * Usage:<code>
+ * class mySpecRunner extends ScalaTestSuite(mySpec)
+ * </code>
+ * Then it can be run with the ScalaTest gui runner: <code>java -cp ... org.scalatest.Runner -g -s mySpecRunner</code> 
  */
-class ScalaTestSuite(specifications: Specification*) extends org.scalatest.Suite {
+class ScalaTestSuite(specifications: Specification*) extends ScalaTest { 
+  val specs: Seq[Specification] = specifications 
+}
+
+/**
+ * This trait is a ScalaTest suite which is build from one or more specifications (provided by the inherited SpecsHolder)
+ * The subspecifications, as well the system under test (sut) are provided as nested suites
+ * Usage:<code>
+ * class mySpecRunner extends Runner(mySpec) with ScalaTest
+ * <code>
+ */
+trait ScalaTest extends SpecsHolder with org.scalatest.Suite {
   /**
    * @return the name of the suite which is either the specification name if there's only one or 
    * a name build after <code>this</code> class
    */
   override def suiteName = {
-    if (specifications.size > 1)
+    if (specs.size > 1)
       this.getClass.getName.replaceAll("\\$", "")
     else
-      specifications(0).description
+      specs(0).description
   }
     
   /**
    * @return an empty map for now. The notion of group may be added later to specifications
    */
-  override def groups = Map()
+  override def groups: Map[String,Set[String]] = Map()
 
   /**
    * @return the subspecifications or the suts as ScalaTest suites
    */
   override def nestedSuites: List[org.scalatest.Suite] = {
     var result: List[org.scalatest.Suite] = Nil 
-    specifications foreach { specification => 
+    specs foreach { specification => 
       specification.subSpecifications.foreach { s: Specification => result = new ScalaTestSuite(s)::result }
       specification.suts foreach {sut => result = new SutSuite(sut)::result }
     }
     result.reverse
   }
+  
+  /**
+   * @return an empty set as a specification doesn't hold tests by itself
+   */
+  override def testNames = Set()
 }
 
 /**

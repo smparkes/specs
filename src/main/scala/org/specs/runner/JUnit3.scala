@@ -10,12 +10,17 @@ import org.specs.collection.JavaCollectionsConversion._
  * JUnit 3 imposes that there is at least one test in a test suite in order to be able to run it
  * This class can run with JUnit4 thanks to the RunWith annotation and the custom JUnit38SuiteRunner
  */
-@RunWith(classOf[JUnit38SuiteRunner])
-abstract class EmptyJUnit3TestSuite extends TestSuite { 
-  
-  /** defines an empty test to satisfy junit requirements for test cases */
-  def testEmpty = {} 
+class EmptyJUnit3TestSuite extends TestSuite
 
+trait JUnit3TestSuite { 
+  val testSuite = new EmptyJUnit3TestSuite
+  def setName(n: java.lang.String): Unit = testSuite.setName(n)
+  def getName: java.lang.String = testSuite.getName
+  def addTest(t: Test) = testSuite.addTest(t)
+  def run(result: TestResult) = testSuite.run(result)
+  def countTestCases = testSuite.countTestCases
+  def tests: java.util.Enumeration[Test] = testSuite.tests
+  
   /** @return test suites nested in this suite */
   def suites = for(t <- tests; 
                    if (t.isInstanceOf[EmptyJUnit3TestSuite])) 
@@ -35,19 +40,42 @@ abstract class EmptyJUnit3TestSuite extends TestSuite {
  * <p>
  * A nested junit TestSuite is created for each sub-specification and for each system under test
  */
-class JUnit3(val specifications : Specification*) extends EmptyJUnit3TestSuite {
-  if (specifications.size > 1)
-    setName(this.getClass.getName.replaceAll("\\$", ""))
-  else
-    setName(specifications(0).description)
-  specifications foreach { specification => 
-    specification.subSpecifications.foreach {s: Specification => addTest(new JUnit3(s))}
-    if (specification.suts.size > 1) 
-      addTest(new SpecificationTestSuite(specification)) 
-    else  
-      specification.suts foreach {sut => addTest(new ExamplesTestSuite(sut.description + " " + sut.verb, sut.examples, sut.skippedSut))}
+@RunWith(classOf[JUnit38SuiteRunner])
+class JUnit3(val specifications : Specification*) extends TestSuite with JUnit { 
+  val specs: Seq[Specification] = specifications 
+  override def setName(n: java.lang.String): Unit = super[JUnit].setName(n)
+  override def addTest(t: Test) = super[JUnit].addTest(t)
+  override def getName: java.lang.String = super[JUnit].getName
+  override def tests: java.util.Enumeration[Test] = super[JUnit].tests
+  override def run(result: TestResult) = super[JUnit].run(result)
+  override def suites = super[JUnit].suites
+  override def countTestCases = super[JUnit].countTestCases
+}
+
+trait JUnit extends JUnit3TestSuite with SpecsHolder {
+  private var initialized = false
+  override def run(result: TestResult) = {init; super.run(result)} 
+  override def getName = {init; super.getName}
+  override def tests: java.util.Enumeration[Test] = {init; super.tests}
+  override def suites = {init; super.suites}
+  override def countTestCases = {init; super.countTestCases}
+
+  private def init = { 
+    if (!initialized) {
+      if (specs.size > 1)
+	    setName(this.getClass.getName.replaceAll("\\$", ""))
+	  else
+	    setName(specs(0).description)
+	  specs foreach { specification => 
+	    specification.subSpecifications.foreach {s: Specification => addTest(new JUnit3(s))}
+	    if (specification.suts.size > 1) 
+	      addTest(new SpecificationTestSuite(specification)) 
+	    else  
+	      specification.suts foreach {sut => addTest(new ExamplesTestSuite(sut.description + " " + sut.verb, sut.examples, sut.skippedSut))}
+	  }
+      initialized = true
+    }
   }
-  
 }
 
 /**
@@ -73,10 +101,10 @@ class ExamplesTestSuite(description: String, examples: Iterable[Example], skippe
       addTest(new ExamplesTestSuite(example.description, example.subExamples, skipped))
   }
   override def run(result: TestResult) = {
-      skipped match {
-         case Some(skipException) => result.addFailure(this, new SkippedAssertionError(skipException))
-         case None => super.run(result)                                    
-      }                                    
+    skipped match {
+      case Some(skipException) => result.addFailure(this, new SkippedAssertionError(skipException))
+      case None => super.run(result)                                    
+    }                                    
   }
 }
 /**

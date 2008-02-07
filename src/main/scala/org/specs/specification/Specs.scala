@@ -70,6 +70,7 @@ abstract class Specification extends Matchers with SpecificationStructure with A
   def skip(m: String) = SkippedException(m).rethrowFrom(this)
 }
 
+
 /**
  * The <code>Sut</code> class represents a system under test<br>
  * It has:<ul>

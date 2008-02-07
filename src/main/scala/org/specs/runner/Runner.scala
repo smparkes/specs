@@ -1,6 +1,54 @@
 package org.specs.runner
 import org.specs.log.ConsoleLog
 import org.specs.collection.JavaCollectionsConversion
+import _root_.org.junit.runner._
+
+/**
+ * The SpecsHolder trait can be inherited by runners to get access to the specifications to report 
+ */  
+trait SpecsHolder {
+  val specs: Seq[Specification]
+}
+
+/**
+ * The Runner class is an abstract class referencing one or several specifications to run. It should be extended
+ * with at least one runner trait which will use the <code>specifications</code>.
+ * Usage:<code>
+ * class mySpecRunner extends Runner(mySpec) with JUnit with Console with ScalaTest
+ * or
+ * class mySpecRunner extends Runner(mySpec) with JUnit with Xml with ScalaTest
+ * which will also output the results in an xml file
+ * <code>
+ * 
+ * Then mySpecRunner class can be executed in many ways:<ul>
+ * <li>scala -cp ... -e "new mySpecRunner.reportSpecs"
+ * <li>java -cp ... org.scalatest.Runner -g -s mySpecRunner
+ * <li>java -cp ... org.junit.runner.JUnitCore mySpecRunner
+ * </ul>
+ * 
+ * It is annotated with a JUnit annotation because JUnit requires that annotation should be placed on the class which will be executed. 
+ * In the example above, Runner(mySpec) is the only class; JUnit, Console and ScalaTest are all traits.
+ */  
+@RunWith(classOf[JUnit38SuiteRunner])
+abstract class Runner(var specifications: Specification*) extends SpecsHolder {
+
+  /** alternate constructor with a list of specifications */  
+  val specs: Seq[Specification] = specifications
+
+  /** alternate constructor with a list of specifications */  
+  def this(specifications: List[Specification]) = this(specifications:_*)
+}
+
+/**
+ * This trait can be mixed in with a Runner class to output the result of a specification to the console 
+ * Usage:<code>
+ * class mySpecRunner extends Runner(mySpec) with Console
+ * <code> 
+ */  
+trait Console extends ConsoleReporter with SpecsHolder with Application {
+  def reportSpecs = report(specs)
+  override def main(args: Array[java.lang.String]) = reportSpecs
+}
 
 /**
  * This class implements the <code>ConsoleReporter</code> by adding a main 
@@ -8,8 +56,8 @@ import org.specs.collection.JavaCollectionsConversion
  * Usage: <code>object mySpecRunner extends ConsoleRunner(mySpec1, mySpec2)</code>
  */  
 class ConsoleRunner(val specifications: Specification*) extends ConsoleReporter {
-   def ConsoleRunner(specs: List[Specification]) = new ConsoleRunner(specs :_*)
-   def main(args: Array[String]) = report(specifications)
+  def ConsoleRunner(specs: List[Specification]) = new ConsoleRunner(specs :_*)
+  def main(args: Array[String]) = report(specifications)
 }
 
 /**
