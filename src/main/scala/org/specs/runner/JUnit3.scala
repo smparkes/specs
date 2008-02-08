@@ -10,26 +10,46 @@ import org.specs.collection.JavaCollectionsConversion._
  * JUnit 3 imposes that there is at least one test in a test suite in order to be able to run it
  * This class can run with JUnit4 thanks to the RunWith annotation and the custom JUnit38SuiteRunner
  */
-class EmptyJUnit3TestSuite extends TestSuite
-
-trait JUnit3TestSuite extends Test { 
-  val testSuite = new EmptyJUnit3TestSuite
+trait JUnit extends JUnitSuite with SpecsHolder {
+  def initialize = { 
+    if (specs.size > 1)
+      setName(this.getClass.getName.replaceAll("\\$", ""))
+    else
+	   setName(specs(0).description)
+	specs foreach { specification => 
+	  specification.subSpecifications.foreach {s: Specification => addTest(new JUnit3(s))}
+	  specification.suts foreach {sut => addTest(new ExamplesTestSuite(sut.description + " " + sut.verb, sut.examples, sut.skippedSut))}
+	}
+  }
+}
+trait JUnitSuite extends Test { 
+  val testSuite = new TestSuite
+  protected var initialized = false
+  def run(result: TestResult) = {init; testSuite.run(result)} 
+  def getName = {init; testSuite.getName}
   def setName(n: java.lang.String): Unit = testSuite.setName(n)
-  def getName: java.lang.String = testSuite.getName
+  def tests: List[Test] = {init; enumerationToList(testSuite.tests)}
+  def countTestCases: Int = { init; tests.size }
+  def testCases: List[Test] = {
+    init
+    for (tc <- tests;
+         if (tc.isInstanceOf[TestCase]))
+         yield tc.asInstanceOf[TestCase]
+  }
+  def suites = {
+    init 
+    for (ts <- tests;
+         if (ts.isInstanceOf[JUnitSuite] || ts.isInstanceOf[TestSuite]))
+         yield ts.asInstanceOf[Test]
+  }
   def addTest(t: Test) = testSuite.addTest(t)
-  def run(result: TestResult) = testSuite.run(result)
-  def countTestCases = testSuite.countTestCases
-  def tests: java.util.Enumeration[Test] = testSuite.tests
-  
-  /** @return test suites nested in this suite */
-  def suites = for(t <- tests; 
-                   if (t.isInstanceOf[EmptyJUnit3TestSuite])) 
-                 yield t.asInstanceOf[EmptyJUnit3TestSuite]
+  def init = {
+    if (!initialized)
+      initialize
+    initialized = true
+  }
+  def initialize
 
-  /** @return test cases nested in this suite */
-  def testCases = for(t <- tests; 
-                    if (t.isInstanceOf[ExampleTestCase])) 
-                 yield t.asInstanceOf[ExampleTestCase]
 }
 
 /**
@@ -41,66 +61,23 @@ trait JUnit3TestSuite extends Test {
  * A nested junit TestSuite is created for each sub-specification and for each system under test
  */
 @RunWith(classOf[JUnit38SuiteRunner])
-class JUnit3(val specifications : Specification*) extends TestSuite with JUnit { 
+class JUnit3(val specifications : Specification*) extends JUnit { 
   val specs: Seq[Specification] = specifications 
-  override def setName(n: java.lang.String): Unit = super[JUnit].setName(n)
-  override def addTest(t: Test) = super[JUnit].addTest(t)
-  override def getName: java.lang.String = super[JUnit].getName
-  override def tests: java.util.Enumeration[Test] = super[JUnit].tests
-  override def run(result: TestResult) = super[JUnit].run(result)
-  override def suites = super[JUnit].suites
-  override def countTestCases = super[JUnit].countTestCases
 }
-
-trait JUnit extends JUnit3TestSuite with SpecsHolder {
-  private var initialized = false
-  override def run(result: TestResult) = {init; super.run(result)} 
-  override def getName = {init; super.getName}
-  override def tests: java.util.Enumeration[Test] = {init; super.tests}
-  override def suites = {init; super.suites}
-  override def countTestCases = {init; super.countTestCases}
-  override def testCases = {init; super.testCases}
-  override def addTest(t: Test) = {init; super.addTest(t)}
-
-  private def init = { 
-    if (!initialized) {
-      if (specs.size > 1)
-	    setName(this.getClass.getName.replaceAll("\\$", ""))
-	  else
-	    setName(specs(0).description)
-	  specs foreach { specification => 
-	    specification.subSpecifications.foreach {s: Specification => addTest(new JUnit3(s))}
-	    if (specification.suts.size > 1) 
-	      addTest(new SpecificationTestSuite(specification)) 
-	    else  
-	      specification.suts foreach {sut => addTest(new ExamplesTestSuite(sut.description + " " + sut.verb, sut.examples, sut.skippedSut))}
-	  }
-      initialized = true
-    }
-  }
-}
-
-/**
- * A <code>SpecificationTestSuite</code> is a junit TestSuite reporting the results of 
- * the suts of a Specification<br>
- * Its name is the description of the Specification
- */
-class SpecificationTestSuite(specification: Specification) extends EmptyJUnit3TestSuite {
-  setName(specification.description)
-  specification.suts foreach {sut => addTest(new ExamplesTestSuite(sut.description + " " + sut.verb, sut.examples, sut.skippedSut))}
-} 
 
 /**
  * A <code>SpecificationTestSuite</code> is a junit TestSuite reporting the results of 
  * a list of examples. If an example has subExamples, they are reported with a separate <code>ExamplesTestSuite</code>
  */
-class ExamplesTestSuite(description: String, examples: Iterable[Example], skipped: Option[Throwable]) extends EmptyJUnit3TestSuite {
-  setName(description)
-  examples foreach { example =>
-    if (example.subExamples.isEmpty)
-      addTest(new ExampleTestCase(example))
-    else
-      addTest(new ExamplesTestSuite(example.description, example.subExamples, skipped))
+class ExamplesTestSuite(description: String, examples: Iterable[Example], skipped: Option[Throwable]) extends JUnitSuite {
+  def initialize = {
+    setName(description)
+    examples foreach { example =>
+      if (example.subExamples.isEmpty)
+        addTest(new ExampleTestCase(example))
+      else
+        addTest(new ExamplesTestSuite(example.description, example.subExamples, skipped))
+    }
   }
   override def run(result: TestResult) = {
     skipped match {

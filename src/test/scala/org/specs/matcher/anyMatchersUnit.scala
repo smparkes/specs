@@ -6,7 +6,7 @@ import org.specs.Sugar._
 import org.specs.specification._
 
 class anyMatchersTest extends JUnit3(anyMatchersUnit)
-object anyMatchersRunner extends ConsoleRunner(anyMatchersUnit)
+class anyMatchersRunner extends Runner(anyMatchersUnit) with JUnit
 object anyMatchersUnit extends MatchersSpecification {
   "A 'be' matcher" should {
     "be ok if comparing the same object" in {

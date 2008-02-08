@@ -16,9 +16,9 @@ object junit3TestSuiteSpec extends Specification {
       suite(that.isOk).getName must beMatching("SimpleSpec")
       suite(that.isOk).suites match {
         case List() => fail("there should be a test suite")
-        case (ts: TestSuite)::List() => {
+        case (ts: JUnitSuite)::List() => {
           ts.getName mustMatch "A specification"
-          enumerationToList(ts.tests) match {
+          ts.testCases match {
             case List() => fail("there should be a test case")
             case (tc: TestCase)::List() => 
               tc.getName() mustMatch "have example 1 ok"
