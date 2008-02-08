@@ -29,7 +29,7 @@ trait SpecsHolder {
  * It is annotated with a JUnit annotation because JUnit requires that annotation should be placed on the class which will be executed. 
  * In the example above, Runner(mySpec) is the only class; JUnit, Console and ScalaTest are all traits.
  */  
-@RunWith(classOf[JUnit38SuiteRunner])
+@RunWith(classOf[JUnitSuiteRunner])
 abstract class Runner(var specifications: Specification*) extends SpecsHolder {
 
   /** alternate constructor with a list of specifications */  
