@@ -77,7 +77,7 @@ class AssertString[A <: String](value: => A) extends Assert[A](value) {
   def must_!=/(a: String) = must(notEqualIgnoreCase(a))
 }
 /** Specialized assert class with iterable matchers aliases */
-class AssertIterable[I <: AnyRef](value: Iterable[I]) extends Assert[Iterable[I]](value) {
+class AssertIterable[I <: AnyRef](value: =>Iterable[I]) extends Assert[Iterable[I]](value) {
 
   /** alias for <code>must(exist(function(_))</code> */
   def mustExist(function: I => Boolean) = must(exist {x:I => function(x)})
@@ -92,7 +92,7 @@ class AssertIterable[I <: AnyRef](value: Iterable[I]) extends Assert[Iterable[I]
   def mustNotContain(elem: I) = must(notContain(elem))
 }
 /** Specialized assert class with iterable[String] matchers aliases */
-class AssertIterableString(value: Iterable[String]) extends AssertIterable[String](value) {
+class AssertIterableString(value: =>Iterable[String]) extends AssertIterable[String](value) {
 
   /** alias for <code>must(existMatch(pattern))</code> */
   def mustHaveMatch(pattern: String) = must(existMatch(pattern))

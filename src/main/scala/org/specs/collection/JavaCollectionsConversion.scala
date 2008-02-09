@@ -19,7 +19,7 @@ object JavaCollectionsConversion {
   implicit def enumerationToList[T](e: java.util.Enumeration[T]): List[T] = {
     var list = List[T]()
     while (e.hasMoreElements()) { list = e.nextElement::list}
-    list
+    list.reverse
   }
 
 }
