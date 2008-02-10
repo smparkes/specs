@@ -26,54 +26,6 @@ trait AssertFactory {
   }
   def forExample(desc: String): Example
 
-  /** implicit transformation of a double into an object supporting numeric matchers */
-  implicit def theDouble[A <: Double](value: => A) = {
-    addAssertion
-    new Assert[A](value)
-  }
-
-  /** implicit transformation of a Number into an object supporting numeric matchers */
-  implicit def theNumber[A <: Number](value: => A) = {
-    addAssertion
-    new Assert[A](value)
-  }
-
-  /** implicit transformation of an Int into an object supporting numeric matchers */
-  implicit def theInt[A <: Int](value: => A) = {
-    addAssertion
-    new Assert[A](value)
-  }
-
-  /** implicit transformation of a Boolean into an object supporting AnyMatcher matchers */
-  implicit def theBoolean[A <: Boolean](value: => A) = {
-    addAssertion
-    new Assert[A](value)
-  }
-  
-  /** implicit transformation of a Long into an object supporting AnyMatcher matchers */
-  implicit def theLong[A <: Long](value: => A) = {
-    addAssertion
-    new Assert[A](value)
-  }
-    
-  /** implicit transformation of a Float into an object supporting AnyMatcher matchers */
-  implicit def theFloat[A <: Float](value: => A) = {
-    addAssertion
-    new Assert[A](value)
-  }
-      
-  /** implicit transformation of a Byte into an object supporting AnyMatcher matchers */
-  implicit def theByte[A <: Byte](value: => A) = {
-    addAssertion
-    new Assert[A](value)
-  }
-        
-  /** implicit transformation of a Char into an object supporting AnyMatcher matchers */
-  implicit def theChar[A <: Char](value: => A) = {
-    addAssertion
-    new Assert[A](value)
-  }
-          
   /** implicit transformation of a String into an object supporting String matchers */
   implicit def theString[A >: String](value: =>A) = {
     addAssertion
