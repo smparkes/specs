@@ -75,25 +75,29 @@ trait AssertFactory {
   }
           
   /** implicit transformation of a String into an object supporting String matchers */
-  implicit def theString[A >: String](value: => A) = {
+  implicit def theString[A >: String](value: =>A) = {
     addAssertion
     new AssertString[String](value.toString)
   }
 
   /** implicit transformation of an object into one supporting AnyMatcher matchers */
-  implicit def theValue[A <: AnyRef](value: => A) = {
+  implicit def theValue[A](value: =>A) = {
     addAssertion
     new Assert[A](value)
   }
 
+  implicit def theBlock(value: =>Nothing) = {
+    addAssertion
+    new Assert[Nothing](value)
+  }
   /** implicit transformation of an Iterable[String] into an object supporting IterableString matchers */
-  implicit def toStringIterableAssert(value: Iterable[String]) = {
+  implicit def toStringIterableAssert(value: =>Iterable[String]) = {
     addAssertion
     new AssertIterableString(value)
   }
 
   /** implicit transformation of an Iterable into an object supporting Iterable matchers */
-  implicit def toIterableAssert[I <: AnyRef](value: Iterable[I]) = {
+  implicit def toIterableAssert[I <: AnyRef](value: =>Iterable[I]) = {
     addAssertion
     new AssertIterable[I](value)
   }

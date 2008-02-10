@@ -3,6 +3,15 @@ import org.specs.matcher._
 import org.specs.matcher.Matchers._
 import org.specs.ExtendedThrowable._
 
+trait Assertable {
+  def applyMatcher[T, S >: T](m: => Matcher[S], value: => T) = {
+    val (result, _, koMessage) = m.apply(value) 
+    result match {
+      case false => FailureException(koMessage).rethrowFrom(this)
+      case _ => true
+    }
+  }  
+}
 /**
  * The assert class adds matcher methods to objects which are being specified<br>
  * Usage: <code>new Assert(value, example) must beMatching(otherValue)</code><p>
@@ -11,18 +20,12 @@ import org.specs.ExtendedThrowable._
  * and errors if a matcher is not ok 
  *
  */
-class Assert[T](value: => T) {
+class Assert[T](value: => T) extends Assertable {
   
   /**
    * applies a matcher to the current value and throw a failure is the result is not true 
    */
-  def must[S >: T](m: => Matcher[S]): Boolean =  {
-    val (result, _, koMessage) = m.apply(value) 
-    result match {
-      case false => FailureException(koMessage).rethrowFrom(this)
-      case _ => true
-    }
-  }
+  def must[S >: T](m: => Matcher[S]): Boolean =  applyMatcher(m, value)
   
   /**
    * applies the negation of a matcher 
@@ -63,46 +66,46 @@ case class FailureException(message: String) extends RuntimeException(message)
 case class SkippedException(message: String) extends RuntimeException(message)
 
 /** Specialized assert class with string matchers aliases */
-class AssertString[A <: String](value: => A) extends Assert[A](value) {
+class AssertString[A <: String](value: => A) extends Assertable {
   /** alias for <code>must(beMatching(a))</code> */
-  def mustMatch(a: String) = must(beMatching(a))
+  def mustMatch(a: String) = applyMatcher(beMatching(a), value)
 
   /** alias for <code>must(not(beMatching(a)))</code> */
-  def mustNotMatch(a: String) = must(not(beMatching(a)))
+  def mustNotMatch(a: String) = applyMatcher(not(beMatching(a)), value)
   
   /** alias for <code>must(equalIgnoreCase(a))</code> */
-  def must_==/(a: String) = must(equalIgnoreCase(a))
+  def must_==/(a: String) = applyMatcher(equalIgnoreCase(a), value)
 
   /** alias for <code>must(notEqualIgnoreCase(a))</code> */
-  def must_!=/(a: String) = must(notEqualIgnoreCase(a))
+  def must_!=/(a: String) = applyMatcher(notEqualIgnoreCase(a), value)
 }
 /** Specialized assert class with iterable matchers aliases */
-class AssertIterable[I <: AnyRef](value: =>Iterable[I]) extends Assert[Iterable[I]](value) {
+class AssertIterable[I <: AnyRef](value: =>Iterable[I]) extends Assertable {
 
   /** alias for <code>must(exist(function(_))</code> */
-  def mustExist(function: I => Boolean) = must(exist {x:I => function(x)})
+  def mustExist(function: I => Boolean) = applyMatcher(exist {x:I => function(x)}, value)
 
   /** alias for <code>must(notExist(function(_))</code> */
-  def mustNotExist(function: I => Boolean) = must(notExist{x:I => function(x)})
+  def mustNotExist(function: I => Boolean) = applyMatcher(notExist{x:I => function(x)}, value)
 
   /** alias for <code>must(contain(a))</code> */
-  def mustContain(elem: I) = must(contain(elem))
+  def mustContain(elem: I) = applyMatcher(contain(elem), value)
 
   /** alias for <code>must(notContain(a))</code> */
-  def mustNotContain(elem: I) = must(notContain(elem))
+  def mustNotContain(elem: I) = applyMatcher(notContain(elem), value)
 }
 /** Specialized assert class with iterable[String] matchers aliases */
-class AssertIterableString(value: =>Iterable[String]) extends AssertIterable[String](value) {
+class AssertIterableString(value: =>Iterable[String]) extends Assertable {
 
   /** alias for <code>must(existMatch(pattern))</code> */
-  def mustHaveMatch(pattern: String) = must(existMatch(pattern))
+  def mustHaveMatch(pattern: String) = applyMatcher(existMatch(pattern), value)
 
   /** alias for <code>must(notExistMatch(pattern))</code> */
-  def mustNotHaveMatch(pattern: String) = must(notExistMatch(pattern))
+  def mustNotHaveMatch(pattern: String) = applyMatcher(notExistMatch(pattern), value)
 
   /** alias for <code>must(existMatch(pattern))</code> */
-  def mustExistMatch(pattern: String) = must(existMatch(pattern))
+  def mustExistMatch(pattern: String) = applyMatcher(existMatch(pattern), value)
 
   /** alias for <code>must(notExistMatch(pattern))</code> */
-  def mustNotExistMatch(pattern: String) = must(notExistMatch(pattern))
+  def mustNotExistMatch(pattern: String) = applyMatcher(notExistMatch(pattern), value)
 }

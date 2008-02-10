@@ -88,7 +88,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
     <dependency>
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
-      <version>[${scala.version},)</version>
+      <version>${scala.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -149,7 +149,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
           <!-- <scalaClassName>scala.tools.nsc.CompileClient</scalaClassName>-->
           <scalaVersion>${scala.version}</scalaVersion>
           <args>
-            <arg>-Ygenerics</arg>
+           <arg>-Ygenerics</arg>
             <arg>-target:jvm-1.5</arg>
           </args>
           <jvmArgs>

@@ -5,7 +5,7 @@ import org.specs.Sugar._
 
 class objectMatchersTest extends JUnit3(objectMatchersSpec) 
 object objectMatchersSpec extends MatchersSpecification {
-  "Object matchers" should { usingBefore { () => clearExample }
+  "Object matchers" should { doBefore { clearExample }
     "provide a 'must_==' matcher: 'name' must_== 'name'" in {
       "string" must_== "string"
       assertion("string" must_== "string2") must failWith("'string' is not equal to 'string2'")  
@@ -38,14 +38,13 @@ object objectMatchersSpec extends MatchersSpecification {
       List() verifies { _.isEmpty }
       assertion(List("1") verifies { _.isEmpty }) must failWith("List(1) doesn't verify the expected property")
     }
-
     "provide a 'mustThrow' matcher expecting a block to send an exception of a given type" in {
-      {throw new Error("user error"); ()} must throwA(new Error)
+      {throw new Error("user error");()} must throwA(new Error)
 
       class MyError(msg: String) extends Error(msg) {}
-      {throw new MyError("subclass of error"); ()} must throwA(new Error) 
+      {throw new MyError("subclass of error");()} must throwA(new Error) 
 
-      assertion({throw new NullPointerException; ()} must throwA(new Error)) must failWith("java.lang.Error should have been thrown. Got: java.lang.NullPointerException")
-    }
+      assertion({throw new NullPointerException;()} must throwA(new Error)) must failWith("java.lang.Error should have been thrown. Got: java.lang.NullPointerException")
+    } 
   }   
 }

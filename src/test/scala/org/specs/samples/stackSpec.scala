@@ -2,7 +2,7 @@ package org.specs.samples
 
 import org.specs.runner._
 
-class stackTest extends JUnit3(stackSpecification)
+class stackTest extends Runner(stackSpecification) with JUnit with Console
 object stackSpecification extends Specification with Sugar {
   "A stack" isSpecifiedBy (EmptyStackSpec, FullStackSpec, NotFullStackSpec)
 }
@@ -53,13 +53,13 @@ object NotFullStackSpec extends NonEmptyStackSpec {
   }
 }
 object EmptyStackSpec extends Specification {
-  def stack = new LimitedStack(10)
+  def stack = new LimitedStack[Int](10)
   "An empty stack" should {
     "complain when sent #top" in {
-      {stack.top; ()} must throwA(new NoSuchElementException)
+      stack.top must throwA(new NoSuchElementException)
     }
     "complain when sent #pop" in {
-      {stack.pop; ()} must throwA(new NoSuchElementException)
+      stack.pop must throwA(new NoSuchElementException)
     }
   }
 }
