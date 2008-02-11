@@ -5,8 +5,7 @@ import org.specs.Sugar._
 import org.specs.matcher.MatcherUtils._
 import org.specs.specification._
 
-class specificationTest extends JUnit3(specificationSpec)
-object specificationRunner extends ConsoleRunner(specificationSpec)
+class specificationTest extends Runner(specificationSpec) with JUnit with Console
 object specificationSpec extends Specification { 
   "A specification" isSpecifiedBy (basicFeatures, advancedFeatures)
 }
@@ -66,6 +65,27 @@ object basicFeatures extends SpecificationWithSamples {
      }
      skipAll.suts must exist { s: Sut => s.skippedSut != None } 
      skipAll.assertionsNb mustBe 0
+   } 
+   "not execute its examples unless asked for their status" in {
+     var executed = false
+     object spec extends Specification {
+       "it" should { "not be executed" in {executed = true}}
+     }
+     spec.name
+     executed must beFalse
+     spec.failures
+     executed must beTrue
+   } 
+   "execute all examples sequentially during their definition if setSequential is called" in {
+     var executions: List[String] = Nil
+     object spec extends Specification { setSequential
+       "it" should { 
+         "do ex1" in {executions = executions:::List("ex1")}
+         "do ex2" in {executions = executions:::List("ex2")}
+       }
+     }
+     spec.name
+     executions must_== List("ex1", "ex2")
    } 
  }
 }
