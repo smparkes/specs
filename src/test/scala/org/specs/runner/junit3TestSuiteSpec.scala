@@ -4,26 +4,38 @@ import org.specs.io.mock.MockOutput
 import org.specs.collection.JavaCollectionsConversion._
 import org.specs.runner.javaConversions._
 import org.specs.runner._
+import org.specs.Sugar._
 import _root_.junit.framework._
 import org.junit.runner.notification.RunNotifier
 import org.junit.runner.Description
 
 class JUnit3TestRunner extends Runner(junit3TestSuiteSpec) with JUnit with Console with ScalaTest
 object junit3TestSuiteSpec extends Specification {
-  "A junit 3 test suite" should {
-    "create a test suite containing tests suites for each specification " + 
-    "in its constructor and a test case for each example" in {
-      suite(that.isOk).getName must beMatching("SimpleSpec")
-      suite(that.isOk).suites match {
-        case List() => fail("there should be a test suite")
-        case (ts: JUnitSuite)::List() => {
-          ts.getName mustMatch "A specification"
-          ts.testCases match {
-            case List() => fail("there should be a test case")
-            case (tc: TestCase)::List() => 
-              tc.getName() mustMatch "have example 1 ok"
-          }
-        }
+  "A junit 3 test suite for a composite specification" should {
+    "create one test suite per specification" in {
+      object S1 extends Specification 
+      object S2 extends Specification 
+      object Composite extends Specification { "this composite spec" isSpecifiedBy (S1, S2) }
+
+      makeRunners(Composite) foreach { runner =>
+        runner.suites.map(_.asInstanceOf[JUnitSuite].getName) must_== List("S1", "S2")
+      }
+    }
+    "create one test suite per sut" in {
+      object S1 extends Specification {
+        "sut1" should {}
+        "sut2" should {}
+      }
+      makeRunners(S1) foreach { runner =>
+        runner.suites.map(_.asInstanceOf[JUnitSuite].getName) must_== List("sut1 should", "sut2 should")
+      }
+    }
+    "create one test case per example" in {
+      object S1 extends Specification {
+        "sut1" should { "ex1" in {}; "ex2" in {}}
+      }
+      makeRunners(S1) foreach { runner =>
+        runner.suites.flatMap(_.asInstanceOf[JUnitSuite].testCases).map(_.asInstanceOf[TestCase].getName) must_== List("ex1", "ex2")
       }
     }
     "report a failure with a stacktrace pointing to the assertion causing it in the executed specification" in {
@@ -56,6 +68,11 @@ object junit3TestSuiteSpec extends Specification {
     }
   }
   def suite(behaviours: that.Value*) = new JUnit3(new SimpleSpec(behaviours.toList))
+  def makeRunners(spec: Specification) = {
+    object R1 extends JUnit3(spec)
+    object R2 extends Runner(spec) with JUnit
+    List(R1, R2)
+  }
 }
 
 class SimpleSpec(behaviours: List[(that.Value)]) extends TestSpec {
@@ -65,4 +82,3 @@ class SimpleSpec(behaviours: List[(that.Value)]) extends TestSpec {
     }
   }   
 }
-
