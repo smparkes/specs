@@ -66,13 +66,13 @@ object Counter extends org.scalacheck.Commands {
     counter.n
   }
 
-  case class Inc extends Command {
+  object Inc extends Command {
     def apply(s: Int) = counter.inc
     def nextState(s: Int) = s+1
     override def postCondition(s: Int, result: Any) = counter.n == s+1
   }
 
-  case class Dec extends Command {
+  object Dec extends Command {
     def apply(s: Int) = counter.dec
     def nextState(s: Int) = s-1
     override def postCondition(s: Int, result: Any) = counter.n == s-1

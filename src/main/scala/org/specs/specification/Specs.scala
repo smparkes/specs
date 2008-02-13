@@ -81,7 +81,7 @@ abstract class Specification extends Matchers with SpecificationStructure with A
  * In specifications, a Sut "should" or "can" provide some functionalities which are defined in <code>Examples</code><br>
  * A Sut is "executed" during its construction and failures and errors are collected from its examples
  */
-case class Sut(description: String, cycle: ExampleLifeCycle) extends ExampleLifeCycle {
+case class Sut(description: String, cycle: org.specs.specification.ExampleLifeCycle) extends ExampleLifeCycle {
   /** default verb used to define the behaviour of the sut */
   var verb = "should"
 
@@ -176,7 +176,7 @@ case class Sut(description: String, cycle: ExampleLifeCycle) extends ExampleLife
  * <p>
  * When assertions have been evaluated inside an example they register their failures and errors for later reporting 
  */
-case class Example(description: String, cycle: ExampleLifeCycle) {
+case class Example(description: String, cycle: org.specs.specification.ExampleLifeCycle) {
 
   /** function containing the test to be run */
   private[this] var toRun: () => Any = () => ()

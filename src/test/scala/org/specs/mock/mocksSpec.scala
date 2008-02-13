@@ -131,10 +131,10 @@ trait ButtonAndLight {
     def isOn = state == On
     def destroy = {}
   }
-implicit val li = Light()
+  implicit val li = Light()
 
   abstract sealed class LightState(s: String)
-  case class On extends LightState("on")
-  case class Off extends LightState("off")
+  object On extends LightState("on")
+  object Off extends LightState("off")
 }
 

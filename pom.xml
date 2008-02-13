@@ -148,6 +148,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
         <configuration>
           <!-- <scalaClassName>scala.tools.nsc.CompileClient</scalaClassName>-->
           <scalaVersion>${scala.version}</scalaVersion>
+          
           <args>
            <arg>-Ygenerics</arg>
             <arg>-target:jvm-1.5</arg>

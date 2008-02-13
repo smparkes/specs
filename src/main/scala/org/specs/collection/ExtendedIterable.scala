@@ -2,7 +2,8 @@ package org.specs.collection
 import org.specs.collection.ExtendedList._
 
 /**
- * The ExtendedIterable object offers methods applicable to iterables
+ * The ExtendedIterable object offers utility methods applicable to iterables like <code>toStream</code>, 
+ * <code>toDeepString</code> (calls toString recursively on the iterable elements), <code>sameElementsAs</code> (compares 2 iterables recursively)
  */
 object ExtendedIterable {
   /**
@@ -11,11 +12,12 @@ object ExtendedIterable {
   implicit def iterableToExtended[A](xs : Iterable[A]) = new ExtendedIterable(xs)
 
   /**
-   * This class adds various utility methods to iterables
+   * This class adds various utility methods to iterables like <code>toStream</code>, 
+   * <code>toDeepString</code> (calls toString recursively on the iterable elements), <code>sameElementsAs</code> (compares 2 iterables recursively)
    */
   class ExtendedIterable[A](xs:Iterable[A]) {
     /**
-     * @returns a Stream created from the iterable
+     * @return a Stream created from the iterable
      */
     def toStream = Stream.fromIterator(xs.elements)
 
@@ -25,7 +27,7 @@ object ExtendedIterable {
     type anyIterable = Iterable[T] forSome {type T} 
     
     /**
-     * @returns the representation of the elements of the iterable using the method toString recursively
+     * @return the representation of the elements of the iterable using the method toString recursively
      */
     def toDeepString: String = {
       "[" + xs.toList.map { x =>
@@ -34,7 +36,7 @@ object ExtendedIterable {
     }
     
     /**
-     * @returns true if the 2 iterables contain the same elements according to a function f 
+     * @return true if the 2 iterables contain the same elements according to a function f 
      */
     def isSimilar[B >: A](that: Iterable[B], f: Function2[A, B, Boolean]): Boolean = {
       val ita = xs.elements
@@ -47,7 +49,7 @@ object ExtendedIterable {
     }
     
     /**
-     * @returns true if the 2 iterables contain the same elements recursively, in the same order 
+     * @return true if the 2 iterables contain the same elements recursively, in the same order 
      */
     def sameElementsAs(that: Iterable[A]): Boolean = {
       val ita = xs.elements.toList

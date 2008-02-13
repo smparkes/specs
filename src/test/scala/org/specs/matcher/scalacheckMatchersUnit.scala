@@ -21,9 +21,6 @@ object scalacheckMatchersUnit extends MatchersSpecification with ScalacheckMock 
       display(minTestsOk->10)(minTestsOk) mustBe 10
       display(minTestsOk->10)(maxDiscarded) mustBe defaultValues(maxDiscarded)
     }
-    "provide a 'display' case class which throws an exception in case of null values" in {
-      display(null) must throwA(new RuntimeException)
-    }
     "provide a 'display' case class which is resilient to a value with a null key" in {
       val s: Symbol = null
       display(s -> 10) must throwA(new RuntimeException)

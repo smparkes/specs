@@ -1,18 +1,13 @@
 package org.specs.matcher
-import scalacheck._
-import scalacheck.Gen
-import scalacheck.Prop
-import scalacheck.Prop._
-import scalacheck.Test
-import scalacheck.Test._
-import scalacheck.ConsoleReporter._
+import org.scalacheck.{StdRand, Gen, Prop, Arg, Test}
+import org.scalacheck.Prop._
+import org.scalacheck.Test.{Stats, Params, Passed, Failed, Exhausted, GenException, PropException, Result}
+import org.scalacheck.ConsoleReporter._
 import scala.collection.immutable.HashMap
 import org.specs.io.ConsoleOutput
 import org.specs.matcher.ScalacheckParameters._
-import org.specs.matcher.MatcherUtils._
-import org.specs.Sugar._
-import org.specs.specification._
-
+import org.specs.matcher.MatcherUtils.q
+import org.specs.specification.FailureException
 /**
  * The <code>ScalacheckMatchers</code> trait provides matchers which allow to 
  * assess properties multiple times with generated data.
@@ -69,14 +64,14 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
     * and indicates if the generation should be verbose or not 
     */
    def checkProperty(prop: Prop)(p: Parameters) = {
-     checkScalacheckProperty(prop)(Test.Params(p(minTestsOk), p(maxDiscarded), p(minSize), p(maxSize), StdRand), p.verbose)
+     checkScalacheckProperty(prop)(Params(p(minTestsOk), p(maxDiscarded), p(minSize), p(maxSize), StdRand), p.verbose)
    }
     
   /**
    * checks if the property is true for each generated value, and with the specified
    * scalacheck parameters. If verbose is true, then print the results on the console
    */
-  def checkScalacheckProperty(prop: Prop)(params: Test.Params, verbose: Boolean) = {
+  def checkScalacheckProperty(prop: Prop)(params: Params, verbose: Boolean) = {
      // will print the result of each test if verbose = true
      def printResult(result: Option[Prop.Result], succeeded: Int, discarded: Int): Unit = {
 			 if (!verbose) return
@@ -93,12 +88,12 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
      }
      
      // check the property
-     val stats = check(params, prop, printResult) 
+     val statistics = check(params, prop, printResult) 
      
      // display the final result if verbose = true
      if (verbose) {
-       val s = prettyTestStats(stats)
-       printf("\r{0} {1}{2}\n", if (stats.result.passed) "+" else "!", s, List.make(70 - s.length, " ").mkString(""))
+       val s = prettyTestStats(statistics)
+       printf("\r{0} {1}{2}\n", if (statistics.result.passed) "+" else "!", s, List.make(70 - s.length, " ").mkString(""))
      }
 
      // depending on the result, return the appropriate success status and messages
@@ -106,18 +101,17 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
      def afterNTries(n: Int) = "after " + (if (n <= 1) n + " try" else n + " tries")
      def noCounterExample(n: Int) = "The property passed without any counter-example " + afterNTries(n)
      def afterNShrinks(shrinks: Int) = if (shrinks >= 1) (", " + shrinks + " shrinks") else ""
-
-     stats match {
-       case Test.Stats(Passed(), n, _)          => (true,  noCounterExample(n), "A counter-example was found " + afterNTries(n)) 
-       case s@Test.Stats(GenException(e), n, _) => (false, noCounterExample(n), prettyTestStats(s)) 
-       case s@Test.Stats(Exhausted(), n, _)     => (false, noCounterExample(n), prettyTestStats(s)) 
-       case Test.Stats(Failed(List(Arg(_, msg, shrinks))), n, _) => 
+     statistics match {
+       case Stats(Passed(), succeeded, discarded) => (true,  noCounterExample(succeeded), "A counter-example was found " + afterNTries(succeeded)) 
+       case s@Stats(GenException(e), n, _) => (false, noCounterExample(n), prettyTestStats(s)) 
+       case s@Stats(Exhausted(), n, _)     => (false, noCounterExample(n), prettyTestStats(s)) 
+       case Stats(Failed(List(Arg(_, msg, shrinks))), n, _) => 
          (false, noCounterExample(n), "A counter-example is '"+msg+"' (" + afterNTries(n) + afterNShrinks(shrinks) + ")") 
-       case Test.Stats(Failed(Arg(_, msg, shrinks)::_), n, _) => 
+       case Stats(Failed(Arg(_, msg, shrinks)::_), n, _) => 
          (false, noCounterExample(n), "A counter-example is '"+msg+"' (" + afterNTries(n) + afterNShrinks(shrinks) + ")") 
-       case Test.Stats(PropException(List(Arg(_, msg, shrinks)), FailureException(ex)), n, _) => 
+       case Stats(PropException(List(Arg(_, msg, shrinks)), FailureException(ex)), n, _) => 
          (false, noCounterExample(n), "A counter-example is '"+msg+"': " + ex + " ("+afterNTries(n)+")") 
-       case s@Test.Stats(PropException(List(Arg(_, msg, shrinks)), ex), n, _) => 
+       case s@Stats(PropException(List(Arg(_, msg, shrinks)), ex), n, _) => 
          (false, noCounterExample(n), prettyTestStats(s)) 
      }
    }
@@ -127,7 +121,7 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
  * This trait is used to facilitate testing by mocking Scalacheck functionalities
  */
 trait ScalacheckFunctions {
-  def check(params: Test.Params, prop: Prop, printResult: (Option[Prop.Result], Int, Int) => Unit) = Test.check(params, prop, printResult)
+  def check(params: Params, prop: Prop, printResult: (Option[Prop.Result], Int, Int) => Unit) = Test.check(params, prop, printResult)
   def forAll[A,P](g: Gen[A])(f: A => Prop): Prop = Prop.forAll(g)(f)
 }
 /**
@@ -159,17 +153,6 @@ trait ScalacheckParameters {
   }
 
   /**
-   * This class is used to set parameters and to print the property evaluation on the console<br>
-   * Usage: <pre><code>
-   *  generated_values must pass { v =>
-   *    property(v) mustBe ok
-   *  }(print(minTestsOk->15, maxDiscarded->20))</code></pre> 
-   */  
-  case class display(p: (Symbol, Int)*) extends Parameters(setParams(p)) {
-    override def verbose = true
-  }
-
-  /**
    * This class is used to set parameters but nothing will be printed to the console<br>
    * Usage: <pre><code>
    * generated_values must pass { v =>
@@ -179,13 +162,22 @@ trait ScalacheckParameters {
   case class set(p: (Symbol, Int)*) extends Parameters(setParams(p))
 
   /**
-   * Those parameters will print the result on the console and use the default settings<br>
+   * Those parameters will print the result on the console and use the default settings, or specified parameters <br>
    * Usage: <pre><code>
    * generated_values must pass { v =
    *   property(v) mustBe ok
    * }(display) </code></pre>
+   * 
+   *  or 
+   * 
+   *  generated_values must pass { v =>
+   *    property(v) mustBe ok
+   *  }(display(minTestsOk->15, maxDiscarded->20))</code></pre> 
    */  
-  val display = new Parameters(setParams(Nil)) {override def verbose = true}
+  object display extends Parameters(setParams(Nil)) {
+    def apply(p: (Symbol, Int)*) = new Parameters(setParams(p)) { override def verbose = true }
+    override def verbose = true
+  }
     
   /**
    * This function transform the varargs parameters into a Map with default values
