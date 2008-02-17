@@ -45,11 +45,11 @@ object scalacheckMatchersUnit extends MatchersSpecification with ScalacheckMock 
       matcher.checkScalacheckProperty(forAll(Gen.value(true))(x => true))(Test.defaultParams, true)
     }
     "call the check function of scalacheck to check the property" in {
-      expect { matcher.check(Test.defaultParams, Prop.proved, (r, t, d) => ()) }
+      expect { matcher.check(Test.defaultParams, Prop.proved, (s, d) => ()) }
       matcher.checkScalacheckProperty(forAll(Gen.value(true))(x => true))(Test.defaultParams, false)
     }
     "return a true status if the check function return a succeeded result" in {
-      expect { matcher.check(any[Test.Params], any[Prop], (r, t, d) => ()) }
+      expect { matcher.check(any[Test.Params], any[Prop], (s, d) => ()) }
       matcher.checkScalacheckProperty(forAll(Gen.value(true))(x => true))(Test.defaultParams, false)._1 mustBe true
     }
     "return a false status if the check function return a failure" in {
@@ -69,7 +69,7 @@ object scalacheckMatchersUnit extends MatchersSpecification with ScalacheckMock 
 trait ScalacheckMock extends Mocker {
   trait ScalacheckFunctionsMock extends ScalacheckFunctions {
     def result = Test.Stats(Test.Passed, 2, 3)
-    override def check(params: Test.Params, prop: Prop, printResult: (Option[Prop.Result], Int, Int) => Unit) = { 
+    override def check(params: Test.Params, prop: Prop, printResult: (Int, Int) => Unit) = { 
       recordAndReturn(result)
     }
     override def forAll[A,P](g: Gen[A])(f: A => Prop): Prop = recordAndReturn(Prop.proved)

@@ -73,13 +73,8 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
    */
   def checkScalacheckProperty(prop: Prop)(params: Params, verbose: Boolean) = {
      // will print the result of each test if verbose = true
-     def printResult(result: Option[Prop.Result], succeeded: Int, discarded: Int): Unit = {
-			 if (!verbose) return
-       result match {
-         case None => ()
-         case Some(r) => printf("\rTested: {0}", r.args) 
-       }
-       
+     def printResult(succeeded: Int, discarded: Int): Unit = {
+       if (!verbose) return
        if (discarded == 0) 
          printf("\rPassed {0} tests", succeeded)
        else 
@@ -102,9 +97,9 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
      def noCounterExample(n: Int) = "The property passed without any counter-example " + afterNTries(n)
      def afterNShrinks(shrinks: Int) = if (shrinks >= 1) (", " + shrinks + " shrinks") else ""
      statistics match {
-       case Stats(Passed(), succeeded, discarded) => (true,  noCounterExample(succeeded), "A counter-example was found " + afterNTries(succeeded)) 
+       case Stats(Passed, succeeded, discarded) => (true,  noCounterExample(succeeded), "A counter-example was found " + afterNTries(succeeded)) 
        case s@Stats(GenException(e), n, _) => (false, noCounterExample(n), prettyTestStats(s)) 
-       case s@Stats(Exhausted(), n, _)     => (false, noCounterExample(n), prettyTestStats(s)) 
+       case s@Stats(Exhausted, n, _)     => (false, noCounterExample(n), prettyTestStats(s)) 
        case Stats(Failed(List(Arg(_, msg, shrinks))), n, _) => 
          (false, noCounterExample(n), "A counter-example is '"+msg+"' (" + afterNTries(n) + afterNShrinks(shrinks) + ")") 
        case Stats(Failed(Arg(_, msg, shrinks)::_), n, _) => 
@@ -121,7 +116,7 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
  * This trait is used to facilitate testing by mocking Scalacheck functionalities
  */
 trait ScalacheckFunctions {
-  def check(params: Params, prop: Prop, printResult: (Option[Prop.Result], Int, Int) => Unit) = Test.check(params, prop, printResult)
+  def check(params: Params, prop: Prop, printResult: (Int, Int) => Unit) = Test.check(params, prop, printResult)
   def forAll[A,P](g: Gen[A])(f: A => Prop): Prop = Prop.forAll(g)(f)
 }
 /**

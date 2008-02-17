@@ -62,7 +62,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
     </developer>
   </developers>
   <properties>
-    <scala.version>2.6.1</scala.version>
+    <scala.version>2.7.0-rc2</scala.version>
     <java.src.version>1.5</java.src.version>
   </properties>
   <repositories>
@@ -104,7 +104,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
     <dependency>
       <groupId>org.scalacheck</groupId>
       <artifactId>scalacheck</artifactId>
-      <version>1.1.1</version>
+      <version>1.1.2</version>
     </dependency>
     <dependency>
       <groupId>org.jmock</groupId>
@@ -148,11 +148,11 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
         <configuration>
           <!-- <scalaClassName>scala.tools.nsc.CompileClient</scalaClassName>-->
           <scalaVersion>${scala.version}</scalaVersion>
-          
+          <!--
           <args>
            <arg>-Ygenerics</arg>
             <arg>-target:jvm-1.5</arg>
-          </args>
+          </args>-->
           <jvmArgs>
             <jvmArg>-Xmx512m</jvmArg>
             <jvmArg>-Xms64m</jvmArg>
@@ -213,11 +213,11 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
       <plugin>
         <groupId>org.scala-tools</groupId>
         <artifactId>maven-scala-plugin</artifactId>
-        <configuration>
+        <configuration><!--
           <args>
             <arg>-Ygenerics</arg>
             <arg>-target:jvm-1.5</arg>
-          </args>
+          </args>-->
         </configuration>
       </plugin>
     </plugins>
