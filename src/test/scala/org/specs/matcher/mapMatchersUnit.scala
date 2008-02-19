@@ -50,26 +50,26 @@ object mapMatchersUnit extends MatchersSpecification with PartialFunctionGen {
   }
 }
 trait PartialFunctionGen {
-  implicit def listInt(dummy: Arb[List[Int]]): Arbitrary[List[Int]] = new Arbitrary[List[Int]] {
-    def getArbitrary = {
+  implicit def listInt: Arbitrary[List[Int]] = new Arbitrary[List[Int]] {
+    def arbitrary = {
       for {length <- choose(1, 4)
            l <- vectorOf(length, choose(1, 4))
       } yield l.toList
     }
   }
-  implicit def genPartialFunction(dummy: Arb[PartialFunction[Int, String]]): Arbitrary[PartialFunction[Int, String]] = new Arbitrary[PartialFunction[Int, String]] {
-    def getArbitrary = {
+  implicit def genPartialFunction: Arbitrary[PartialFunction[Int, String]] = new Arbitrary[PartialFunction[Int, String]] {
+    def arbitrary = {
       for {length <- choose(0, 4)
            keys <- vectorOf(length, choose(1, 4))
-           values <- vectorOf(length, arbitrary[String])
+           values <- vectorOf(length, Arbitrary.arbitrary[String])
       } yield Map(keys.toList zip values.toList map {kv => kv._1 -> kv._2} : _*)
     }
   }
-  implicit def genMap(dummy: Arb[Map[Int, String]]): Arbitrary[Map[Int, String]] = new Arbitrary[Map[Int, String]] {
-    def getArbitrary = {
+  implicit def genMap: Arbitrary[Map[Int, String]] = new Arbitrary[Map[Int, String]] {
+    def arbitrary = {
       for {length <- choose(0, 4)
            keys <- vectorOf(length, choose(1, 4))
-           values <- vectorOf(length, arbitrary[String])
+           values <- vectorOf(length, Arbitrary.arbitrary[String])
       } yield Map(keys.toList zip values.toList map {kv => kv._1 -> kv._2} : _*)
     }
   }

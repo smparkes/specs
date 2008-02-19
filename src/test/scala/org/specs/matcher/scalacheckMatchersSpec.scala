@@ -33,7 +33,7 @@ object scalacheckMatchersSpec extends MatchersSpecification with ScalacheckExamp
       assertion(exceptionValues must pass(isTrue)) must failWith("Exception \"java.lang.Exception: e\" raised on argument generation.")
     }
     "be ko if checking the property yields an exception during its evaluation" in {
-      assertion(alwaysTrue must pass(exceptionProperty)) must failWith("Exception \"java.lang.Exception: e\" raised on property evaluation:\n> ARG_0 = true")
+      assertion(alwaysTrue must pass(exceptionProperty)) must failWith("Exception \"java.lang.Exception: e\" raised on property evaluation:\n> ARG_0 = \"true\"")
     }
     "be ko if all values have been exhausted before the min number of ok tests is reached" in {
       assertion(Gen.fail[Boolean] must pass(isTrue)(set(maxDiscarded->10))) must failWith("Gave up after only 0 passed tests. 10 tests were discarded.")
