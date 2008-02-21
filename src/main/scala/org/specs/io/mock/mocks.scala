@@ -7,8 +7,7 @@ import org.specs.io.FileSystem
 import java.io._
 
 /**
- * The MockFileSystem trait allows to add file paths which can be read through the <code>readFile</code> method
- * or which can be created and written using the <code>createFile</code> and <code>getWriter</code> (which returns a Mock FileWriter)
+ * The MockFileSystem trait mocks the FileSystem by storing a Map[path, content] representing the content of the FileSystem
  */
 trait MockFileSystem extends FileSystem {
 
@@ -25,10 +24,10 @@ trait MockFileSystem extends FileSystem {
   override def filePaths(path: String) = files.keySet.toList
 
   /** adds a new file to the FileSystem. The file path will be a default one */
-  def addFile(content: String) = { files += defaultFilePath -> content }
+  def addFile(content: String) = files += defaultFilePath -> content
 
-  /** add a new file to the FileSystem with a specific file path */
-  def addFile(path: String, content: String) = { files += path -> content }
+  /** adds a new file to the FileSystem with a specific file path */
+  def addFile(path: String, content: String) = files += path -> content
 
   /** @return a default file path. All default file paths will be different from each other */
   def defaultFilePath = "name" + files.size + defaultExtension
@@ -40,7 +39,7 @@ trait MockFileSystem extends FileSystem {
   override def getWriter(path: String) = MockFileWriter(path)
 
   case class MockFileWriter(path: String) extends MockWriter {
-    override def write(m: String) : Unit = { files(path) = files(path) + m }
+    override def write(m: String): Unit = files(path) = files(path) + m
   }
   /** removes all specified files */
   def reset = files = new HashMap[String, String]
@@ -50,18 +49,32 @@ trait MockFileSystem extends FileSystem {
  * The MockOutput trait catches all messages printed with the Output trait
  */
 trait MockOutput extends Output {
+
+  /** list of messages representing the output */
   val messages : Queue[String] = new Queue[String]
-  override def println(m : Any) : Unit = { messages += m.toString }
+
+  /** adds m.toString to a list of messages */
+  override def println(m : Any) : Unit = messages += m.toString
 }
 
 /**
  * The MockWriter writes all the content written with the Writer interface to a Queue of Strings
  */
 trait MockWriter extends java.io.Writer {
+
+  /** list of messages representing the output */
   val messages : Queue[String] = new Queue[String]
+
+  /** is the Writer closed? */
   var closed = false
-  override def write(m: String) : Unit = { messages += m }
-  override def close = {closed = true}
+  override def write(m: String) : Unit = messages += m
+
+  /** closes the Writer */
+  override def close = closed = true
+
+  /** flushes the Writer */
   override def flush = {}
+
+  /** overrides the write(a: Array[Char], b: Int, c: Int) method to do nothing */
   override def write(a: Array[Char], b: Int, c: Int) = {}
 }

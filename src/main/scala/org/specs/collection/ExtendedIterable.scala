@@ -2,8 +2,11 @@ package org.specs.collection
 import org.specs.collection.ExtendedList._
 
 /**
- * The ExtendedIterable object offers utility methods applicable to iterables like <code>toStream</code>, 
- * <code>toDeepString</code> (calls toString recursively on the iterable elements), <code>sameElementsAs</code> (compares 2 iterables recursively)
+ * The ExtendedIterable object offers utility methods applicable to iterables like:<ul>
+ * <li><code>toStream</code> 
+ * <li><code>toDeepString</code>: calls toString recursively on the iterable elements
+ * <li><code>sameElementsAs</code>: compares 2 iterables recursively
+ * </ul>
  */
 object ExtendedIterable {
   /**
@@ -12,8 +15,7 @@ object ExtendedIterable {
   implicit def iterableToExtended[A](xs : Iterable[A]) = new ExtendedIterable(xs)
 
   /**
-   * This class adds various utility methods to iterables like <code>toStream</code>, 
-   * <code>toDeepString</code> (calls toString recursively on the iterable elements), <code>sameElementsAs</code> (compares 2 iterables recursively)
+   * See the description of the ExtendedIterable object
    */
   class ExtendedIterable[A](xs:Iterable[A]) {
     /**
@@ -74,6 +76,12 @@ object ExtendedIterable {
      * adds the sameElementsAs method to any object in order to do that comparison recursively 
      */
     implicit def anyToSameElements(x: Any) = new AnyWithSameElements(x)
-    class AnyWithSameElements(x: Any) { def sameElementsAs(that: Any): Boolean = {x == that}}
+
+    /**
+     * Class adding the <code>sameElementsAs</code> method to any object. The default implementation uses standard equality (==) 
+     */
+    class AnyWithSameElements(x: Any) { 
+       def sameElementsAs(that: Any): Boolean = x == that 
+    }
   }
 }

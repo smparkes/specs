@@ -40,7 +40,7 @@ abstract class AbstractMatcher[T] {
  * <code>not</code> operator is used, the ok message is used as a ko message</p>
  *   
  */
-abstract class Matcher[T] extends AbstractMatcher[T] with MatcherResult {
+abstract class Matcher[T] extends AbstractMatcher[T] with MatcherResult { outer =>
   
   /**
    *  The <code>and</code> operator allow to combine to matchers through a logical and.
@@ -48,16 +48,15 @@ abstract class Matcher[T] extends AbstractMatcher[T] with MatcherResult {
    *  and m2 succeeds also
    */   
   def and(m: => Matcher[T]): Matcher[T] = { 
-    val outer = this
     new Matcher[T](){
-    def apply(a: => T) = {
-      val r1 = outer(a)
-      if (!r1.success)
-        (false, r1.okMessage, r1.koMessage)
-      else {
-        val r2 = m(a) 
-        (r2.success, r1.okMessage + " and " + r2.okMessage, r1.okMessage + " but " + r2.koMessage) 
-      }
+      def apply(a: => T) = {
+        val r1 = outer(a)
+        if (!r1.success)
+          (false, r1.okMessage, r1.koMessage)
+         else {
+           val r2 = m(a) 
+          (r2.success, r1.okMessage + " and " + r2.okMessage, r1.okMessage + " but " + r2.koMessage) 
+        }
   }}}
 
   /**
@@ -66,7 +65,6 @@ abstract class Matcher[T] extends AbstractMatcher[T] with MatcherResult {
    *  or m2 succeeds
    */   
   def or(m: => Matcher[T]) : Matcher[T] = { 
-    val outer = this
     new Matcher[T]() {
     def apply(a: =>T) = {
     val r1 = outer(a)
@@ -92,8 +90,7 @@ abstract class Matcher[T] extends AbstractMatcher[T] with MatcherResult {
    *  The <code>not</code> operator allow to combine to matchers through a logical not.
    *  <code>m1.not</code> returns a matcher failing if m1 succeeds, and succeeding if m1 fails
    */   
-  def not = { 
-    val outer = this;
+  def not = {      
     new Matcher[T]() {
     def apply(a: => T) = {
       val result = outer(a)
@@ -105,7 +102,6 @@ abstract class Matcher[T] extends AbstractMatcher[T] with MatcherResult {
    *  The <code>when</code> operator returns a matcher which will be ok only if a condition is true
    */   
   def when(condition : => Boolean) = { 
-    val outer = this;
     new Matcher[T]() {
      def apply(a: => T) = {
           val result = outer(a)
