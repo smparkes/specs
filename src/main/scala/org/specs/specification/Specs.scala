@@ -26,21 +26,41 @@ abstract class Specification extends Matchers with SpecificationStructure with A
    * @deprecated
    * adds a "before" function to the last sut being defined 
    */
-  def usingBefore(beforeFunction: () => Unit) = { suts.last.before = Some(beforeFunction) } 
+  def usingBefore(beforeFunction: () => Unit) = { 
+    suts.lastOption match {
+      case Some(last) => last.before = Some(beforeFunction)
+      case None => throw new FailureException("The usingBefore declaration should be declared inside a system under test")
+    }
+ } 
 
   /** adds a "before" function to the last sut being defined */
-  def doBefore(actions: =>Any) = { suts.last.before = Some(() => actions) } 
+  def doBefore(actions: =>Any) = { 
+    suts.lastOption match {
+      case Some(last) => last.before = Some(() => actions)
+      case None => throw new FailureException("The doBefore declaration should be declared inside a system under test")
+    }
+  } 
 
   /** 
    * @deprecated
    * adds an "after" function to the last sut being defined 
    */
-  def usingAfter(afterFunction: () => Unit) = { suts.last.after = Some(afterFunction) }
+  def usingAfter(afterFunction: () => Unit) = { 
+    suts.lastOption match {
+      case Some(last) => last.after = Some(afterFunction)
+      case None => throw new FailureException("The usingAfter declaration should be declared inside a system under test")
+    }
+  }
 
   /** 
    * adds an "after" function to the last sut being defined 
    */
-  def doAfter(actions: =>Any) = { suts.last.before = Some(() => actions) } 
+  def doAfter(actions: =>Any) = { 
+    suts.lastOption match {
+      case Some(last) => last.after = Some(() => actions)
+      case None => throw new FailureException("The doAfter declaration should be declared inside a system under test")
+    }
+  } 
 
   /** @return the failures of each sut */
   def failures: List[FailureException] = subSpecifications.flatMap{_.failures} ::: suts.flatMap {_.failures}
