@@ -95,18 +95,17 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
      // the failure message indicates a counter-example to the property
      def afterNTries(n: Int) = "after " + (if (n <= 1) n + " try" else n + " tries")
      def noCounterExample(n: Int) = "The property passed without any counter-example " + afterNTries(n)
-     def afterNShrinks(shrinks: Int) = if (shrinks >= 1) (", " + shrinks + " shrinks") else ""
+     def afterNShrinks(args: List[Arg]) = args.map(arg => if (arg.shrinks >= 1) arg.shrinks.toString else "").mkString(", ")
+     def counterExample(args: List[Arg]) = args.map(_.arg).mkString(", ")
      statistics match {
        case Stats(Passed, succeeded, discarded) => (true,  noCounterExample(succeeded), "A counter-example was found " + afterNTries(succeeded)) 
        case s@Stats(GenException(e), n, _) => (false, noCounterExample(n), prettyTestStats(s)) 
        case s@Stats(Exhausted, n, _)     => (false, noCounterExample(n), prettyTestStats(s)) 
-       case Stats(Failed(List(Arg(_, msg, shrinks))), n, _) => 
-         (false, noCounterExample(n), "A counter-example is '"+msg+"' (" + afterNTries(n) + afterNShrinks(shrinks) + ")") 
-       case Stats(Failed(Arg(_, msg, shrinks)::_), n, _) => 
-         (false, noCounterExample(n), "A counter-example is '"+msg+"' (" + afterNTries(n) + afterNShrinks(shrinks) + ")") 
-       case Stats(PropException(List(Arg(_, msg, shrinks)), FailureException(ex)), n, _) => 
-         (false, noCounterExample(n), "A counter-example is '"+msg+"': " + ex + " ("+afterNTries(n)+")") 
-       case s@Stats(PropException(List(Arg(_, msg, shrinks)), ex), n, _) => 
+       case Stats(Failed(args), n, _) => 
+         (false, noCounterExample(n), "A counter-example is '"+counterExample(args)+"' (" + afterNTries(n) + afterNShrinks(args) + ")") 
+       case Stats(PropException(args, FailureException(ex)), n, _) => 
+         (false, noCounterExample(n), "A counter-example is '"+counterExample(args)+"': " + ex + " ("+afterNTries(n)+")") 
+       case s@Stats(PropException(m, ex), n, _) => 
          (false, noCounterExample(n), prettyTestStats(s)) 
      }
    }

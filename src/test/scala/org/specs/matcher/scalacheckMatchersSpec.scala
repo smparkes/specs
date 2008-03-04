@@ -10,8 +10,7 @@ import org.scalacheck.Prop.property
 import org.specs.mock._
 import org.specs.io._
 
-class scalacheckMatchersTest extends JUnit3(scalacheckMatchersSpec)
-object scalacheckMatchersSpecRunner extends ConsoleRunner(scalacheckMatchersSpec)
+class scalacheckMatchersTest extends Runner(scalacheckMatchersSpec) with JUnit
 object scalacheckMatchersSpec extends MatchersSpecification with ScalacheckExamples {
   "A 'pass' matcher" should {
     "be ok if a property is true for all generated values" in {

@@ -30,7 +30,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.specs</groupId>
   <artifactId>specs</artifactId>
-  <version>1.2.5-SNAPSHOT</version>
+  <version>1.2.4</version>
   <packaging>jar</packaging>
   <name>${project.artifactId}</name>
   <description>specs is a Behaviour-Driven-Design framework</description>
@@ -62,7 +62,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
     </developer>
   </developers>
   <properties>
-    <scala.version>2.7.0</scala.version>
+    <scala.version>2.7.0-rc3</scala.version>
     <java.src.version>1.5</java.src.version>
   </properties>
   <repositories>
