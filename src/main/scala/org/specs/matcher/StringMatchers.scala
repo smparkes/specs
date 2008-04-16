@@ -69,6 +69,11 @@ trait StringMatchers {
    * Matches if the regexp a is found inside b
    */   
   def find[T <: String](a: T) = new FindMatcher(a)
+
+  /**
+   * Matcher to find if the regexp a is found inside b. 
+   * This matcher can be specialized to a FindMatcherWithGroups which will also check the found groups
+   */   
   class FindMatcher[T <: String](a: T) extends Matcher[T] {
     def found(b: T) = {
       val matcher = Pattern.compile(a).matcher(b)
@@ -78,6 +83,11 @@ trait StringMatchers {
     def withGroups(groups: String*) = new FindMatcherWithGroups(a, groups:_*)
     def apply(v: => T) = {val b = v; (a != null && b != null && found(b), q(a) + " is found in " + q(b), q(a) + " isn't found in " + q(b))} 
   }
+
+  /**
+   * Matcher to find if the regexp a is found inside b. 
+   * This matcher checks if the found groups are really the ones expected
+   */   
   class FindMatcherWithGroups[T <: String](a: T, groups: String*) extends Matcher[T] {
     def found(b: T) = {
       val matcher = Pattern.compile(a).matcher(b)
