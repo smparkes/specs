@@ -114,6 +114,15 @@ abstract class Matcher[T] extends AbstractMatcher[T] with MatcherResult { outer 
   def unless(condition : => Boolean) = when(!condition)
   
   /**
+   *  The <code>lazily</code> operator returns a matcher which will match a function returning the expected value
+   */   
+  def lazily = { 
+    new Matcher[() => T]() {
+      def apply(a: => (() => T)) = outer(a.apply)
+    }
+  }
+
+  /**
    *  The <code>orSkipExample</code> operator throws a SkippedException if the matcher fails
    */   
   def orSkipExample = { 

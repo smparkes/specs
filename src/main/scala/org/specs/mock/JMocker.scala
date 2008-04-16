@@ -393,7 +393,7 @@ trait JMockActions {
 trait JMockerExampleLifeCycle extends ExampleLifeCycle with JMockerContext {
 
   /** 
-   * before any example, a new context and new expetcations should be created
+   * before any example, a new context and new expectations should be created
    */
   override def beforeExample(ex: Example) = {
     super.beforeExample(ex)

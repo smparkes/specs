@@ -37,17 +37,5 @@ trait Sugar extends Products {
       /** print and pass: print the value and return it */ 
       def pp = {Console.println(a); a}
   }
-  
-  implicit def stringToMult(s: String) = new ExtendedString(s) 
-  class ExtendedString(s: String) {
-      def mult(s: String, i: Int): String = {        
-        if (i == 0) 
-          ""
-        else
-          s + mult(s, i-1)
-      }
-      def * (i: Int): String = mult(s, i)
-    }
-  
 }
 

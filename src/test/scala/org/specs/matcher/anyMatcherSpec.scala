@@ -28,6 +28,10 @@ object anyMatcherSpec extends MatchersSpecification {
     "be skipped" in {
       assertion( 1 must be_==(2).orSkipExample ) must throwThis(SkippedException("skipped because '1' is not equal to '2'"))
     }
+    "match lazy values" in {
+      val lazyVal = () => 1
+      lazyVal must be_==(1).lazily
+    }
   }
 
 }

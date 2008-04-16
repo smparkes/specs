@@ -7,7 +7,7 @@ import org.specs.runner._
 import org.hamcrest.core._
 import org.specs.matcher._
 
-class JMockSpecRunner extends Runner(jmockSpec) with ScalaTest with Console with JUnit with Xml 
+class jMockSpecTest extends Runner(jmockSpec) with ScalaTest with Console with JUnit with Xml 
 
 object jmockSpec extends Specification {
   "The jMock integration".isSpecifiedBy(jmockGoodSpec, jmockBadSpec)
@@ -64,6 +64,13 @@ object jmockGoodSpec extends Mocked {
     "provide an anyInt matcher which can be used to specify that any Int will be used as a parameter" in {
       expect { 1.of(list).get(anyInt) }
       list.get(0)
+    } 
+    "provide an any[classOf[Type]] matcher which can match any parameter of a given type with vargs" in {
+      case class Param(name: String)
+      trait ToMock { def method(p: Param*) = () }
+      val mocked = mock(classOf[ToMock])
+      expect { 1.of(mocked).method(any(classOf[Param])) }
+      mocked.method(Param("hello"))
     } 
     "provide an a(classOf[X]) matcher which can be used to specify that an instance of class X will be used as a parameter" in {
       val listString: List[String] = mock(classOf[List[String]], "list of strings")
