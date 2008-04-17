@@ -86,6 +86,12 @@ object jmockGoodSpec extends Mocked {
       expect { 1.of(list).get(equal(0)) }
       list.get(0)
     } 
+    "provide an equal matcher which can be used to specify that a specific value will be used as a parameter - with 2 paramters" in {
+      trait ParamMock { def method(p1: Int, p2: Int) = () }
+      val mocked = mock(classOf[ParamMock])
+      expect { 1.of(mocked).method(equal(0), equal(1)) }
+      mocked.method(0, 1)
+    } 
     "provide a will method, using a Hamcrest matcher, to specify that a specific value will be used as a parameter" in {
       expect { 1.of(list).get(will(new IsEqual(0))) }
       list.get(0)
