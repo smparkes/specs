@@ -11,7 +11,7 @@ class extendedIterableUnitTest extends JUnit3(extendedIterableUnit)
 object extendedIterableUnit extends Specification with Sugar {
   "A toDeepString function" should {
     "print the inside of an iterable, even if it is a Stream" in {
-			Stream.cons(1, Stream.cons(2, Nil.toStream)).toDeepString must_== "[1, 2]"
+      Stream.cons(1, Stream.cons(2, Nil.toStream)).toDeepString must_== "[1, 2]"
     }
   }
   "A sameElementsAs function" should {

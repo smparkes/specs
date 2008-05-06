@@ -32,6 +32,28 @@ object anyMatcherSpec extends MatchersSpecification {
       val lazyVal = () => 1
       lazyVal must be_==(1).lazily
     }
+    "be composed with a function using the ^^ operator and return a matcher" in {
+      6 must beEqual("66") ^^ ((_:Int).toString * 2)
+    }
+    "be composed with a function using the ^^ operator and return a matcher" in {
+      6 must ((beEqual(_:Int)) ^^ ((x: String) => x.size)) {"string"}
+    }
+    "be composed with a function using the ^^^ operator and return a function returning a matcher" in {
+      "123456" must ((beEqual(_:Int)) ^^^ ((x: String) => x.size))("string")
+    }
+    "transformed to a matcher matching a sequence of objects using the toSeq method" in {
+      List("a", "b", "c") must (beEqual(_:String)).toSeq(List("a", "b", "c"))
+      assertion { List("a", "c", "b") must (beEqual(_:String)).toSeq(List("a", "b", "c")) } must 
+        failWith("'c' is not equal to 'b'; 'b' is not equal to 'c'") 
+    }
+    "transformed to a matcher matching a set of objects using the toSet method" in {
+      Set("a", "b", "c") must (beEqual(_:String)).toSet(Set("b", "a", "c"))
+      assertion { Set("a", "b", "c") must (beEqual(_:String)).toSet(Set("b", "a", "d")) } must 
+        failWith("no match for element 'c'") 
+    }
+    "provide a toSeq method which can be composed with a function" in {
+      List(3, 1, 2) must ((beEqual(_:Int)) ^^ ((x: String) => x.size)).toSeq(List("abc", "a", "ab"))
+    }
   }
 
 }

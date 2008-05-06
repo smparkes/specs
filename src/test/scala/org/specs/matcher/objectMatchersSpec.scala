@@ -3,7 +3,7 @@ import scala.collection.mutable.Queue
 import org.specs.runner._
 import org.specs.Sugar._
 
-class objectMatchersTest extends JUnit3(objectMatchersSpec) 
+class objectMatchersTest extends Runner(objectMatchersSpec) with JUnit 
 object objectMatchersSpec extends MatchersSpecification {
   "Object matchers" should { doBefore { clearExample }
     "provide a 'must_==' matcher: 'name' must_== 'name'" in {
@@ -46,5 +46,12 @@ object objectMatchersSpec extends MatchersSpecification {
 
       assertion({throw new NullPointerException;()} must throwA(new Error)) must failWith("java.lang.Error should have been thrown. Got: java.lang.NullPointerException")
     } 
+    "provide a beAlsoNull matcher which will check if 2 objects are null at the same time" in {
+      val nullString: String = null 
+      nullString must beAlsoNull(nullString)
+      1 must beAlsoNull(1)
+      assertion(nullString must beAlsoNull("not null")) must failWith("'not null' is not null")
+      assertion("not null" must beAlsoNull(nullString)) must failWith("'not null' is not null")
+    }
   }   
 }

@@ -53,7 +53,8 @@ object ExtendedIterable {
     /**
      * @return true if the 2 iterables contain the same elements recursively, in the same order 
      */
-    def sameElementsAs(that: Iterable[A]): Boolean = {
+    def sameElementsAs(that: Iterable[A]): Boolean = sameElementsAs(that, (x, y) => x == y)
+    def sameElementsAs(that: Iterable[A], f: (A, A) => Boolean): Boolean = {
       val ita = xs.elements.toList
       val itb = that.elements.toList
       var res = true
@@ -62,8 +63,8 @@ object ExtendedIterable {
         case (a: anyIterable, b: anyIterable) => {
           if (a.headOption.isDefined && b.headOption.isDefined) {
             val (x, y, resta, restb) = (a.head, b.head, a.drop(1), b.drop(1))
-            ((x == y) && (resta sameElementsAs restb)) || 
-            ((resta.exists(_==y)  && restb.exists(_==x)) && (resta.removeFirst(_==y) sameElementsAs restb.removeFirst(_==x)))
+            ((f(x, y)) && (resta sameElementsAs restb)) || 
+            ((resta.exists(f(_, y))  && restb.exists(f(_, x))) && (resta.removeFirst(f(_, y)) sameElementsAs restb.removeFirst(f(_, x))))
           }
           else
             false

@@ -2,6 +2,7 @@ package org.specs.matcher
 
 import org.specs._
 import org.specs.specification._
+import org.specs.collection.ExtendedIterable._
 
 object Matchers extends Matchers
 /**
@@ -62,21 +63,21 @@ abstract class Matcher[T] extends AbstractMatcher[T] with MatcherResult { outer 
   /**
    *  The <code>or</code> operator allow to combine to matchers through a logical or.
    *  <code>m1 or m2</code> can successfully match a value <code>a</code> if m1 succeeds 
-   *  or m2 succeeds
+   *  or m2 succeeds. <code>m2</code> is not evaluated if m1 succeeds
    */   
   def or(m: => Matcher[T]) : Matcher[T] = { 
     new Matcher[T]() {
     def apply(a: =>T) = {
     val r1 = outer(a)
-    val r2 = m(a) 
-      if (!r1.success && !r2.success)
-        (false, r1.okMessage + " and " + r2.okMessage, r1.koMessage + " and " + r2.koMessage) 
-      else if (r1.success && !r2.success)
-        (true, r1.okMessage + " but " + r2.koMessage, r1.koMessage + " and " + r2.koMessage)
-      else if (!r1.success && r2.success)
+    if (r1.success)
+      (true, r1.okMessage, r1.koMessage)
+    else {
+      val r2 = m(a)
+      if (r2.success)
         (true, r2.okMessage + " but " + r1.koMessage, r1.koMessage + " and " + r2.koMessage)
       else
-        (true, r1.okMessage + " and " + r2.okMessage, r1.koMessage + " and " + r2.koMessage) 
+        (false, r1.okMessage + " and " + r2.okMessage, r1.koMessage + " and " + r2.koMessage)
+    }
   }}}
 
   /**
@@ -84,7 +85,7 @@ abstract class Matcher[T] extends AbstractMatcher[T] with MatcherResult { outer 
    *  <code>m1 xor m2</code> can successfully match a value <code>a</code> if m1 succeeds 
    *  and m2 fails, or if m1 fails and m2 succeeds
    */   
-  def xor(m: Matcher[T]) : Matcher[T] = (this and m.not) or (this.not and m)
+  def xor(m: => Matcher[T]) : Matcher[T] = (this and m.not) or (this.not and m)
 
   /**
    *  The <code>not</code> operator allow to combine to matchers through a logical not.
@@ -123,12 +124,22 @@ abstract class Matcher[T] extends AbstractMatcher[T] with MatcherResult { outer 
   }
 
   /**
+   *  The <code>^^</code> operator returns a matcher which will apply a function before doing the match
+   */   
+  def composeWithFunction[A](f: A => T) = this ^^ f
+  def ^^[A](f: A => T) = {
+    new Matcher[A]() {
+      def apply(a: => A) = outer(f(a))
+    }
+  }  
+
+  /**
    *  The <code>orSkipExample</code> operator throws a SkippedException if the matcher fails
    */   
   def orSkipExample = { 
     val outer = this;
     new Matcher[T]() {
-     def apply(a: => T) = {
+      def apply(a: => T) = {
           val result = outer(a)
           if (!result.success) throw new SkippedException("skipped because " + result.koMessage)
           (result.success, result.okMessage, result.koMessage)

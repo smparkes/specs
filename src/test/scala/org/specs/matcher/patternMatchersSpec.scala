@@ -20,6 +20,13 @@ object patternMatchersSpec extends MatchersSpecification {
       List().find {_ == 2} must beNone
       assertion(List(2).find {_ == 2} must beNone[Int]) must failWith("'Some(2)' is not None")
     }
+    "provide a beAlsoNone matcher matching if 2 options are None at the same time" in {
+      val noneString: Option[String] = None
+      noneString must beAlsoNone(noneString)
+      Some(2) must beAlsoNone(Some(1))
+      assertion(noneString must beAlsoNone(Some("thing"))) must failWith("'Some(thing)' is not None")
+      assertion(Some("thing") must beAlsoNone(noneString)) must failWith("'Some(thing)' is not None")
+    }
     "provide a beSome matcher for options: List(2).find {_ == 2} must beSome[Int] [alias: beSomething when type is not important]" in {
       List(2).find {_ == 2} must beSome[Int]
       List(2).find {_ == 2} must beSomething

@@ -5,8 +5,7 @@ import org.specs.mock._
 import org.specs.Sugar._
 import org.specs.specification._
 
-class anyMatchersTest extends JUnit3(anyMatchersUnit)
-class anyMatchersRunner extends Runner(anyMatchersUnit) with JUnit
+class anyMatchersTest extends Runner(anyMatchersUnit) with JUnit
 object anyMatchersUnit extends MatchersSpecification {
   "A 'be' matcher" should {
     "be ok if comparing the same object" in {
@@ -150,6 +149,11 @@ object anyMatchersUnit extends MatchersSpecification {
     }
     "not evaluate the expressions twice: be_==" in {
       be_==(1) must evalOnce(exp(anyValue))
+    }
+    "not evaluate the expressions twice: be_==" in {
+      val expression = exp(anyValue)
+      be_==(expression.evaluate).apply(1)
+      expression.evaluationsNb must_== 1
     }
     "not evaluate the expressions twice: be" in {
       be(1) must evalOnce(exp(anyValue))

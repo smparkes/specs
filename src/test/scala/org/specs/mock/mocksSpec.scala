@@ -4,9 +4,7 @@ import org.specs.matcher._
 import org.specs.Sugar._
 
 object mocksSpec extends Specification { "Mocks" areSpecifiedBy (mockProtocols, mockParameters) }
-class mockProtocolsTest extends JUnit3(mockProtocols) 
-class mockProtocolsSuite extends ScalaTestSuite(mockProtocols) 
-object mockProtocolsRunner extends ConsoleRunner(mockProtocols) 
+class mockProtocolsRunnerTest extends Runner(mockProtocols) with JUnit with Console with ScalaTest 
 object mockProtocols extends MatchersSpecification with ButtonAndLightMock {
   "Mock protocols" should { doBefore { clearExample; button.init() }
    "provide an 'expect oneOf' protocol checking if one call exactly has been made" in {

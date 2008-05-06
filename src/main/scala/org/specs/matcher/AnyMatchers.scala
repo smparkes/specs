@@ -4,6 +4,9 @@ import org.specs.specification._
 import org.specs.matcher.MatcherUtils.{q, matches}
 import org.specs.matcher.PatternMatchers._
 import org.specs.ExtendedThrowable._
+import org.specs.collection.ExtendedIterable._
+import scala.collection.immutable.{Set => Removed}
+import scala.collection.Set
 
 object AnyMatchers extends AnyMatchers
 /**
@@ -14,56 +17,75 @@ trait AnyMatchers {
   /**
    * Matches if (a eq b)
    */   
-  def be(a: Any) = new Matcher[Any](){
-    def apply(v: =>Any) = {val b = v; (a.asInstanceOf[AnyRef] eq b.asInstanceOf[AnyRef], q(b) + " is the same as " + q(a), q(b) + " is not the same as " + q(a))} 
+  def be(a: =>Any) = new Matcher[Any](){
+    def apply(v: =>Any) = {
+      val (x, y) = (a, v) 
+      (x.asInstanceOf[AnyRef] eq y.asInstanceOf[AnyRef], q(y) + " is the same as " + q(x), q(y) + " is not the same as " + q(x))} 
   } 
-  def notBe(a: Any) = be(a).not
+  def notBe(a: =>Any) = be(a).not
 
   /**
    * Matches if (a == b)
    */   
-  def beEqual[T](a: T) = new Matcher[T](){
-    def apply(v: =>T) = {val b = v; (a == b, q(b) + " is equal to as " + q(a), q(b) + " is not equal to " + q(a))} 
+  def beEqual[T](a: =>T) = new Matcher[T](){
+    def apply(v: =>T) = {
+      val (x, y) = (a, v) 
+      (x == y, q(y) + " is equal to " + q(x), q(y) + " is not equal to " + q(x))
+    } 
   } 
 
   /**
    * Matches if (a != b)
    */   
-  def beDifferent[T](a: T) = beEqual[T](a).not
+  def beDifferent[T](a: =>T) = beEqual[T](a).not
 
   /**
    * Matches if (a == b)
    */   
-  def is_==(a: Any) = new Matcher[Any](){ 
-     def apply(v: =>Any) = {val b = v; ((a == b), q(b) + " is equal to " + q(a), q(b) + " is not equal to " + q(a))}
+  def is_==(a: =>Any) = new Matcher[Any](){ 
+    def apply(v: =>Any) = {
+      val (x, y) = (a, v) 
+      ((x == y), q(y) + " is equal to " + q(x), q(y) + " is not equal to " + q(x))
+    }
   }
 
   /**
    * Alias of is_==
    */   
-  def be_==(a: Any) = is_==(a)
+  def be_==(a: =>Any) = is_==(a)
 
   /**
    * Matches if (a neq b)
    */  
-  def notEq(a: Any) = be(a).not 
+  def notEq(a: =>Any) = be(a).not 
 
   /**
    * Matches if (a != b)
    */   
-  def is_!=(a: Any) = (is_==(a)).not 
+  def is_!=(a: =>Any) = (is_==(a)).not 
   
   /**
    * Matches if (a != b)
    */   
-  def be_!=(a: Any) = (is_==(a)).not 
+  def be_!=(a: =>Any) = (is_==(a)).not 
 
   /**
    * Matches if b is null
    */   
   def beNull[T] = new Matcher[T](){
-     def apply(v: =>T) = {val b = v; (b == null, "the value is null", q(b) + " is not null")} 
-   }  
+    def apply(v: =>T) = { val b = v; (b == null, "the value is null", q(b) + " is not null") } 
+  }  
+
+  /**
+   * Matches if a is null when v is null and a is not null when v is not null
+   */   
+  def beAlsoNull[T](a: =>T) = new Matcher[T](){
+    def apply(v: =>T) = {
+      val x = a; 
+      val y = v; 
+      (x == null && y == null || x != null && y != null, "both values are null", if (x == null) q(y) + " is not null" else q(x) + " is not null")
+    } 
+  }  
 
   /**
    * Matches if b is not null
@@ -74,27 +96,30 @@ trait AnyMatchers {
    * Matches if b is true
    */   
   def beTrue[T] = new Matcher[T](){
-    def apply(v: =>T) = {val b = v; (b == true, q(b) + " is true", q(b) + " is false")} 
+    def apply(v: =>T) = { val b = v; (b == true, q(b) + " is true", q(b) + " is false") } 
   }  
 
   /**
    * Matches if b is false
    */   
   def beFalse[T] = new Matcher[T](){
-    def apply(v: =>T) = {val b = v; (b == false, q(b) + " is false", q(b) + " is true")} 
+    def apply(v: =>T) = { val b = v; (b == false, q(b) + " is false", q(b) + " is true") } 
   }  
   
   /**
    * Matches if iterable.exists(_ == a)
    */   
-  def beIn[T <: AnyRef](iterable: Iterable[T]) = new Matcher[T](){
-    def apply(v: => T) = {val a= v; (iterable.exists(_ == a), q(a) + " is in " + q(iterable), q(a) + " is not in " + q(iterable))}
+  def beIn[T <: AnyRef](iterable: =>Iterable[T]) = new Matcher[T](){
+    def apply(v: => T) = {
+      val (x, y) = (iterable, v) 
+      (x.exists(_ == y), q(y) + " is in " + q(x), q(y) + " is not in " + q(x))
+    }
   }
 
   /**
    * Matches if not(iterable.exists(_ == a))
    */   
-  def notBeIn[T <: AnyRef](iterable: Iterable[T]) = beIn(iterable).not 
+  def notBeIn[T <: AnyRef](iterable: =>Iterable[T]) = beIn(iterable).not 
 
   /**
    * Matches if any object with an <code>isEmpty</code> method returns true: (Any {def isEmpty: Boolean}).isEmpty
@@ -131,7 +156,7 @@ trait AnyMatchers {
    * <br>Usage: <code>value must throwA(new ExceptionType)</code>
    * <br>Advanced usage: <code>value must throwA(new ExceptionType).like {case ExceptionType(m) => m.startsWith("bad")}</code>
    */   
-  def throwException[E <: Throwable](exception: E) = new ExceptionMatcher(exception)
+  def throwException[E <: Throwable](exception: =>E) = new ExceptionMatcher(exception)
     class ExceptionMatcher[E <: Throwable](exception: E) extends Matcher[Any] {
      def apply(value: => Any) = { 
        (isThrown(value, exception, (e => exception.getClass.isAssignableFrom(e.getClass))).isDefined, exception + " was thrown", exception + " should have been thrown")
@@ -149,17 +174,17 @@ trait AnyMatchers {
   /**
    * Alias for throwException
    */   
-  def throwA[E <: Throwable](e: E) = throwException[E](e)
+  def throwA[E <: Throwable](e: =>E) = throwException[E](e)
 
   /**
    * Alias for throwException
    */   
-  def throwAn[E <: Throwable](e: E) = throwException[E](e)
+  def throwAn[E <: Throwable](e: =>E) = throwException[E](e)
 
   /**
    * Matches if the thrown exception is == to e
    */   
-  def throwThis[E <: Throwable](exception: E) = new Matcher[Any](){
+  def throwThis[E <: Throwable](exception: =>E) = new Matcher[Any](){
     def apply(value: => Any) = { 
         (isThrown(value, exception, (e => e == exception)).isDefined, exception + " was thrown", exception + " should have been thrown")
     }
@@ -192,9 +217,135 @@ trait AnyMatchers {
    * @param e original exception 
    * @param failureMessage exception message 
    */
-  def throwFailure(e: Throwable, failureMessage: String) = {
+  def throwFailure(e: =>Throwable, failureMessage: =>String) = {
     val failure = FailureException(failureMessage) 
     failure.setStackTrace((e.getStackTrace.toList.dropWhile {x: StackTraceElement => x.toString.matches("AnyMatchers") || x.toString.matches("Assert")}).toArray)
     throw failure
+  }
+  
+  /**
+   * Adds functionalities to functions returning matchers so that they can be combined before taking a value and 
+   * returning actual matchers
+   */
+  implicit def toMatcher[S, T](f: S => Matcher[T]) = new ToMatcher(f)
+  implicit def toMatcher2[T](f: T => Matcher[T]) = new ToMatcher2(f)
+
+  /**
+   * The <code>ToMatcher</code> class allows to combine functions returning matchers, or a function returning a matcher and a matcher.<p>
+   * For example:<code>((beEqual(_:Int)) or (be_>(_:Int)))(3) </code> 
+   */
+  class ToMatcher[S, T](f: S => Matcher[T]) {
+    /**
+     * @return a function which will return the and of 2 matchers 
+     */
+    def and(m: =>Matcher[T]) = new Function1[S, Matcher[T]] {
+      def apply(s: S) = f(s) and m 
+    }
+    /**
+     * @return a function which will return the or of 2 matchers 
+     */
+    def or(m: =>Matcher[T]) = new Function1[S, Matcher[T]] {
+      def apply(s: S) = f(s) or m 
+    }
+    /**
+     * @return a function which will return the xor of 2 matchers 
+     */
+    def xor(m: Matcher[T]) = new Function1[S, Matcher[T]] {
+      def apply(s: S) = f(s) xor m 
+    }
+    /**
+     * @return a function which will return the negation of a matcher 
+     */
+    def not = new Function1[S, Matcher[T]] {
+      def apply(s: S) = f(s).not 
+    }
+    /**
+     * @return a function which will return the and of 2 matchers 
+     */
+    def and(m: S => Matcher[T]) = new Function1[S, Matcher[T]] {
+      def apply(s: S) = f(s) and m(s) 
+    }
+    /**
+     * @return a function which will return the or of 2 matchers 
+     */
+    def or(m: S => Matcher[T]) = new Function1[S, Matcher[T]] {
+      def apply(s: S) = f(s) or m(s) 
+    }
+    /**
+     * @return a function which will return the xor of 2 matchers 
+     */
+    def xor(m: S => Matcher[T]) = new Function1[S, Matcher[T]] {
+      def apply(s: S) = f(s) xor m(s) 
+    }
+
+    /**
+     * @return a function which will return the composition of a matcher and a function 
+     */
+    def ^^[A](g: A => S) = new Function1[A, Matcher[T]] {
+      def apply(a: A) = f(g(a)) 
+    }
+
+    /**
+     * @return a function which will return a matcher checking a sequence of objects 
+     */
+    def toSeq = new Function1[Seq[S], Matcher[Seq[T]]] {
+      def apply(s: Seq[S]) = new SeqMatcher(s, f) 
+    }
+
+    /**
+     * @return a function which will return a matcher checking a set of objects 
+     */
+    def toSet = new Function1[Set[S], Matcher[Set[T]]] {
+      def apply(s: Set[S]) = new SetMatcher(s, f) 
+    }
+  }
+  class ToMatcher2[T](f: T => Matcher[T]) {
+    /**
+     * @return a function which will return the composition of a matcher and a function 
+     */
+    def ^^^[A](g: A => T) = {
+      (a: A) => new Matcher[A] {
+        def apply(b: =>A) = {
+          f(g(a)).apply(g(b))
+        }
+      }
+    } 
+  }
+
+  /**
+   * The <code>SeqMatcher</code> class is a matcher matching a sequence of objects with a matcher returned by a function.<p>
+   * Usage:<code>List(1, 2, 3) must ((beEqual(_:Int)).toSeq)(List(1, 2, 3)) </code> 
+   */
+  class SeqMatcher[S, T](s: Seq[S], f: S => Matcher[T]) extends Matcher[Seq[T]] {
+    def apply(t: => Seq[T]) = {
+      val bothSequences = t.toList zip s.toList
+      val results = bothSequences map { st => val (t1, s1) = st 
+                                        f(s1).apply(t1) }
+      (results.map(_._1).reduceLeft(_ && _), results.filter(_._1).map(_._2).mkString("; "), 
+                                             results.filter(!_._1).map(_._3).mkString("; "))
+    }
+  }
+
+  /**
+   * The <code>SetMatcher</code> class is a matcher matching a set of objects with a matcher returned by a function.<p>
+   * Usage:<code>List(1, 2, 3) must ((beEqual(_:Int)).toSet)(List(2, 1, 3)) </code> 
+   */
+  class SetMatcher[S, T](s: Set[S], f: S => Matcher[T]) extends Matcher[Set[T]] {
+    def apply(t: => Set[T]) = {
+      val setToTest = t
+      if (s.size != setToTest.size)
+        (false, "the sets contain the same number of elements", 
+                 q(setToTest) + " contains " + setToTest.size + " elements while " + q(s) + " contains " + s.size + " elements")
+      else {
+        val results = setToTest.map {(element: T) => 
+          s.find { (otherElement:S) => f(otherElement).apply(element).success } match {
+            case None => (false, "all matches", "no match for element " + q(element))
+            case Some(x) => (true, q(element) + " matches with " + x, "no match for element " + q(element))
+          }
+        }
+        (results.map(_._1).reduceLeft(_ && _), results.filter(_._1).map(_._2).mkString("; "), 
+                                               results.filter(!_._1).map(_._3).mkString("; "))
+      }
+    }
   }
 }
