@@ -59,18 +59,22 @@ trait SpecificationStructure extends ExampleLifeCycle {
     reverse.toList(0)
 
   /** specifications contained by the current specification. An empty list by default */ 
-  var subSpecifications: List[Specification] = Nil
+  var subSpecifications: List[Specification] = List()
 
   /** this declares that a specification is composed of other specifications */ 
   def isSpecifiedBy(specifications: Specification*) = {
     this.description = this.name + " is specified by"
-    subSpecifications = subSpecifications:::specifications.toList
+    include(specifications:_*)
   }
 
+  def include(specifications: Specification*) = {
+    subSpecifications = subSpecifications:::specifications.toList
+  }
+  
   /** alias for isSpecifiedBy */ 
   def areSpecifiedBy(specifications: Specification*) = {
     this.description = this.name + " are specified by"
-    subSpecifications = subSpecifications:::specifications.toList
+    include(specifications:_*)
   }
 
   /** 

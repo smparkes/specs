@@ -22,6 +22,10 @@ import org.specs.ExtendedThrowable._
  *
  */
 abstract class Specification extends Matchers with SpecificationStructure with AssertFactory {
+  /**
+   * Default main method for a specification: uses the ConsoleRunner
+   */
+  def main(args: Array[String]) = new ConsoleRunner(this).main(args)
   /** 
    * @deprecated
    * adds a "before" function to the last sut being defined 
