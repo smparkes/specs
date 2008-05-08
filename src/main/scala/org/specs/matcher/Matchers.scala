@@ -15,7 +15,6 @@ trait Matchers extends AnyMatchers with
                        IterableMatchers with
                        MapMatchers with
                        NumericMatchers with
-                       ScalacheckMatchers with
                        PatternMatchers with 
                        MockMatchers with 
                        XmlMatchers with 

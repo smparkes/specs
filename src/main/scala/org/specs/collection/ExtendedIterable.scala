@@ -61,7 +61,7 @@ object ExtendedIterable {
       (ita, itb) match {
         case (Nil, Nil) => true
         case (a: anyIterable, b: anyIterable) => {
-          if (a.headOption.isDefined && b.headOption.isDefined) {
+          if (a.firstOption.isDefined && b.firstOption.isDefined) {
             val (x, y, resta, restb) = (a.head, b.head, a.drop(1), b.drop(1))
             ((f(x, y)) && (resta sameElementsAs restb)) || 
             ((resta.exists(f(_, y))  && restb.exists(f(_, x))) && (resta.removeFirst(f(_, y)) sameElementsAs restb.removeFirst(f(_, x))))

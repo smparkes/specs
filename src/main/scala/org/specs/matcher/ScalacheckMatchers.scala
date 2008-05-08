@@ -5,19 +5,20 @@ import org.scalacheck.Test.{Stats, Params, Passed, Failed, Exhausted, GenExcepti
 import org.scalacheck.ConsoleReporter._
 import scala.collection.immutable.HashMap
 import org.specs.io.ConsoleOutput
-import org.specs.matcher.ScalacheckParameters._
+import org.specs.matcher._
 import org.specs.matcher.MatcherUtils.q
 import org.specs.specification.FailureException
+
 /**
  * The <code>ScalacheckMatchers</code> trait provides matchers which allow to 
  * assess properties multiple times with generated data.
  * @see the <a href="http://code.google.com/p/scalacheck/">Scalacheck project</a>
  */
-trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions {
+trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions with ScalacheckParameters {
    /**
     * default parameters. Uses Scalacheck default values and doesn't print to the console
     */
-   implicit def defaultParameters = new Parameters(ScalacheckParameters.setParams(Nil))
+   implicit def defaultParameters = new Parameters(setParams(Nil))
 		
    /**
     * Matches ok if the <code>function T => Boolean</code> returns <code>true</code> for any generated value<br>
@@ -137,23 +138,15 @@ trait ScalacheckParameters {
   def defaultValues = Map(minTestsOk->100, maxDiscarded->500, minSize->0, maxSize->100) 
 
   /**
-   * This class is the base class for the print and set case classes.<br>
-   * It contains a Map of generation parameters and indicates if the generation
-   * must be verbose.
-   */  
-  sealed class Parameters(params: Map[Symbol, Int]) {
-    def apply(s: Symbol) = params(s)
-    def verbose = false
-  }
-
-  /**
-   * This class is used to set parameters but nothing will be printed to the console<br>
+   * This object is used to set parameters but nothing will be printed to the console<br>
    * Usage: <pre><code>
    * generated_values must pass { v =>
    *   property(v) mustBe ok
    * }(set(minTestsOk->15, maxDiscarded->20))</code></pre> 
    */  
-  case class set(p: (Symbol, Int)*) extends Parameters(setParams(p))
+  object set extends Parameters(setParams(Nil)) {
+    def apply(p: (Symbol, Int)*) = new Parameters(setParams(p))
+  }
 
   /**
    * Those parameters will print the result on the console and use the default settings, or specified parameters <br>
@@ -168,7 +161,7 @@ trait ScalacheckParameters {
    *    property(v) mustBe ok
    *  }(display(minTestsOk->15, maxDiscarded->20))</code></pre> 
    */  
-  object display extends Parameters(setParams(Nil)) {
+  object display  extends Parameters(setParams(Nil)) {
     def apply(p: (Symbol, Int)*) = new Parameters(setParams(p)) { override def verbose = true }
     override def verbose = true
   }
@@ -185,14 +178,18 @@ trait ScalacheckParameters {
           throw new RuntimeException("null values are not accepted in scalacheck parameters: " + q(pair))
         else { 
           val (s, i) = pair
-          params = params + s->i
+          params = params + Pair(s, i)
         }
     }
     params.withDefault(defaultValues)
   }
 }
 /**
- * Companion object of the <code>ScalacheckParameters</code> trait<br>
- * Use import to access the <code>ScalacheckParameters</code> functions
- */
-object ScalacheckParameters extends ScalacheckParameters
+ * This class is the base class for the display and set case classes.<br>
+ * It contains a Map of generation parameters and indicates if the generation
+ * must be verbose.
+ */  
+class Parameters(params: Map[Symbol, Int]) {
+  def apply(s: Symbol) = params(s)
+  def verbose = false
+}

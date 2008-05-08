@@ -2,14 +2,13 @@ package org.specs.matcher
 import org.specs._
 import org.specs.runner._
 import org.specs.Sugar._
-import org.specs.matcher.ScalacheckParameters._
 import scalacheck._
 import org.specs.mock._
 import org.specs.io._
 import org.specs.specification._
 
 class scalacheckMatchersUnitTest extends JUnit3(scalacheckMatchersUnit)
-object scalacheckMatchersUnit extends MatchersSpecification with ScalacheckMock {
+object scalacheckMatchersUnit extends MatchersSpecification with ScalacheckMock with Scalacheck {
   "The ScalacheckParameters object" should {
     "provide a 'display' value which is verbose" in {
        display.verbose mustBe true

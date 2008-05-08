@@ -5,10 +5,10 @@ import org.specs._
 import org.specs.collection.ExtendedIterable._
 import org.specs.collection.ExtendedList._
 import scalacheck.Gen._
-import org.specs.matcher.ScalacheckParameters._
+import org.specs.Scalacheck
 
-class extendedIterableUnitTest extends JUnit3(extendedIterableUnit)
-object extendedIterableUnit extends Specification with Sugar {
+class extendedIterableUnitTest extends Runner(extendedIterableUnit) with JUnit
+object extendedIterableUnit extends Specification with Sugar with Scalacheck {
   "A toDeepString function" should {
     "print the inside of an iterable, even if it is a Stream" in {
       Stream.cons(1, Stream.cons(2, Nil.toStream)).toDeepString must_== "[1, 2]"

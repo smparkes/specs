@@ -7,10 +7,9 @@ import org.specs._
 import org.specs.matcher._
 import org.specs.runner._
 import org.specs.Sugar._
-import org.specs.matcher.ScalacheckParameters._
 
 class matcherUnitTest extends JUnit3(matcherUnit)
-object matcherUnit extends Specification with MatcherCases {
+object matcherUnit extends Specification with MatcherCases with Scalacheck {
   "A matcher" should {
     "when negated, use the ok message of the original matcher to indicate a failure" in {
       val m = new Matcher[Boolean](){ def apply(b: => Boolean) = (b, "ok", "ko") }

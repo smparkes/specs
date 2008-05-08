@@ -24,10 +24,10 @@ trait MockFileSystem extends FileSystem {
   override def filePaths(path: String) = files.keySet.toList
 
   /** adds a new file to the FileSystem. The file path will be a default one */
-  def addFile(content: String) = files += defaultFilePath -> content
+  def addFile(content: String) = files += Pair(defaultFilePath, content)
 
   /** adds a new file to the FileSystem with a specific file path */
-  def addFile(path: String, content: String) = files += path -> content
+  def addFile(path: String, content: String) = files += Pair(path, content)
 
   /** @return a default file path. All default file paths will be different from each other */
   def defaultFilePath = "name" + files.size + defaultExtension

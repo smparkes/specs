@@ -2,7 +2,6 @@ package org.specs.matcher
 import org.specs._
 import org.specs.runner._
 import org.specs.Sugar._
-import org.specs.matcher.ScalacheckParameters._
 import org.scalacheck._
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen._
@@ -42,7 +41,7 @@ object scalacheckMatchersSpec extends MatchersSpecification with ScalacheckExamp
     } 
   }
 }
-trait ScalacheckExamples extends Specification {
+trait ScalacheckExamples extends Specification with Scalacheck {
   val identityProp = property((a:Boolean) => a)
   val alwaysTrueProp = property((a:Int) => true)
   val alwaysTrue = elements(true)

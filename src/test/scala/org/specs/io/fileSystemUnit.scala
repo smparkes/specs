@@ -8,7 +8,7 @@ import org.specs.Sugar._
 import org.specs.runner._
 
 class fileSystemUnitTest extends JUnit3(fileSystemUnit)
-object fileSystemUnit extends Specification with FileSystem with ConsoleOutput {
+object fileSystemUnit extends Specification with FileSystem with ConsoleOutput with Scalacheck {
 
   "A file system" should {
     "return the string pattern corresponding to a glob definition" in {

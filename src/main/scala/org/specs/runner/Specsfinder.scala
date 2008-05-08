@@ -33,7 +33,7 @@ trait SpecsFinder extends FileSystem {
     val specPattern = "\\s*object\\s*(" + pattern + ")\\s*extends\\s*.*Spec.*\\s*\\{"
     val m = Pattern.compile(specPattern).matcher(readFile(filePath))
     while (m.find) {
-      result += ((packageName(filePath).map(_ + ".").get("") + m.group(1).trim) + "$")
+      result += ((packageName(filePath).map(_ + ".").getOrElse("") + m.group(1).trim) + "$")
     }
   }
   

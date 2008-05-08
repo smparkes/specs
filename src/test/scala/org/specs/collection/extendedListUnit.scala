@@ -2,12 +2,12 @@ package org.specs.collection
 import org.specs.runner._
 import org.specs.Sugar._
 import org.specs._
-import org.specs.matcher.ScalacheckParameters._
 import org.specs.collection.ExtendedList._
 import scalacheck.Gen._
+import org.specs.Scalacheck
 
-class extendedListUnitTest extends JUnit3(extendedListUnit)
-object extendedListUnit extends Specification with Sugar {
+class extendedListUnitTest extends Runner(extendedListUnit) with JUnit
+object extendedListUnit extends Specification with Sugar with Scalacheck {
   "A removeFirst predicate function" should {
     "remove nothing if the list is empty" in {
       val l: List[String] = Nil

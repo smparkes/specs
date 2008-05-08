@@ -9,9 +9,8 @@ import scala.collection.mutable._
 import scalacheck.Gen._
 import org.specs.matcher.MatcherUtils._
 
-object specificationUnitRunner extends ConsoleRunner(specificationUnit)
-class specificationUnitTest extends JUnit3(specificationUnit)
-object specificationUnit extends Specification {
+class specificationUnitTest extends Runner(specificationUnit) with JUnit with Console
+object specificationUnit extends Specification with Scalacheck {
 
   "A specification" should {
     "have a description corresponding to its unqualified class name, whatever the class name" in {
