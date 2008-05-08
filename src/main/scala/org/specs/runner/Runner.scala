@@ -47,7 +47,10 @@ abstract class Runner(var specifications: Specification*) extends SpecsHolder {
  */  
 trait Console extends ConsoleReporter with SpecsHolder with Application {
   def reportSpecs = report(specs)
-  override def main(args: Array[java.lang.String]) = reportSpecs
+  override def main(args: Array[java.lang.String]) = {
+    reportSpecs
+    if (specs.exists { _.isFailing }) System.exit(1) else System.exit(0)
+  }
 }
 
 /**
@@ -57,7 +60,10 @@ trait Console extends ConsoleReporter with SpecsHolder with Application {
  */  
 class ConsoleRunner(val specifications: Specification*) extends ConsoleReporter {
   def ConsoleRunner(specs: List[Specification]) = new ConsoleRunner(specs :_*)
-  def main(args: Array[String]) = report(specifications)
+  def main(args: Array[String]) = {
+    report(specifications)
+    if (specifications.exists { _.isFailing }) System.exit(1) else System.exit(0)
+  }
 }
 
 /**

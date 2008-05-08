@@ -96,14 +96,14 @@ trait AnyMatchers {
    * Matches if b is true
    */   
   def beTrue[T] = new Matcher[T](){
-    def apply(v: =>T) = { val b = v; (b == true, q(b) + " is true", q(b) + " is false") } 
+    def apply(v: =>T) = { val b = v; (b == true, "the value is true", "the value is false") } 
   }  
 
   /**
    * Matches if b is false
    */   
   def beFalse[T] = new Matcher[T](){
-    def apply(v: =>T) = { val b = v; (b == false, q(b) + " is false", q(b) + " is true") } 
+    def apply(v: =>T) = { val b = v; (b == false, "the value is false", "the value is true") } 
   }  
   
   /**

@@ -1,7 +1,6 @@
 package org.specs.runner
 
 import org.specs.io.mock.MockOutput
-import org.specs.runner.javaConversions._
 import org.specs.runner._
 import org.specs.runner._
 import org.specs.Sugar._
@@ -9,9 +8,7 @@ import org.scalatest._
 import org.specs.mock.JMocker
 import scala.collection.immutable._
 
-class scalaTestSpecSuite extends ScalaTestSuite(scalaTestSpec)
-object scalaTestSpecRunner extends ConsoleRunner(scalaTestSpec)
-class scalaTestSpec extends JUnit3(scalaTestSpec)
+class scalaTestSpecTest extends Runner(scalaTestSpec) with ScalaTest with JUnit with Console
 object scalaTestSpec extends Specification with JMocker {
   "A ScalaTest runner" should {
     "create a ScalaTest suite named after the specification description" in {

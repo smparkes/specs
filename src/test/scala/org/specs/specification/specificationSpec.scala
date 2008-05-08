@@ -104,6 +104,13 @@ object advancedFeatures extends SpecificationWithSamples {
        compositeSpec.description must_== "A complex system is specified by"
        compositeSpec.subSpecifications must_== List(okSpec, koSpec)
     }
+    "use the include method to include other specifications. The description of the specification is only its name then"  in {
+       object compositeSpec extends Specification {
+         include(okSpec, koSpec)
+       }
+       compositeSpec.description must_== "compositeSpec"
+       compositeSpec.subSpecifications must_== List(okSpec, koSpec)
+    }
     "share examples with another specification.\n" +
     "Declare an example to be a collection of examples coming from another spec. " +
     "The specified example will have the other examples as sub-examples" in {

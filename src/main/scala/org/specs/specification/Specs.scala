@@ -92,6 +92,9 @@ abstract class Specification extends Matchers with SpecificationStructure with A
    * Usage: <code>skip("this example should be skipped")</code>
    */
   def skip(m: String) = SkippedException(m).rethrowFrom(this)
+  
+  /** @return true if there are failures or errors */
+  def isFailing: Boolean = !this.failures.isEmpty || !this.errors.isEmpty
 }
 
 

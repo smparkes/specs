@@ -1,5 +1,4 @@
 package org.specs.runner
-import org.specs.runner.javaConversions._
 import org.specs.specification._
 import _root_.junit.framework._
 import _root_.org.junit.runner._

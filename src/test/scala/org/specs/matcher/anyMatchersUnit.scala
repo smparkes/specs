@@ -99,7 +99,7 @@ object anyMatchersUnit extends MatchersSpecification {
       true must beTrue
     }
     "display a failure message if the value is not true" in {
-      assertion(false must beTrue) must failWith("'false' is false")
+      assertion(false must beTrue) must failWith("the value is false")
     }
   }
   "A 'beFalse' matcher" should {
@@ -107,7 +107,7 @@ object anyMatchersUnit extends MatchersSpecification {
       false must beFalse
     }
     "display a failure message if the value is not true" in {
-      assertion(true must beFalse) must failWith("'true' is true")
+      assertion(true must beFalse) must failWith("the value is true")
     }
   }
   "A throwA + exception matcher" should {

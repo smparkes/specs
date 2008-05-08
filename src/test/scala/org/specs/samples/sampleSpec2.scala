@@ -8,3 +8,8 @@ object sampleSpec2 extends Specification {
     }
   }
 }
+object helloWorld extends Specification {
+  "return 11 characters for hello world" in {
+     "hello world".size mustBe 12
+  }
+}

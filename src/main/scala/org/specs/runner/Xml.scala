@@ -63,7 +63,10 @@ trait Xml extends FileSystem with ConsoleLog with FileWriter with ConsoleReporte
   /**
    * calling main should execute the runner 
    */
-  override def main(args: Array[String]): Unit = reportSpec
+  override def main(args: Array[String]): Unit = {
+    reportSpec
+    if (spec.isFailing) System.exit(1) else System.exit(0)
+  }
   
   /**
    * creates the file and write the xml result of the specification execution 
