@@ -100,7 +100,7 @@ trait SpecificationStructure extends ExampleLifeCycle {
   }
 
   /** utility method to track the last sut being currently defined, in order to be able to add examples to it */ 
-  protected[this] def currentSut = if (!suts.isEmpty) suts.last else specify("The system")
+  protected[this] def currentSut = if (!suts.isEmpty) suts.last else specify("specifies")
 
   /** 
    * implicit definition allowing to declare a new example described by a string <code>desc</code><br>   

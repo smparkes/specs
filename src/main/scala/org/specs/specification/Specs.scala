@@ -110,7 +110,7 @@ abstract class Specification extends Matchers with SpecificationStructure with A
  */
 case class Sut(description: String, cycle: org.specs.specification.ExampleLifeCycle) extends ExampleLifeCycle {
   /** default verb used to define the behaviour of the sut */
-  var verb = "should"
+  var verb = ""
 
   /** 
    * instead of using several examples, a whole text with embedded assertions can be used to
@@ -133,6 +133,7 @@ case class Sut(description: String, cycle: org.specs.specification.ExampleLifeCy
 
   /** default way of defining the behaviour of a sut */
   def should(ex: =>Example) = {
+    verb = "should"
     try { ex } catch {
       case e: SkippedException => skippedSut = Some(e)
       case FailureException(m) => failedSut = Some(m)
@@ -141,7 +142,7 @@ case class Sut(description: String, cycle: org.specs.specification.ExampleLifeCy
   }
 
   /** alternately there may be no example given yet */
-  def should(noExampleGiven: Unit) = this
+  def should(noExampleGiven: Unit) = { verb = "should"; this }
   
   /** specifies the system with a literal description and embedded assertions */
   def is(e: => Elem)= {
