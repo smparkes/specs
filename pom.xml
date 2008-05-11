@@ -237,9 +237,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
         </repository>
         <site>
           <id>scala-tools.org</id>
-          <!--url>dav:http://dav.scala-tools.org/mvnsites/specs</url-->
-          <url>
-          file://${user.home}/.m2/mvnsites/specs/${project.version}</url>
+          <url>dav:http://dav.scala-tools.org/mvnsites/specs/${project.version}</url>
         </site>
       </distributionManagement>
     </profile>
