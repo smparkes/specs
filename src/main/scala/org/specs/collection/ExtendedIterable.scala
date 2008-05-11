@@ -51,9 +51,13 @@ object ExtendedIterable {
     }
     
     /**
-     * @return true if the 2 iterables contain the same elements recursively, in the same order 
+     * @return true if the 2 iterables contain the same elements recursively, in any order 
      */
     def sameElementsAs(that: Iterable[A]): Boolean = sameElementsAs(that, (x, y) => x == y)
+
+    /**
+     * @return true if the 2 iterables contain the same elements (according to a comparision function f) recursively, in any order 
+     */
     def sameElementsAs(that: Iterable[A], f: (A, A) => Boolean): Boolean = {
       val ita = xs.elements.toList
       val itb = that.elements.toList

@@ -59,4 +59,14 @@ trait IterableMatchers {
         q(l.toDeepString) + " hasn't the same elements as " + q(iterable.toDeepString))
   }
 
+  /**
+   * Matches if a sequence contains the same elements as s, using the equality (in the same order)
+   */   
+  def beSameSeqAs[T](s: =>Seq[T]) = ((be_==(_:T)).toSeq)(s)
+
+  /**
+   * Matches if a set contains the same elements as s, using the equality (in the any order)
+   */   
+  def beSameSetAs[T](s: =>Set[T]) = ((be_==(_:T)).toSet)(s)
+
 }
