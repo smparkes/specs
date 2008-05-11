@@ -1,7 +1,7 @@
 package org.specs.matcher
 import org.specs.matcher.MatcherUtils._
 import org.specs.collection.ExtendedIterable._
-
+import org.specs.matcher.AnyMatchers._
 /**
  * The <code>IterableMatchers</code> trait provides matchers which are applicable to Iterable objects
  */
@@ -62,11 +62,11 @@ trait IterableMatchers {
   /**
    * Matches if a sequence contains the same elements as s, using the equality (in the same order)
    */   
-  def beSameSeqAs[T](s: =>Seq[T]) = ((be_==(_:T)).toSeq)(s)
+  def beSameSeqAs[T](s: =>Seq[T]) = (toMatcher(AnyMatchers.be_==(_:T)).toSeq)(s)
 
   /**
    * Matches if a set contains the same elements as s, using the equality (in the any order)
    */   
-  def beSameSetAs[T](s: =>Set[T]) = ((be_==(_:T)).toSet)(s)
+  def beSameSetAs[T](s: =>Set[T]) = (toMatcher(AnyMatchers.be_==(_:T)).toSet)(s)
 
 }
