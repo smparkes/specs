@@ -8,8 +8,7 @@ import org.specs.io.mock.MockOutput
 import org.specs.Sugar._
 import org.specs.matcher.MatcherUtils._
 
-object consoleReporterRunner extends ConsoleRunner(consoleReporterSpec)
-class consoleReporterTest extends JUnit3(consoleReporterSpec)
+class consoleReporterTest extends Runner(consoleReporterSpec) with JUnit with Console
 object consoleReporterSpec extends Specification {
 
   "A console reporter" should {

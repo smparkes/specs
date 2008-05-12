@@ -3,8 +3,8 @@ import org.specs.matcher._
 import org.specs.matcher.Matchers._
 import org.specs.ExtendedThrowable._
 
-trait Assertable {
-  def applyMatcher[T, S >: T](m: => Matcher[S], value: => T) = {
+trait Assertable[T] {
+  def applyMatcher[S >: T](m: => Matcher[S], value: => T) = {
     val (result, _, koMessage) = m.apply(value) 
     result match {
       case false => FailureException(koMessage).rethrowFrom(this)
@@ -20,12 +20,12 @@ trait Assertable {
  * and errors if a matcher is not ok 
  *
  */
-class Assert[T](value: => T) extends Assertable {
+class Assert[T](value: => T) extends Assertable[T] {
   
   /**
    * applies a matcher to the current value and throw a failure is the result is not true 
    */
-  def must[S >: T](m: => Matcher[S]): Boolean =  applyMatcher(m, value)
+  def must[S >: T](m: => Matcher[S]): Boolean = applyMatcher[S](m, value)
   
   /**
    * applies the negation of a matcher 
@@ -33,7 +33,7 @@ class Assert[T](value: => T) extends Assertable {
   def mustNot[S >: T](m: => Matcher[S]): Boolean =  must(m.not)
 
   /** alias for <code>must verify(f)</code>  */
-  def mustVerify[S >: T](f: S => Boolean): Boolean = must[S](verify(f))
+  def mustVerify[S >: T](f: S => Boolean): Boolean = must(verify(f))
 
   /** alias for <code>mustVerify(f)</code>  */
   def verifies(f: T => Boolean) = mustVerify(f)
@@ -66,7 +66,7 @@ case class FailureException(message: String) extends RuntimeException(message)
 case class SkippedException(message: String) extends RuntimeException(message)
 
 /** Specialized assert class with string matchers aliases */
-class AssertString[A <: String](value: => A) extends Assertable {
+class AssertString[A <: String](value: => A) extends Assertable[A] {
   /** alias for <code>must(beMatching(a))</code> */
   def mustMatch(a: String) = applyMatcher(beMatching(a), value)
 
@@ -80,7 +80,7 @@ class AssertString[A <: String](value: => A) extends Assertable {
   def must_!=/(a: String) = applyMatcher(notEqualIgnoreCase(a), value)
 }
 /** Specialized assert class with iterable matchers aliases */
-class AssertIterable[I <: AnyRef](value: =>Iterable[I]) extends Assertable {
+class AssertIterable[I <: AnyRef](value: =>Iterable[I]) extends Assertable[Iterable[I]] {
 
   /** alias for <code>must(exist(function(_))</code> */
   def mustExist(function: I => Boolean) = applyMatcher(exist {x:I => function(x)}, value)
@@ -95,7 +95,7 @@ class AssertIterable[I <: AnyRef](value: =>Iterable[I]) extends Assertable {
   def mustNotContain(elem: I) = applyMatcher(notContain(elem), value)
 }
 /** Specialized assert class with iterable[String] matchers aliases */
-class AssertIterableString(value: =>Iterable[String]) extends Assertable {
+class AssertIterableString(value: =>Iterable[String]) extends Assertable[Iterable[String]] {
 
   /** alias for <code>must(existMatch(pattern))</code> */
   def mustHaveMatch(pattern: String) = applyMatcher(existMatch(pattern), value)

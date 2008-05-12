@@ -40,10 +40,15 @@ object iterableMatchersUnit extends MatchersSpecification {
       beIn(List("")) must evalOnce(exp(""))
     }
     "not evaluate the expressions twice: contain" in {
-      contain("") must evalOnce(exp(nil))
+      val list: Iterable[Any] = List("")
+      contain("s") must evalOnce(exp(list))
     }
     "not evaluate the expressions twice: exist" in {
       exist((x:String) => x.size > 0) must evalOnce(exp(nil))
     }
+    "allow to use 'contain' matcher on a heterogeneous list of elements" in {
+      List("one", 2) must contain("one")
+    }
+
   }
 }

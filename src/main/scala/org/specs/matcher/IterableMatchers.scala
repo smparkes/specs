@@ -10,8 +10,8 @@ trait IterableMatchers {
   /**
    * Matches if (iterable.exists(_ == a)
    */   
-  def contain[T](a: T) = new Matcher[Iterable[T]](){ 
-    def apply(v: => Iterable[T]) = {val iterable = v; (iterable.exists(_ == a), q(iterable) + " contains " + q(a), q(iterable) + " doesn't contain " + q(a))} 
+  def contain[T](a: T) = new Matcher[Iterable[Any]](){ 
+    def apply(v: => Iterable[Any]) = {val iterable = v; (iterable.exists(_ == a), q(iterable) + " contains " + q(a), q(iterable) + " doesn't contain " + q(a))} 
   }
 
   /**
