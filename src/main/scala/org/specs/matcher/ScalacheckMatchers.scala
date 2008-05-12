@@ -1,7 +1,7 @@
 package org.specs.matcher
 import org.scalacheck.{StdRand, Gen, Prop, Arg, Test}
 import org.scalacheck.Prop._
-import org.scalacheck.Test.{Stats, Params, Passed, Failed, Exhausted, GenException, PropException, Result}
+import org.scalacheck.Test.{Stats, Params, Proved, Passed, Failed, Exhausted, GenException, PropException, Result}
 import org.scalacheck.ConsoleReporter._
 import scala.collection.immutable.HashMap
 import org.specs.io.ConsoleOutput
@@ -99,6 +99,7 @@ trait ScalacheckMatchers extends ConsoleOutput with ScalacheckFunctions with Sca
      def afterNShrinks(args: List[Arg]) = args.map(arg => if (arg.shrinks >= 1) arg.shrinks.toString else "").mkString(", ")
      def counterExample(args: List[Arg]) = args.map(_.arg).mkString(", ")
      statistics match {
+       case Stats(Proved(as), succeeded, discarded) => (true,  noCounterExample(succeeded), "A counter-example was found " + afterNTries(succeeded)) 
        case Stats(Passed, succeeded, discarded) => (true,  noCounterExample(succeeded), "A counter-example was found " + afterNTries(succeeded)) 
        case s@Stats(GenException(e), n, _) => (false, noCounterExample(n), prettyTestStats(s)) 
        case s@Stats(Exhausted, n, _)     => (false, noCounterExample(n), prettyTestStats(s)) 
