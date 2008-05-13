@@ -66,6 +66,15 @@ case class TableHeader(h: List[String]) {
  * def types(n)
  *   (1..n).map{|i| "T#{i-1}"}.join(", ")
  * end
+ * def surtypes_decl(n)
+ *   (1..n).map{|i| "S#{i-1} >: T#{i-1}"}.join(", ")
+ * end
+ * def surtypes(n)
+ *   (1..n).map{|i| "S#{i-1}"}.join(", ")
+ * end
+ * def variant_types(n)
+ *   (1..n).map{|i| "+T#{i-1}"}.join(", ")
+ * end
  * def values_decl(n)
  * (1..n).map{|i| "v#{i-1}: T#{i-1}"}.join(", ")
  * end
@@ -74,6 +83,15 @@ case class TableHeader(h: List[String]) {
  * end
  * def all_types 
  *   types(N)
+ * end
+ * def all_variant_types 
+ *   variant_types(N)
+ * end
+ * def all_surtypes_decl 
+ *   surtypes_decl(N)
+ * end
+ * def all_surtypes 
+ *   surtypes(N)
  * end
  * 
  * def datarow(i) 
@@ -100,12 +118,12 @@ case class TableHeader(h: List[String]) {
  *    "def |>[R](f: Function#{i}[#{types(i)}, R]) = {shouldExecute = true; this.|(f)}"
  * end
  * 
- * datarow = "abstract class DataRow[#{all_types}](val values: (#{all_types})) {
+ * datarow = "abstract class DataRow[#{all_variant_types}](val values: (#{all_types})) {
  *   var header: TableHeader = TableHeader(Nil)
  *   var shouldExecute: Boolean = false;
  *   def | = this
- *   def |(row: DataRow[#{all_types}]) = DataTable(header, List(this, row), shouldExecute)
- *   def |>(row: DataRow[#{all_types}]) = DataTable(header, List(this, row), true)
+ *   def |[#{all_surtypes_decl}](row: DataRow[#{all_surtypes}]) = DataTable(header, List(this, row), shouldExecute)
+ *   def |[#{all_surtypes_decl}]>(row: DataRow[#{all_surtypes}]) = DataTable(header, List(this, row), true)
  *   override def toString = {
  *     var l: List[Any] = Nil
  *     for (i <- new Range(0, values.productArity, 1);
@@ -145,12 +163,17 @@ case class TableHeader(h: List[String]) {
  * 
  */
 
-abstract class DataRow[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19](val values: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19)) {
+abstract class DataRow[+T0, +T1, +T2, +T3, +T4, +T5, +T6, +T7, +T8, +T9, +T10, 
+                       +T11, +T12, +T13, +T14, +T15, +T16, +T17, +T18, +T19](val values: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19)) {
   var header: TableHeader = TableHeader(Nil)
   var shouldExecute: Boolean = false;
   def | = this
-  def |(row: DataRow[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]) = DataTable(header, List(this, row), shouldExecute)
-  def |>(row: DataRow[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]) = DataTable(header, List(this, row), true)
+  def |[S0 >: T0, S1 >: T1, S2 >: T2, S3 >: T3, S4 >: T4, S5 >: T5, S6 >: T6, S7 >: T7, S8 >: T8, S9 >: T9, 
+        S10 >: T10, S11 >: T11, S12 >: T12, S13 >: T13, S14 >: T14, 
+        S15 >: T15, S16 >: T16, S17 >: T17, S18 >: T18, S19 >: T19](row: DataRow[S0, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, S17, S18, S19]): DataTable[S0, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, S17, S18, S19] = DataTable(header, List(this, row), shouldExecute)
+  def |>[S0 >: T0, S1 >: T1, S2 >: T2, S3 >: T3, S4 >: T4, S5 >: T5, S6 >: T6, S7 >: T7, S8 >: T8, S9 >: T9, 
+        S10 >: T10, S11 >: T11, S12 >: T12, S13 >: T13, S14 >: T14, 
+        S15 >: T15, S16 >: T16, S17 >: T17, S18 >: T18, S19 >: T19](row: DataRow[S0, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, S17, S18, S19]): DataTable[S0, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12, S13, S14, S15, S16, S17, S18, S19] = DataTable(header, List(this, row), true)
   override def toString = {
     var l: List[Any] = Nil
     for (i <- new Range(0, values.productArity, 1);
@@ -209,7 +232,7 @@ case class DataTable[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13,
   /**
    * Adds a new datarow to the existing table
    */  
-  def |(r: AbstractDataRow) = DataTable(header, rows:::List(r), shouldExecute) 
+  def |(r: DataRow[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19]) = DataTable(header, rows:::List(r), shouldExecute) 
 
   /**
    * Adds a new datarow to the existing table and sets the table for immediate execution

@@ -56,5 +56,11 @@ object dataTableUnit extends Specification with DataTables {
                                 "x|1|2|4| '3' is not equal to '4'\n" +
                                 " |1|2|3|"
     }
+    "allow type inference on cell types" in {
+      val row1 = true ! true
+      val row2 = 1    ! true 
+      val t = row1 | row2; ()
+      
+    }
   }
 }

@@ -23,6 +23,11 @@ import org.specs.ExtendedThrowable._
  */
 abstract class Specification extends Matchers with SpecificationStructure with AssertFactory {
   /**
+   * Alternate constructor with the name of the specification
+   */
+  def this(n: String) = { this(); name = n; this }
+
+  /**
    * Default main method for a specification: uses the ConsoleRunner
    */
   def main(args: Array[String]) = new ConsoleRunner(this).main(args)
