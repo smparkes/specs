@@ -69,4 +69,10 @@ trait IterableMatchers {
    */   
   def beSameSetAs[T](s: =>Set[T]) = (toMatcher(AnyMatchers.be_==(_:T)).toSet)(s)
 
+  /**
+   * Matches if the size is n
+   */   
+  def haveSize(n: Int) = new Matcher[Collection[Any]](){
+    def apply(v: => Collection[Any]) = {val collection = v; (collection.size == n, q(collection) + " has size " + n, q(collection) + " doesn't have size " + n)}
+  }
 }

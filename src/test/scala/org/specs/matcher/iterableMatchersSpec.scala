@@ -47,5 +47,10 @@ object iterableMatchersSpec extends MatchersSpecification {
       List("one", "two") must notExistMatch("[a-c]")
       assertion(List("one", "two") mustNotExistMatch("[n-o]")) must failWith("at least one element matches '[n-o]' in 'List(one, two)'")
     }
+    "provide a 'haveLength" in {
+      List("one", "two") must haveSize(2)
+      assertion(List("one", "two") must haveSize(3)) must failWith("'List(one, two)' doesn't have size 3")
+    }
+
   }
 }
