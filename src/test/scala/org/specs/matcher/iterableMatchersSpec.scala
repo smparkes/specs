@@ -2,7 +2,7 @@ package org.specs.matcher
 import org.specs.runner._
 import org.specs._
 
-class iterableTest extends JUnit3(iterableMatchersSpec) 
+class iterableTest extends JUnit4(iterableMatchersSpec) 
 object iterableMatchersSpec extends MatchersSpecification {
   "Iterable matchers" should { usingBefore { () => clearExample }
     "provide a 'must beEmpty' matcher on iterables: List() must beEmpty" in {
@@ -47,7 +47,7 @@ object iterableMatchersSpec extends MatchersSpecification {
       List("one", "two") must notExistMatch("[a-c]")
       assertion(List("one", "two") mustNotExistMatch("[n-o]")) must failWith("at least one element matches '[n-o]' in 'List(one, two)'")
     }
-    "provide a 'haveLength" in {
+    "provide a 'haveSize' matcher checking the size of a collection" in {
       List("one", "two") must haveSize(2)
       assertion(List("one", "two") must haveSize(3)) must failWith("'List(one, two)' doesn't have size 3")
     }
