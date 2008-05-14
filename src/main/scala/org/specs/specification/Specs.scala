@@ -25,7 +25,7 @@ abstract class Specification extends Matchers with SpecificationStructure with A
   /**
    * Alternate constructor with the name of the specification
    */
-  def this(n: String) = { this(); name = n; this }
+  def this(n: String) = { this(); name = n; description = n; this }
 
   /**
    * Default main method for a specification: uses the ConsoleRunner

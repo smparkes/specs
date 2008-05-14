@@ -95,15 +95,15 @@ trait AnyMatchers {
   /**
    * Matches if b is true
    */   
-  def beTrue[T] = new Matcher[T](){
-    def apply(v: =>T) = { val b = v; (b == true, "the value is true", "the value is false") } 
+  def beTrue = new Matcher[Boolean](){
+    def apply(v: =>Boolean) = { val b = v; (b == true, "the value is true", "the value is false") } 
   }  
 
   /**
    * Matches if b is false
    */   
-  def beFalse[T] = new Matcher[T](){
-    def apply(v: =>T) = { val b = v; (b == false, "the value is false", "the value is true") } 
+  def beFalse[Boolean] = new Matcher[Boolean](){
+    def apply(v: =>Boolean) = { val b = v; (b == false, "the value is false", "the value is true") } 
   }  
   
   /**

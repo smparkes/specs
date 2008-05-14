@@ -165,10 +165,10 @@ object anyMatchersUnit extends MatchersSpecification {
       verify((x:Int) => x == 1) must evalOnce(exp(1)) 
     }
     "not evaluate the expressions twice: beTrue" in {
-      beTrue[Boolean] must evalOnce(exp(boolValue))
+      beTrue must evalOnce(exp(boolValue))
     }
     "not evaluate the expressions twice: beFalse" in {
-      beFalse[Boolean] must evalOnce(exp(boolValue))
+      (beFalse: Matcher[Boolean]) must evalOnce(exp(boolValue))
     }
   }
 }
