@@ -38,16 +38,16 @@ object inAnyOrderUnit extends Specification with TestData with Scalacheck {
       val lessReceivedCalls = receivedSizeIs(_ < _)
       lessReceivedCalls must pass { t: (List[ExpectedCall], List[ReceivedCall]) => val (expected, received) = t
         inAnyOrder.consume(expected, received) 
-        expected.forall(_.passes) must be(false).unless(expected.isEmpty || received.isEmpty)
+        expected.forall(_.passes) must beFalse.unless(expected.isEmpty || received.isEmpty)
       }(set(maxSize->5))
     }
     "consume all received calls if it is a the same list of calls in a different order" in {
       val sameReceivedCalls = receivedSizeIs(_ == _)
       sameReceivedCalls must pass { t: (List[ExpectedCall], List[ReceivedCall]) => val (expected, received) = t
         inAnyOrder.consume(expected, received) 
-        expected.forall(_.passes) mustBe true
-        received.forall(_.consumed) mustBe true 
-      }(set(maxSize->5))
+        expected.forall(_.passes) must beTrue
+        received.forall(_.consumed) must beTrue 
+      }(set(maxSize->5, maxDiscarded->1000))
     }
     "consume all expected calls if the received calls are a the superset of the expected calls" in {
       val moreReceivedCalls = receivedSizeIs(_ > _)
