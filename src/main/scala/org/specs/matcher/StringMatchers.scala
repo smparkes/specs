@@ -19,6 +19,18 @@ trait StringMatchers {
   def notEqualIgnoreCase[T <: String](a: T) = equalIgnoreCase(a).not 
 
   /**
+   * Matches if (a.trim.equals(b.trim))
+   */   
+  def equalIgnoreSpace[T <: String](a: T) = new Matcher[T](){ 
+    def apply(v: => T) = {val b = v; (a != null && b != null && a.trim.equals(b.trim), q(b) + " is equal ignoring space to " + q(a), q(b) + " is not equal ignoring space to " + q(a))} 
+  }
+
+  /**
+   * Matches if !(a.equalsIgnoreSpace(b))
+   */   
+  def notEqualIgnoreSpace[T <: String](a: T) = equalIgnoreSpace(a).not 
+
+  /**
    * Matches if (b.indexOf(a) >= 0)
    */   
   def include[T <: String](a: String) = new Matcher[T](){ 
