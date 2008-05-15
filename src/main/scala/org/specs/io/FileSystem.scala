@@ -8,15 +8,15 @@ import org.specs.log.Log
 /**
  * The fs object offers a simple interface to the file system (see the description of the FileSystem trait)
  */
-object fs extends FileSystem with ConsoleOutput
+object fs extends FileSystem
 
 /**
  * The FileSystem trait abstract file system operations to allow easier mocking of file system related operations.
  * <p>
  * It mixes the <code>FileReader</code> and <code>FileWrite</code> traits to provide easy read/write operations to files  
  */
-trait FileSystem extends FileReader with FileWriter with Log with JavaConversions {
-  
+trait FileSystem extends FileReader with FileWriter with JavaConversions {
+  object logger extends Log with ConsoleOutput
   /**
    * @param path glob expression, for example: <code>./dir/**/*.xml</code>
    * @return the list of paths represented by the "glob" definition <code>path</path>  
@@ -36,12 +36,14 @@ trait FileSystem extends FileReader with FileWriter with Log with JavaConversion
    * @param pattern regular expression which should be matching the file path
    */
   def collectFiles(result: Queue[String], file: File, pattern: String): Unit = {
-    debug("try to accept " + file.getPath.replace("\\", "/") + " with " + pattern)
+    logger.debug("try to accept " + file.getPath.replace("\\", "/") + " with " + pattern)
     if (file.isFile && file.getPath.replace("\\", "/").matches(pattern)) {
-      debug("got a match")
+      logger.debug("got a match")
       result += (file.getPath)
     }
-    else if (file.listFiles != null) file.listFiles.foreach { collectFiles(result, _, pattern) }
+    else if (file.listFiles != null) {
+      file.listFiles.foreach { collectFiles(result, _, pattern) }
+    }
   }
   
   /**
@@ -63,7 +65,7 @@ trait FileSystem extends FileReader with FileWriter with Log with JavaConversion
   /**
    * @return true if the File represented by this path is a directory
    */
-  def isDir(path: String) = (new File(path)).isDirectory
+  def isDir(path: String) = isDirectory(path)
 
   /**
    * creates a directory for a given path
@@ -130,5 +132,5 @@ trait FileSystem extends FileReader with FileWriter with Log with JavaConversion
   def getParent(path: String) = new File(path).getParent  
 
   /** @return the files of that directory */
-  def listFiles(path: String) = new File(path).list
+  def listFiles(path: String): List[String] = if (new File(path).list == null) List() else new File(path).list.toList
 }

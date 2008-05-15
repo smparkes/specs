@@ -25,7 +25,7 @@ object fileSystemSpec extends Specification {
     "list file paths using /**/*name.ext and return only relevant files" in {
       fs.filePaths("./**/io/*mSpec.*") mustNotExistMatch "fileWriterSpec"      
     }
-    usingAfter { () => fs.removeDir("./testingDir") }
+    doAfter { fs.removeDir("./testingDir") }
     "remove a directory and all its content recursively with removeDir" in {
       fs.createDir("./testingDir/directoryToRemove")
       fs.createFile("./testingDir/directoryToRemove/testFile.txt")

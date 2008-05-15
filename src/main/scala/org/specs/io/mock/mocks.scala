@@ -1,10 +1,10 @@
 package org.specs.io.mock
 
+import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Queue
 import scala.collection.mutable.HashMap
 import org.specs.io.Output
 import org.specs.io.FileSystem
-import java.io._
 
 /**
  * The MockFileSystem trait mocks the FileSystem by storing a Map[path, content] representing the content of the FileSystem
@@ -16,6 +16,9 @@ trait MockFileSystem extends FileSystem {
 
   /** this map associates some file paths with file contents */
   var files = new HashMap[String, String]
+
+  /** this map associates some file paths with children paths */
+  var children = new HashMap[String, ListBuffer[String]]
 
   /** this list stores readable files */
   var readableFiles = List[String]()
@@ -38,6 +41,15 @@ trait MockFileSystem extends FileSystem {
     readableFiles ::= path
     writableFiles ::= path
   }
+  /** adds a new child to a given file */
+  def addChild(parent: String, child: String): Unit = {
+    children.get(parent) match {
+      case Some(l) => () 
+      case None => children.put(parent, new ListBuffer)
+    }
+    children.get(parent).get += child
+  }
+
   /** sets a file as readable */
   def setReadable(path: String) = if (!canRead(path)) (readableFiles ::= path)
   /** sets a file as writable */
@@ -60,6 +72,8 @@ trait MockFileSystem extends FileSystem {
   override def isFile(path: String) = path.matches(".*\\..*")
   /** overrides the isDirectory definition checking if it ends with / (partial definition) */
   override def isDirectory(path: String) = !isFile(path)
+  /** overrides the listFiles definition */
+  override def listFiles(path: String) = children.get(path.replaceAll("\\\\", "/")).getOrElse(List[String]()).toList
 
   /** @return a default file path. All default file paths will be different from each other */
   def defaultFilePath = "name" + files.size + defaultExtension
@@ -76,6 +90,7 @@ trait MockFileSystem extends FileSystem {
   /** removes all specified files */
   def reset = {
     files = new HashMap[String, String]
+    children = new HashMap[String, ListBuffer[String]]
     readableFiles = Nil
     writableFiles = Nil
   }
@@ -93,6 +108,12 @@ trait MockOutput extends Output {
 
   /** adds m.toString to a list of messages */
   override def println(m : Any) : Unit = messages += m.toString
+
+  /** prints several objects according to a format string (see Console.printf) */
+  override def printf(format: String, args: Any*) = messages += (format + ":" + args)
+
+  /** doesn't flush */
+  override def flush = ()
 }
 
 /**

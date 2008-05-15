@@ -22,6 +22,10 @@ trait Reporter {
  */  
 trait OutputReporter extends Reporter with Output {
   
+  /** this variable controls if stacktraces should be printed */
+  var verbose = false
+  def setVerbose = verbose = true
+  
   /** the timer is used to display execution times */
   val timer: org.specs.util.Timer
 
@@ -157,10 +161,15 @@ trait OutputReporter extends Reporter with Output {
     }
 
     println(padding + status(example) + example.description)
+    if (verbose && example.errors.size > 0) example.errors foreach { _.printStackTrace }
+    
     // if the failure, skip or the error message has linefeeds they must be padded too
     def parens(f: Throwable) = " (" + f.location + ")"
-    example.skipped.toList ::: example.failures.toList ::: example.errors.toList foreach { f: Throwable => 
-      println(padding + "  " + f.getMessage.replaceAll("\n", "\n" + padding + "  ") + parens(f)) 
+    example.skipped.toList ::: example.failures.toList ::: example.errors.toList foreach { f: Throwable =>
+      if (f.getMessage != null)
+        println(padding + "  " + f.getMessage.replaceAll("\n", "\n" + padding + "  ") + parens(f)) 
+      else
+        println(padding + "  exception message is null" + parens(f)) 
     }
   }
 }

@@ -9,8 +9,7 @@ import org.specs.Sugar._
 import org.specs.matcher.MatcherUtils._
 
 class consoleReporterTest extends Runner(consoleReporterSpec) with JUnit with Console
-object consoleReporterSpec extends Specification {
-
+object consoleReporterSpec extends Specification with MockOutput {
   "A console reporter" should {
     "report the name of the specification: 'A specification should'" in {
       specWithOneExample(that.isOk) must containMatch("A specification should")

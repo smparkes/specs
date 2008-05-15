@@ -116,7 +116,7 @@ object beforeExampleFailing extends beforeAfterTestSpec {
     "A specification" should {
       var beforeCalls = 0
       usingBefore { () => error("before error") }
-      "have example 1 ok" in { Console.println("tested") }
+      "have example 1 ok" in { }
     }
     reportSpec(this)
   }   
@@ -134,8 +134,8 @@ object doAfterExample extends beforeAfterTestSpec {
 object doAfterExampleFailing extends beforeAfterTestSpec {
   override def executeSpec = {
       var afterCalls = 0
-    "A specification" should { doAfter { error("after error") }
-      "have example 1 ok" in { Console.println("tested") }
+    "A specification" should { doAfter { println("after");error("after error") }
+      "have example 1 ok" in {  }
     }
     reportSpec(this)
   }   
@@ -161,3 +161,4 @@ object afterExampleFailing extends beforeAfterTestSpec {
     reportSpec(this)
   }   
 }
+

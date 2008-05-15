@@ -48,6 +48,7 @@ abstract class Runner(var specifications: Specification*) extends SpecsHolder {
 trait Console extends ConsoleReporter with SpecsHolder with Application {
   def reportSpecs = report(specs)
   override def main(args: Array[java.lang.String]) = {
+    if (args.contains("-v") || args.contains("--verbose")) setVerbose
     reportSpecs
     if (specs.exists { _.isFailing }) System.exit(1) else System.exit(0)
   }
@@ -61,6 +62,7 @@ trait Console extends ConsoleReporter with SpecsHolder with Application {
 class ConsoleRunner(val specifications: Specification*) extends ConsoleReporter {
   def ConsoleRunner(specs: List[Specification]) = new ConsoleRunner(specs :_*)
   def main(args: Array[String]) = {
+    if (args.contains("-v") || args.contains("--verbose")) setVerbose
     report(specifications)
     if (specifications.exists { _.isFailing }) System.exit(1) else System.exit(0)
   }

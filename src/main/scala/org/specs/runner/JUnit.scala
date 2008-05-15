@@ -127,8 +127,9 @@ class ExamplesTestSuite(description: String, examples: Iterable[Example], skippe
   override def run(result: TestResult) = {
     skipped match {
       case Some(skipException) => result.addFailure(this, new SkippedAssertionError(skipException))
-      case None => super.run(result)                                    
-    }                                    
+      case None => ()                                    
+    }
+    super.run(result)
   }
 }
 

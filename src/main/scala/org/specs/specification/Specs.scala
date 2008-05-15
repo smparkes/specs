@@ -273,7 +273,7 @@ case class Example(description: String, cycle: org.specs.specification.ExampleLi
         // skipped assertions will launch a SkippedException
         case f: FailureException => addFailure(f)
         case s: SkippedException => addSkipped(s)
-        case t: Throwable => {t.printStackTrace; addError(t)}
+        case t: Throwable => addError(t)
       }
       // try the "after" methods. If there is an exception, add an error and return the current example
       try { if (!failed) cycle.afterExample(this) } catch { case t: Throwable => addError(t) }
