@@ -98,7 +98,7 @@ trait PathMatchers extends FileSystem {
     def apply(v: => T) = {val path = v; (isEqualIgnoringSep(path, other) , q(path) + " is equal ignoring separators to " + q(other), q(path) + " is not equal ignoring separators to " + q(other))} 
   }
   /** @return true if the 2 paths are equal, ignoring separators */
-  def isEqualIgnoringSep[T <: String](path: T, other: String) = path != null && other != null&& getCanonicalPath(path) == getCanonicalPath(other) 
+  def isEqualIgnoringSep[T <: String](path: T, other: String) = path != null && other != null&& getCanonicalPath(path).replaceAll("\\", "/") == getCanonicalPath(other).replaceAll("\\", "/") 
   
 }
 /**
