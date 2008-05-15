@@ -18,6 +18,7 @@ trait Matchers extends AnyMatchers with
                        PatternMatchers with 
                        MockMatchers with 
                        XmlMatchers with 
+                       FileMatchers with 
                        MatcherResult
                        
 /**

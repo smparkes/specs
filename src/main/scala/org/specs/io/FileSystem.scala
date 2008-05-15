@@ -96,4 +96,39 @@ trait FileSystem extends FileReader with FileWriter with Log with JavaConversion
     }
     dir.getParent
   }
+  /** @return true if the file exists */
+  def exists(path: String) = path != null && new File(path).exists  
+
+  /** @return true if the file can be read */
+  def canRead(path: String) = path != null && new File(path).canRead  
+
+  /** @return true if the file can be written */
+  def canWrite(path: String) = path != null && new File(path).canWrite  
+
+  /** @return true if the file is absolute */
+  def isAbsolute(path: String) = path != null && new File(path).isAbsolute  
+
+  /** @return true if the file is a file */
+  def isFile(path: String) = path != null && new File(path).isFile  
+
+  /** @return true if the file is a directory */
+  def isDirectory(path: String) = path != null && new File(path).isDirectory  
+
+  /** @return true if the file is hidden */
+  def isHidden(path: String) = path != null && new File(path).isHidden  
+
+  /** @return the file name */
+  def getName(path: String) = new File(path).getName  
+
+  /** @return the file absolute path */
+  def getAbsolutePath(path: String) = new File(path).getAbsolutePath  
+
+  /** @return the file canonical path */
+  def getCanonicalPath(path: String) = new File(path).getCanonicalPath  
+
+  /** @return the file parent path */
+  def getParent(path: String) = new File(path).getParent  
+
+  /** @return the files of that directory */
+  def listFiles(path: String) = new File(path).list
 }
