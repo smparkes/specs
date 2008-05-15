@@ -45,5 +45,5 @@ object allSpecsAndUnits extends Specification {
   "The specs and unit tests for the specs project" areSpecifiedBy (allSpecs, allUnits)
 }
 class allSuite extends JUnit3(allSpecsAndUnits)
-class allRunner extends Runner(allSpecsAndUnits) with Console with ScalaTest with JUnit
+object allRunner extends Runner(allSpecsAndUnits) with Console with ScalaTest with JUnit
 object allXml extends XmlRunner(allSpecsAndUnits)
