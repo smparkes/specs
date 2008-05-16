@@ -14,17 +14,7 @@ package org.specs.specification
  * Then StringMatchers are expecting values with String as an upper bound so that effectively only String instances
  * will be used with the implicit def (only solution found to make it all work, to my current understanding again)
  */
-trait AssertFactory {
-  /** utility function to track the last example being currently defined, in order to be able to add assertions to it */ 
-  protected[this] var example: Option[Example] 
-
-  def addAssertion = {
-    example match {
-      case None => forExample("for Example").addAssertion
-      case Some(e) => e.addAssertion
-    }
-  }
-  def forExample(desc: String): Example
+trait AssertFactory extends AssertionListener {
 
   /** implicit transformation of a String into an object supporting String matchers */
   implicit def theString[A >: String](value: =>A) = {
@@ -53,5 +43,26 @@ trait AssertFactory {
     addAssertion
     new AssertIterable[I](value)
   }
+}
+/** trait declaring the ability to listen to a new assertion */
+trait AssertionListener {
+  def addAssertion
+}
+/** trait doing nothing on a new assertion */
+trait DefaultAssertionListener extends AssertionListener {
+  def addAssertion = ()
+}
+/** trait adding the new assertion to an example */
+trait ExampleAssertionListener extends AssertionListener {
+    /** utility variable to track the last example being currently defined, in order to be able to add assertions to it */ 
+  protected[this] var example: Option[Example] 
+
+  def addAssertion = {
+    example match {
+      case None => forExample("for Example").addAssertion
+      case Some(e) => e.addAssertion
+    }
+  }
+  def forExample(desc: String): Example
 }
 	

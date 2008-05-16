@@ -35,7 +35,7 @@ import org.specs.SpecUtils._
  * a test inside an example. This is used to plug setup/teardown behaviour at the sut level and to plug
  * mock expectations checking when a specification is using the Mocker trait: <code>mySpec extends Specification with Mocker</code>
  */
-trait SpecificationStructure extends ExampleLifeCycle {
+trait SpecificationStructure extends ExampleLifeCycle with ExampleAssertionListener {
 
   /** description of the specification */ 
   var description = createDescription(getClass.getName)

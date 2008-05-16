@@ -10,6 +10,11 @@ import org.specs.specification._
 import org.specs.ExtendedThrowable._
 
 /**
+ * This trait can be reused in any test based framework to access Matchers functionalities
+ */
+trait SpecsMatchers extends Matchers with AssertFactory with DefaultAssertionListener
+
+/**
  * This class is the main class for declaring a new specification<br>
  * In the context of a specification, you can:<ul>
  * <li>declare nested specifications
