@@ -50,6 +50,11 @@ object basicFeatures extends SpecificationWithSamples {
      failMethodSpec.failures must beLike {case Seq(FailureException(msg)) => 
                                                  msg must_== "failure with the fail method"} 
    }
+   "provide a 'fail' method with no argument adding a new failure to the current example" in {
+     object failMethodSpec extends oneEx(List(that.isOk, that.isKoWithTheFailMethodWithNoArgument))
+     failMethodSpec.failures must beLike {case Seq(FailureException(msg)) => 
+                                                 msg must_== "failure"} 
+   }
    "provide a 'skip' method skipping the current example" in {
      object skipSpec extends oneEx(List(that.isSkipped, that.isOk))
      skipSpec.skipped must beLike {case Seq(SkippedException(msg)) => 
@@ -138,6 +143,7 @@ trait SpecificationWithSamples extends Specification {
     val failure1 = () => "ok" mustBe "first failure"
     val failure2 = () => "ok" mustBe "second failure"
     val failMethod = () => fail("failure with the fail method")
+    val failMethodWithNoArgument = () => fail
     val skipMethod = () => skip("skipped with the skip method")
     val exception = () => error("new Error")
     def assertions(behaviours: List[that.Value]) = behaviours map { case that.isOk => success
@@ -145,6 +151,7 @@ trait SpecificationWithSamples extends Specification {
                                       case that.isSkipped => skipMethod
                                       case that.isKoTwice => () => {failure1(); failure2()} 
                                       case that.isKoWithTheFailMethod => failMethod 
+                                      case that.isKoWithTheFailMethodWithNoArgument => failMethodWithNoArgument 
                                       case that.throwsAnException => exception }
   }
   object specification extends Specification
@@ -189,7 +196,7 @@ trait SpecificationWithSamples extends Specification {
   }
 }
 object that extends Enumeration {
-  val isKo, isOk, isSkipped, isKoTwice, isKoWithTheFailMethod, throwsAnException = Value
+  val isKo, isOk, isSkipped, isKoTwice, isKoWithTheFailMethod, isKoWithTheFailMethodWithNoArgument, throwsAnException = Value
 }
 
 

@@ -103,6 +103,12 @@ abstract class Specification extends Matchers with SpecificationStructure with A
   def fail(m: String) = FailureException(m).rethrowFrom(this)
 
   /** 
+   * Convenience method: adds a new failure to the latest example. The failure message is "failure"<br>
+   * Usage: <code>fail</code>
+   */
+  def fail: Unit = fail("failure")
+
+  /** 
    * Convenience method: adds a new skippedException to the latest example<br>
    * Usage: <code>skip("this example should be skipped")</code>
    */

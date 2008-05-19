@@ -29,7 +29,7 @@ class TimerSpecificationActionWords extends LiteralSpecification {
   val person = new Person; 
   val Peter = "Peter"
   def stop = timer.stop.shh
-  def fail = timer.hms must beMatching("\\d second")
+  override def fail = timer.hms must beMatching("\\d second")
   def succeeds = timer.hms must beMatching("\\d second")
   def personName = person.setName _
   def checkName = person.name must_== Peter
