@@ -31,7 +31,6 @@ trait SpecsHolder {
  */  
 @RunWith(classOf[JUnitSuiteRunner])
 abstract class Runner(var specifications: Specification*) extends SpecsHolder {
-
   /** alternate constructor with a list of specifications */  
   val specs: Seq[Specification] = specifications
 
@@ -46,9 +45,13 @@ abstract class Runner(var specifications: Specification*) extends SpecsHolder {
  * <code> 
  */  
 trait Console extends ConsoleReporter with SpecsHolder with Application {
+  /**
+   * optional arguments to the main method if called from the code directly
+   */
+  var args: Array[String] = Array()
   def reportSpecs = report(specs)
   override def main(args: Array[java.lang.String]) = {
-    if (args.contains("-v") || args.contains("--verbose")) setVerbose
+    if ((args ++ this.args).contains("-ns") || (args ++ this.args).contains("--nostacktrace")) setNoStacktrace
     reportSpecs
     if (specs.exists { _.isFailing }) System.exit(1) else System.exit(0)
   }
@@ -60,9 +63,13 @@ trait Console extends ConsoleReporter with SpecsHolder with Application {
  * Usage: <code>object mySpecRunner extends ConsoleRunner(mySpec1, mySpec2)</code>
  */  
 class ConsoleRunner(val specifications: Specification*) extends ConsoleReporter {
+  /**
+   * optional arguments to the main method if called from the code directly
+   */
+  var args: Array[String] = Array()
   def ConsoleRunner(specs: List[Specification]) = new ConsoleRunner(specs :_*)
   def main(args: Array[String]) = {
-    if (args.contains("-v") || args.contains("--verbose")) setVerbose
+    if ((args ++ this.args).contains("-ns") || (args ++ this.args).contains("--nostacktrace")) setNoStacktrace
     report(specifications)
     if (specifications.exists { _.isFailing }) System.exit(1) else System.exit(0)
   }

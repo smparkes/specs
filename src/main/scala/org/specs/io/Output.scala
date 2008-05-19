@@ -18,6 +18,11 @@ trait Output {
    * flushes the content if necessary
    */
   def flush()
+
+  /**
+   * prints stacktraces
+   */
+  def printStackTrace(t: Throwable) =  t.printStackTrace
 }
 
 /**

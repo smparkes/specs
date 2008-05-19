@@ -64,7 +64,7 @@ trait Xml extends FileSystem with ConsoleLog with FileWriter with ConsoleReporte
    * calling main should execute the runner 
    */
   override def main(args: Array[String]): Unit = {
-    if (args.contains("-v") || args.contains("--verbose")) setVerbose
+    if (args.contains("-ns") || args.contains("--nostacktrace")) setNoStacktrace
     reportSpec
     if (spec.isFailing) System.exit(1) else System.exit(0)
   }

@@ -33,9 +33,14 @@ abstract class Specification extends Matchers with SpecificationStructure with A
   def this(n: String) = { this(); name = n; description = n; this }
 
   /**
+   * optional arguments to the main method
+   */
+  var specArgs: Array[String] = Array()
+  
+  /**
    * Default main method for a specification: uses the ConsoleRunner
    */
-  def main(args: Array[String]) = new ConsoleRunner(this).main(args)
+  def main(args: Array[String]) = new ConsoleRunner(this).main(args ++ specArgs)
   /** 
    * @deprecated
    * adds a "before" function to the last sut being defined 

@@ -114,6 +114,9 @@ trait MockOutput extends Output {
 
   /** doesn't flush */
   override def flush = ()
+  
+  /** doesn't print anything */
+  override def printStackTrace(t: Throwable) = ()
 }
 
 /**
