@@ -26,21 +26,18 @@ trait SpecsMatchers extends Matchers with AssertFactory with DefaultAssertionLis
  * be collected with the corresponding methods
  *
  */
-abstract class Specification extends Matchers with SpecificationStructure with AssertFactory {
+abstract class Specification extends Matchers with SpecificationStructure with AssertFactory with Application {
+  /** nested reporter so that a specification is executable on the console */
+  private val reporter = new ConsoleRunner(this)
+
+  /** A specification has a main method to be executable and print its result on a Console */
+  override def main(args: Array[String]) = reporter.main(args)
+  
   /**
    * Alternate constructor with the name of the specification
    */
   def this(n: String) = { this(); name = n; description = n; this }
 
-  /**
-   * optional arguments to the main method
-   */
-  var specArgs: Array[String] = Array()
-  
-  /**
-   * Default main method for a specification: uses the ConsoleRunner
-   */
-  def main(args: Array[String]) = new ConsoleRunner(this).main(args ++ specArgs)
   /** 
    * @deprecated
    * adds a "before" function to the last sut being defined 

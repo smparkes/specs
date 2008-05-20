@@ -44,35 +44,28 @@ abstract class Runner(var specifications: Specification*) extends SpecsHolder {
  * class mySpecRunner extends Runner(mySpec) with Console
  * <code> 
  */  
-trait Console extends ConsoleReporter with SpecsHolder with Application {
+trait Console extends ConsoleReporter with SpecsHolder {
   /**
    * optional arguments to the main method if called from the code directly
    */
   var args: Array[String] = Array()
-  def reportSpecs = report(specs)
-  override def main(args: Array[java.lang.String]) = {
-    if ((args ++ this.args).contains("-ns") || (args ++ this.args).contains("--nostacktrace")) setNoStacktrace
+  def reportSpecs = {
+   // if (args.exists(List("-ns", "--nostacktrace").contains(_))) setNoStacktrace
+    report(specs) 
+  }
+  def main(arguments: Array[java.lang.String]) = {
     reportSpecs
     if (specs.exists { _.isFailing }) System.exit(1) else System.exit(0)
   }
 }
 
 /**
- * This class implements the <code>ConsoleReporter</code> by adding a main 
- * method.<br>
+ * This class implements the <code>Console</code> trait and can be initialized with specifications directly<br>
  * Usage: <code>object mySpecRunner extends ConsoleRunner(mySpec1, mySpec2)</code>
  */  
-class ConsoleRunner(val specifications: Specification*) extends ConsoleReporter {
-  /**
-   * optional arguments to the main method if called from the code directly
-   */
-  var args: Array[String] = Array()
+class ConsoleRunner(val specifications: Specification*) extends Console {
+  val specs = specifications 
   def ConsoleRunner(specs: List[Specification]) = new ConsoleRunner(specs :_*)
-  def main(args: Array[String]) = {
-    if ((args ++ this.args).contains("-ns") || (args ++ this.args).contains("--nostacktrace")) setNoStacktrace
-    report(specifications)
-    if (specifications.exists { _.isFailing }) System.exit(1) else System.exit(0)
-  }
 }
 
 /**
@@ -83,26 +76,24 @@ class ConsoleRunner(val specifications: Specification*) extends ConsoleReporter 
  * and <code>pattern</code> is a regular expression which is supposed to match an object name extending a Specification
  * class named ".*Spec.*"
  */  
-class SpecsFileRunner(path: String, pattern: String) extends ConsoleRunner with SpecsFinder {
+class SpecsFileRunner(path: String, pattern: String) extends Console with SpecsFinder {
+  val specs = new scala.collection.mutable.ListBuffer[Specification]
   
   /** 
-   * overrides the <code>report</code> method in <code>ConsoleRunner</code>
-   * which is called by default in the main method<br>
-   * In that case, the <code>specifications</code> parameter is an empty list
-   * but the list of specifications to report is build from specification names found on the path
+   * overrides the <code>reportSpecs</code> method in the <code>Console</code> trait.<p>
+   * The list of specifications to report is build from specification names found on the path
    * indicated by the <code>path</code> parameter
    */
-  override def report(specifications: Iterable[Specification]) = {
-    var specList: List[Specification] = Nil
+  override def reportSpecs = {
     specificationNames(path, pattern) foreach {className => 
       createSpecification(className) match {
-        case Some(s) => specList = s::specList
-        case None => {println("Could not load " + className);()}
+        case Some(s) => specs.prepend(s)
+        case None => println("Could not load " + className)
       }
     }
     // this specification is added for better reporting
     object totalSpecification extends Specification {
-      new java.io.File(path).getAbsolutePath isSpecifiedBy(specList: _*)
+      new java.io.File(path).getAbsolutePath isSpecifiedBy(specs: _*)
     }
     super.report(List(totalSpecification))
   } 

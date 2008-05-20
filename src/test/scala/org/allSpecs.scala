@@ -44,8 +44,6 @@ object allUnits extends Specification {
 object allSpecsAndUnits extends Specification {
   "The specs and unit tests for the specs project" areSpecifiedBy (allSpecs, allUnits)
 }
-class allSuite extends JUnit3(allSpecsAndUnits)
-object allRunner extends Runner(allSpecsAndUnits) with Console with ScalaTest with JUnit {
-  args = Array("--nostacktrace")
-}
+class allSuite extends JUnit4(allSpecsAndUnits)
+object allRunner extends Runner(allSpecsAndUnits) with Console with ScalaTest with JUnit
 object allXml extends XmlRunner(allSpecsAndUnits)

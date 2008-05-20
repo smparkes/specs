@@ -7,8 +7,8 @@ import scala.xml._
 trait RunnerFixture extends LiteralSpecification with RunnerTestData {
   def createSimpleSpecRunner = runner = simpleSpecRunner
   def executeCompositeSpecRunner = {runner = compositeSpecRunner; executeRunner}
-  def executeRunner = {runner.reset; runner.reportSpec.shh}
-  def runnerOutputDir = {runner.outputDir_=_}
+  def executeRunner = { runner.reset; runner.reportSpec.shh }
+  def runnerOutputDir = { runner.outputDir_= _ }
   def checkXml = XML.loadString(runner.readFile(runner.files.keys.next)) must \\(xml()) 
  
   def checkFilePath = {
@@ -18,7 +18,7 @@ trait RunnerFixture extends LiteralSpecification with RunnerTestData {
   }
   def checkOutputDirectory = {
     runner.reset
-    runner.reportSpec
+    executeRunner
     runner.files must haveKey(path.toString)
   }
   def checkConsole = simpleSpecRunner.messages must not(beEmpty)
@@ -40,7 +40,7 @@ trait RunnerTestData {
       "have one sub-example" in { "a sub-example" in {1 mustBe 1}}
     }
   }
-  object compositeSpecRunner extends XmlRunner(compositeSpec) with MockFileSystem
+  object compositeSpecRunner extends XmlRunner(compositeSpec) with MockFileSystem with MockOutput
   object compositeSpec extends Specification { 
     "a composite spec" isSpecifiedBy(spec1, spec1)
   }

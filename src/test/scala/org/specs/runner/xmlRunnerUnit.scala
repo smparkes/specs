@@ -35,7 +35,7 @@ trait TestData extends DataTables {
   trait ExtendedMockFileSystem extends MockFileSystem {
     override def createFile(path: String) = {files += (path -> ""); true}
    }
-  object xmlRunner extends XmlRunner(spec1) with ExtendedMockFileSystem
+  object xmlRunner extends XmlRunner(spec1) with ExtendedMockFileSystem with MockOutput
   object spec1 extends Specification {
     override def toString = name
     "the sut" should { "have one ok example" in { 1 mustBe 1 } }

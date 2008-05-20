@@ -32,7 +32,7 @@ trait ConsoleOutput extends Output {
   /**
    * prints an object with a newline
    */
-  def println(m: Any) = Console.println(m) 
+  def println(m: Any) = Console.println(m)
   
   /**
    * prints several objects according to a format string (see Console.printf)

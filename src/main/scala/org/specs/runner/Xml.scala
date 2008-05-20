@@ -37,7 +37,7 @@ class XmlRunner(val specification: Specification, path: String) extends Xml {
  * The output directory can be overriden if necessary:<pre>
  * class mySpecRunner extends Runner(mySpec) with Xml { override def outputDir = "./results/specs" }</pre>
  */
-trait Xml extends FileSystem with ConsoleLog with FileWriter with ConsoleReporter with SpecsHolder with Application {
+trait Xml extends FileSystem with ConsoleLog with FileWriter with Console {
   /** private variable storing the output directory path */
   protected var outputDirPath = "."
   
@@ -60,15 +60,7 @@ trait Xml extends FileSystem with ConsoleLog with FileWriter with ConsoleReporte
    */
   def filePath = {normalize(outputDirPath) + fileName + ".xml"}
 
-  /**
-   * calling main should execute the runner 
-   */
-  override def main(args: Array[String]): Unit = {
-    if (args.contains("-ns") || args.contains("--nostacktrace")) setNoStacktrace
-    reportSpec
-    if (spec.isFailing) System.exit(1) else System.exit(0)
-  }
-  
+  override def reportSpecs = reportSpec
   /**
    * creates the file and write the xml result of the specification execution 
    */
