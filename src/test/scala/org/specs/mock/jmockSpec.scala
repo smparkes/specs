@@ -1,5 +1,6 @@
 package org.specs.mock
 import org.specs.runner._
+import org.specs.io.mock._
 import org.specs.mock._
 import org.specs.Sugar._
 import org.specs.specification._
@@ -189,6 +190,15 @@ object jmockGoodSpec extends Mocked {
       list.size
       list.get(0)
     } 
+    "provide a isAssertion method to register an new assertion when a mock is called" in {
+      object mockSpec extends Specification with MockOutput {
+        "spec with mock expectations" in {
+          expect { one(list).get(anyInt) will(returnValue("hey")) isAssertion }
+          list.get(0) must_== "hey"
+        }
+      }
+      mockSpec.assertionsNb must_== 1
+    }
   }
 }
 object jmockBadSpec extends BadMocked {

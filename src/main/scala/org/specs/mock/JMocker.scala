@@ -20,12 +20,14 @@ import org.specs.collection.JavaCollectionsConversion._
  * This object can be used to import and rename some functions in case of a conflict with some other trait.
  * For example the trait Suite in ScalaTest uses an expect method too
  */
-object JMocker extends JMocker
+object JMocker extends JMocker {
+  def addAssertion = {}
+}
 
 /** 
  * The JMocker trait is used to give access to the mocking functionalities of the JMock library 
  */
-trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockActions {
+trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockActions with AssertionListener {
 
   /**
    * the mock method is used to create a mock object
@@ -86,6 +88,18 @@ trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockAc
     val result = block;
     context.checking(expectations);
     result
+  }
+  
+  /** 
+   * Adds an isAssertion method to any mock expectation to better count the number of assertions
+   */
+  implicit def anyToAssertionCounter(a: Any) = AssertionCounter(a)
+  /** 
+   * Adds an isAssertion method to any mock expectation to better count the number of assertions
+   */
+  case class AssertionCounter(a: Any) {
+    /** adds an assertion to the AssertionListener trait */
+    def isAssertion = addAssertion
   }
 
   /** 
@@ -315,7 +329,7 @@ trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockAc
     /** set up a JMock action to be executed */
     def will(action: Action) = expectations.will(action)
   }
-  
+
   /** set up a jMock action to be executed */
   def will(action: Action) = expectations.will(action)
     
