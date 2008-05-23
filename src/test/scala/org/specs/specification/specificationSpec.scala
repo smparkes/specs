@@ -51,7 +51,7 @@ object basicFeatures extends SpecificationWithSamples {
                                                  msg must_== "failure with the fail method"} 
    }
    "provide a 'fail' method with no argument adding a new failure to the current example" in {
-     object failMethodSpec extends oneEx(List(that.isOk, that.isKoWithTheFailMethodWithNoArgument))
+     object failMethodSpec extends oneEx(List(that.isKoWithTheFailMethodWithNoArgument))
      failMethodSpec.failures must beLike {case Seq(FailureException(msg)) => 
                                                  msg must_== "failure"} 
    }

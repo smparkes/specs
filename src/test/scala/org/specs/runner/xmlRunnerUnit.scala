@@ -3,7 +3,7 @@ import org.specs.specification._
 import org.specs.util.DataTables
 import org.specs.Sugar._
 
-class xmlRunnerUnitRunner extends Runner(xmlRunnerUnit) with JUnit with Console
+class xmlRunnerUnitTest extends JUnit4(xmlRunnerUnit)
 object xmlRunnerUnit extends LiteralSpecification with TestData {
   "An xml runner" should {
     "create an xml file in the default directory if nothing is specified" in {

@@ -14,12 +14,13 @@ them hierarchically as xml elements.
 1. File creation 
 1.1 Simple file creation 
   
-{"Running an XML runner on a specification should create a file whose path is " + "./spec1.xml".as(path) in checkFilePath }
+Running an XML runner on a specification should create a file whose path is the name of the specification.
+For example, running the specification named "spec1" should create the path {"./spec1.xml".as(path) in checkFilePath }
 
 1.2 Output directory
 It is possible to indicate the output directory of the runner, for example: {"specresults" as runnerOutputDir}
 In that case, {"the xml file should be created in the output directory with path: " + 
-               ("./" + runner.outputDir + "/spec1.xml").as(path) in checkOutputDirectory}
+               "./specresults/spec1.xml".as(path) in checkOutputDirectory}
 
 2. XML content 
 

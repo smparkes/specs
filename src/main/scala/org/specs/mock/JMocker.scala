@@ -1,19 +1,19 @@
 package org.specs.mock
 import org.jmock.lib.legacy.ClassImposteriser
-import org.jmock.lib.action._;
+import org.jmock.lib.action._
 import org.jmock.api._
-import org.jmock.internal.State;
-import org.jmock.internal.StatePredicate;
-import java.util.Collection;
-import java.util.Iterator;
-import org.hamcrest._;
-import org.hamcrest.core._;
-import org.hamcrest.core.AnyOf._;
+import org.jmock.internal.State
+import org.jmock.internal.StatePredicate
+import java.util.Collection
+import java.util.Iterator
+import org.hamcrest._
+import org.hamcrest.core._
+import org.hamcrest.core.AnyOf._
 import org.jmock._
 import org.specs.specification._
 import org.specs.util.Property
 import org.specs.ExtendedThrowable._
-import org.jmock.internal.matcher.MethodNameMatcher;
+import org.jmock.internal.matcher.MethodNameMatcher
 import org.specs.collection.JavaCollectionsConversion._
 
 /** 
@@ -242,6 +242,9 @@ trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockAc
   class JMockAction[T](v: T) {
 
     private[this] def wrap[T](collection: java.util.Collection[T]) = collection.toArray
+
+    /** sets a value to be returned by the mock */
+    def willReturnValue(result: T) = expectations.will(new ReturnValueAction(result))
 
     /** sets a value to be returned by the mock */
     def willReturn(result: T) = expectations.will(new ReturnValueAction(result))

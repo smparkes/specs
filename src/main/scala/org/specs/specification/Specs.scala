@@ -103,7 +103,7 @@ abstract class Specification extends Matchers with SpecificationStructure with A
    * Convenience method: adds a new failure to the latest example. The failure message is "failure"<br>
    * Usage: <code>fail</code>
    */
-  def fail: Unit = fail("failure")
+  def fail: Nothing = fail("failure")
 
   /** 
    * Convenience method: adds a new skippedException to the latest example<br>
