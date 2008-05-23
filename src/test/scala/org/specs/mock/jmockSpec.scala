@@ -191,13 +191,14 @@ object jmockGoodSpec extends Mocked {
       list.get(0)
     } 
     "provide a isAssertion method to register an new assertion when a mock is called" in {
-      object mockSpec extends Specification with MockOutput {
+      object mockSpec extends Specification with MockOutput with JMocker {
         "spec with mock expectations" in {
-          expect { one(list).get(anyInt) will(returnValue("hey")) isAssertion }
+          expect { one(list).get(anyInt) will(returnValue("hey")) isAssertion 
+          }
           list.get(0) must_== "hey"
         }
       }
-      mockSpec.assertionsNb must_== 1
+      mockSpec.assertionsNb must_== 2
     }
   }
 }
