@@ -38,45 +38,48 @@ abstract class Specification extends Matchers with SpecificationStructure with A
    */
   def this(n: String) = { this(); name = n; description = n; this }
 
+  /**
+   * Alternate constructor with subspecifications
+   */
+  def this(subspecs: Specification*) = { this(); subSpecifications = subspecs.toList; this }
+
   /** 
    * @deprecated
    * adds a "before" function to the last sut being defined 
    */
-  def usingBefore(beforeFunction: () => Unit) = { 
-    suts.lastOption match {
-      case Some(last) => last.before = Some(beforeFunction)
-      case None => throw new FailureException("The usingBefore declaration should be declared inside a system under test")
-    }
- } 
+  def usingBefore(actions: () => Any) = currentSut.before = Some(actions)
 
   /** adds a "before" function to the last sut being defined */
-  def doBefore(actions: =>Any) = { 
-    suts.lastOption match {
-      case Some(last) => last.before = Some(() => actions)
-      case None => throw new FailureException("The doBefore declaration should be declared inside a system under test")
-    }
-  } 
+  def doBefore(actions: =>Any) = currentSut.before = Some(() => actions)
 
+  /** 
+   * Syntactic sugar for before/after actions.<p>
+   * Usage: <code>"a system" should { createObjects.before
+   *  ...
+   * </code>
+   */
+  implicit def toSutActions(actions: =>Unit) = SutActions(() => actions)
+
+  /** 
+   * Syntactic sugar for before/after actions.<p>
+   * Usage: <code>"a system" should { createObjects.before
+   *  ...
+   * </code>
+   */
+  case class SutActions(actions: () =>Unit) {
+    def before = usingBefore(actions)
+    def after = usingAfter(actions)
+  }
   /** 
    * @deprecated
    * adds an "after" function to the last sut being defined 
    */
-  def usingAfter(afterFunction: () => Unit) = { 
-    suts.lastOption match {
-      case Some(last) => last.after = Some(afterFunction)
-      case None => throw new FailureException("The usingAfter declaration should be declared inside a system under test")
-    }
-  }
+  def usingAfter(actions: () => Any) = currentSut.after = Some(actions)
 
   /** 
    * adds an "after" function to the last sut being defined 
    */
-  def doAfter(actions: =>Any) = { 
-    suts.lastOption match {
-      case Some(last) => last.after = Some(() => actions)
-      case None => throw new FailureException("The doAfter declaration should be declared inside a system under test")
-    }
-  } 
+  def doAfter(actions: =>Any) = currentSut.after = Some(() => actions)
 
   /** @return the failures of each sut */
   def failures: List[FailureException] = subSpecifications.flatMap{_.failures} ::: suts.flatMap {_.failures}
@@ -141,10 +144,10 @@ case class Sut(description: String, cycle: org.specs.specification.ExampleLifeCy
   def addExample(e: Example) = examples += e
 
   /** the before function will be invoked before each example */
-  var before: Option[() => Unit] = None
+  var before: Option[() => Any] = None
   
   /** the after function will be invoked after each example */
-  var after: Option[() => Unit] = None
+  var after: Option[() => Any] = None
   
   var skippedSut: Option[Throwable] = None
   var failedSut: Option[String] = None

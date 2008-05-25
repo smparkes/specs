@@ -17,11 +17,11 @@ object beforeAfterSpec extends Specification {
       doBeforeExampleFailing.messages must existMatch("1 error")
       doBeforeExampleFailing.messages must notExistMatch("tested")
     }
-    "throw an exception if the doBefore clause is not declared inside a sut" in { 
+    "be executed even if the doBefore clause is not declared inside a sut" in { 
       object badSpec extends Specification {
         doBefore {}
       }
-      badSpec must throwA(new FailureException(""))
+      badSpec
     } 
     "deprecated - have each example using the usingBefore method before being executed" in { 
       beforeEx.execute
@@ -32,12 +32,6 @@ object beforeAfterSpec extends Specification {
       beforeExampleFailing.execute
       beforeExampleFailing.messages must existMatch("1 error")
       beforeExampleFailing.messages must notExistMatch("tested")
-    } 
-    "deprecated - throw an exception if the usingBefore clause is not declared inside a sut" in { 
-      object badSpec extends Specification {
-        usingBefore {() => ()}
-      }
-      badSpec must throwA(new FailureException(""))
     } 
   }
   "A specification with after clauses" should {
@@ -51,11 +45,11 @@ object beforeAfterSpec extends Specification {
       doAfterExampleFailing.messages must existMatch("1 error")
       doAfterExampleFailing.messages must notExistMatch("tested")
     }
-    "throw an exception if the doAfter clause is not declared inside a sut" in { 
+    "work even if the doAfter clause is not declared inside a sut" in { 
       object badSpec extends Specification {
         doAfter {}
       }
-      badSpec must throwA(new FailureException(""))
+      badSpec
     } 
     "deprecated - have each example using the usingAfter method after being executed" in { 
       afterEx.execute
@@ -66,12 +60,6 @@ object beforeAfterSpec extends Specification {
       afterExampleFailing.execute
       afterExampleFailing.messages must existMatch("1 error")
       afterExampleFailing.messages must notExistMatch("tested")
-    } 
-    "deprecated - throw an exception if the usingAfter clause is not declared inside a sut" in { 
-      object badSpec extends Specification {
-        usingAfter {() => ()}
-      }
-      badSpec must throwA(new FailureException(""))
     } 
   }
 }
