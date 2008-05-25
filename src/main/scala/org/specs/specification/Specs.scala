@@ -1,5 +1,6 @@
 package org.specs
 import org.specs.util._
+import org.specs.util.ExtendedString._
 import scala.xml._
 import org.specs.matcher._
 import scala.collection.mutable._
@@ -26,7 +27,7 @@ trait SpecsMatchers extends Matchers with AssertFactory with DefaultAssertionLis
  * be collected with the corresponding methods
  *
  */
-abstract class Specification extends Matchers with SpecificationStructure with AssertFactory with Application {
+abstract class Specification extends Matchers with SpecificationStructure with AssertFactory with Application { outer =>
   /** nested reporter so that a specification is executable on the console */
   private val reporter = new ConsoleRunner(this)
 
@@ -70,6 +71,28 @@ abstract class Specification extends Matchers with SpecificationStructure with A
     def before = usingBefore(actions)
     def after = usingAfter(actions)
   }
+  /** 
+   * Syntactic sugar for examples sharing between systems under test.<p>
+   * Usage: <code>  
+   *   "A stack below full capacity" should {
+   *    behave like "A non-empty stack below full capacity" 
+   *    ...
+   * </code>
+   * In this example we suppose that there is a system under test with the same name previously defined.
+   * Otherwise, an Exception would be thrown, causing the specification failure at construction time.
+   */
+  object behave {
+    def like(other: Sut): Example = {
+      val behaveLike = "behave like " + other.description.uncapitalize in {}
+      other.examples.foreach(behaveLike.addExample(_))
+      behaveLike
+    }
+    def like(sutName: String): Example = outer.suts.find(_.description == sutName) match {
+      case Some(sut) => this.like(sut)
+      case None => throw new Exception(q(sutName) + " is not specified in " + outer.name)
+    }
+  }
+
   /** 
    * @deprecated
    * adds an "after" function to the last sut being defined 
@@ -142,7 +165,6 @@ case class Sut(description: String, cycle: org.specs.specification.ExampleLifeCy
   /** examples describing the sut behaviour */
   var examples = new Queue[Example]
   def addExample(e: Example) = examples += e
-
   /** the before function will be invoked before each example */
   var before: Option[() => Any] = None
   

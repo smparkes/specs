@@ -12,22 +12,6 @@ object stackSpecification extends StackSpec {
       stack.pop must throwA(new NoSuchElementException)
     }
   }
-  "A full stack" should { 
-    createFullStack.before
-    "behave like a non-empty stack" in nonEmptyStack.examples 
-    "throw an exception when sent #push" in {
-      stack.push(11) must throwA(new Error)
-    }
-  }
-  "A stack below full capacity" should {
-    createBelowCapacityStack.before
-    "behave like a non-empty stack" in nonEmptyStack.examples 
-    "add to the top when sent #push" in {
-      stack push 3
-      stack.top mustBe 3
-    }
-  }
-  val nonEmptyStack = 
   "A non-empty stack below full capacity" should {
     createNonEmptyStack.before
     "not be empty" in {
@@ -47,6 +31,21 @@ object stackSpecification extends StackSpec {
     }
     "return the top item when sent #pop" in {
       stack.pop mustBe lastItemAdded
+    }
+  }
+  "A stack below full capacity" should {
+    createBelowCapacityStack.before
+    behave like "A non-empty stack below full capacity" 
+    "add to the top when sent #push" in {
+      stack push 3
+      stack.top mustBe 3
+    }
+  }
+  "A full stack" should { 
+    createFullStack.before
+    behave like "A non-empty stack below full capacity" 
+    "throw an exception when sent #push" in {
+      stack.push(11) must throwA(new Error)
     }
   }
 }

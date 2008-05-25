@@ -4,10 +4,12 @@ import org.specs.runner._
 import org.specs._
 
 
-class allUtilTest extends JUnit3(allUtilSpec)
+class allUtilTest extends JUnit4(allUtilSpec)
 object allUtilSpec extends Specification {
     "The util specifications" areSpecifiedBy (
-        timerSpec)
+        timerSpec,
+        ExtendedStringSpec
+    )
 }
 
 object allUtilUnit extends Specification {
