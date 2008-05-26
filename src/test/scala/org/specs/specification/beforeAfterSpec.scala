@@ -62,6 +62,21 @@ object beforeAfterSpec extends Specification {
       afterExampleFailing.messages must notExistMatch("tested")
     } 
   }
+  "A specification" can {
+    "use a context to setup the before actions of a system under test" in {
+      specWithBeforeContext.execute
+      specWithBeforeContext.beforeIsCalled must beTrue
+    }
+    "use a context to setup the after actions of a system under test" in {
+      specWithAfterContext.execute
+      specWithAfterContext.afterIsCalled must beTrue
+    }
+    "use a context to setup the before and after actions of a system under test" in {
+      specWithContext.execute
+      specWithContext.beforeIsCalled must beTrue
+      specWithContext.afterIsCalled must beTrue
+    }
+  }
 }
 
 trait beforeAfterTestSpec extends Specification with ConsoleReporter with MockOutput {
@@ -149,4 +164,34 @@ object afterExampleFailing extends beforeAfterTestSpec {
     reportSpec(this)
   }   
 }
-
+object specWithBeforeContext extends beforeAfterTestSpec {
+  var beforeIsCalled = false
+  val context1 = beforeContext(beforeIsCalled = true)
+  override def executeSpec = {
+    "A specification" ->- context1 should {
+      "have example 1 ok" in { }
+    }
+    reportSpec(this)
+  }
+}
+object specWithAfterContext extends beforeAfterTestSpec {
+  var afterIsCalled = false
+  val context1 = afterContext(afterIsCalled = true)
+  override def executeSpec = {
+    "A specification" ->- context1 should {
+      "have example 1 ok" in { }
+    }
+    reportSpec(this)
+  }
+}
+object specWithContext extends beforeAfterTestSpec {
+  var beforeIsCalled = false
+  var afterIsCalled = false
+  val context1 = context(beforeIsCalled = true, afterIsCalled = true)
+  override def executeSpec = {
+    "A specification" ->- context1 should {
+      "have example 1 ok" in { }
+    }
+    reportSpec(this)
+  }
+}

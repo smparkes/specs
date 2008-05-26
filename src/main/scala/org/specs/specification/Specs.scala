@@ -27,7 +27,7 @@ trait SpecsMatchers extends Matchers with AssertFactory with DefaultAssertionLis
  * be collected with the corresponding methods
  *
  */
-abstract class Specification extends Matchers with SpecificationStructure with AssertFactory with Application { outer =>
+abstract class Specification extends Matchers with AssertFactory with Application with Contexts { outer =>
   /** nested reporter so that a specification is executable on the console */
   private val reporter = new ConsoleRunner(this)
 
@@ -44,33 +44,6 @@ abstract class Specification extends Matchers with SpecificationStructure with A
    */
   def this(subspecs: Specification*) = { this(); subSpecifications = subspecs.toList; this }
 
-  /** 
-   * @deprecated
-   * adds a "before" function to the last sut being defined 
-   */
-  def usingBefore(actions: () => Any) = currentSut.before = Some(actions)
-
-  /** adds a "before" function to the last sut being defined */
-  def doBefore(actions: =>Any) = currentSut.before = Some(() => actions)
-
-  /** 
-   * Syntactic sugar for before/after actions.<p>
-   * Usage: <code>"a system" should { createObjects.before
-   *  ...
-   * </code>
-   */
-  implicit def toSutActions(actions: =>Unit) = SutActions(() => actions)
-
-  /** 
-   * Syntactic sugar for before/after actions.<p>
-   * Usage: <code>"a system" should { createObjects.before
-   *  ...
-   * </code>
-   */
-  case class SutActions(actions: () =>Unit) {
-    def before = usingBefore(actions)
-    def after = usingAfter(actions)
-  }
   /** 
    * Syntactic sugar for examples sharing between systems under test.<p>
    * Usage: <code>  
@@ -92,17 +65,6 @@ abstract class Specification extends Matchers with SpecificationStructure with A
       case None => throw new Exception(q(sutName) + " is not specified in " + outer.name)
     }
   }
-
-  /** 
-   * @deprecated
-   * adds an "after" function to the last sut being defined 
-   */
-  def usingAfter(actions: () => Any) = currentSut.after = Some(actions)
-
-  /** 
-   * adds an "after" function to the last sut being defined 
-   */
-  def doAfter(actions: =>Any) = currentSut.after = Some(() => actions)
 
   /** @return the failures of each sut */
   def failures: List[FailureException] = subSpecifications.flatMap{_.failures} ::: suts.flatMap {_.failures}
@@ -177,6 +139,12 @@ case class Sut(description: String, cycle: org.specs.specification.ExampleLifeCy
   /** default way of defining the behaviour of a sut */
   def should(ex: =>Example) = {
     verb = "should"
+    specifyExamples(ex)
+  }
+  /** Alias method to describe more advanced or optional behaviour. This will change the verb used to report the sut behavior */
+  def can(ex: =>Example) = { verb = "can"; specifyExamples(ex) }
+
+  private def specifyExamples(ex: =>Example) = {
     try { ex } catch {
       case e: SkippedException => skippedSut = Some(e)
       case FailureException(m) => failedSut = Some(m)
@@ -192,9 +160,6 @@ case class Sut(description: String, cycle: org.specs.specification.ExampleLifeCy
       verb = "specifies"
       literalDescription = Some(e.text)
   }
-
-  /** Alias method to describe more advanced or optional behaviour. This will change the verb used to report the sut behavior */
-  def can(ex: =>Example) = {verb = "can"; should(ex)}
 
   /** @return all examples failures */
   def failures = examples.flatMap {_.failures}
@@ -358,6 +323,99 @@ case class Example(description: String, cycle: org.specs.specification.ExampleLi
   override def toString = description
 }
 
+/**
+ * This traits adds before / after capabilities to specifications, so that a context can be defined for
+ * each system under test being specified.
+ */
+trait Contexts extends SpecificationStructure {
+  /** 
+   * @deprecated
+   * adds a "before" function to the last sut being defined 
+   */
+  def usingBefore(actions: () => Any) = currentSut.before = Some(actions)
+
+  /** adds a "before" function to the last sut being defined */
+  def doBefore(actions: =>Any) = currentSut.before = Some(() => actions)
+
+  /** 
+   * @deprecated
+   * adds an "after" function to the last sut being defined 
+   */
+  def usingAfter(actions: () => Any) = currentSut.after = Some(actions)
+
+  /** 
+   * adds an "after" function to the last sut being defined 
+   */
+  def doAfter(actions: =>Any) = currentSut.after = Some(() => actions)
+
+  /** 
+   * Syntactic sugar for before/after actions.<p>
+   * Usage: <code>"a system" should { createObjects.before
+   *  ...
+   * </code>
+   */
+  implicit def toSutActions(actions: =>Unit) = SutActions(() => actions)
+
+  /** 
+   * Syntactic sugar for before/after actions.<p>
+   * Usage: <code>"a system" should { createObjects.before
+   *  ...
+   * </code>
+   */
+  case class SutActions(actions: () =>Unit) {
+    def before = usingBefore(actions)
+    def after = usingAfter(actions)
+  }
+
+  /** 
+   * Syntactic sugar to create pass a new context before creating a sut.<p>
+   * Usage: <code>"a system" ->(context) should { 
+   *  ...
+   * </code>
+   * In that case before/after actions defined in the context will be set on the defined sut.
+   */
+  implicit def toContext(s: String) = ToContext(s) 
+
+  /** 
+   * Syntactic sugar to create pass a new context before creating a sut.<p>
+   * Usage: <code>"a system" ->(context) should { 
+   *  ...
+   * </code>
+   * In that case before/after actions defined in the context will be set on the defined sut.
+   */
+  case class ToContext(s: String) {
+    def ->-(context: Context): Sut = {
+      val sut = specify(s)
+      usingBefore(context.beforeActions)
+      usingAfter(context.afterActions)
+      sut
+    } 
+  }
+
+  /** 
+   * Factory method to create contexts with before only actions
+   */
+  def beforeContext(actions: => Any) = new Context { before(actions) }
+
+  /** 
+   * Factory method to create contexts with after only actions
+   */
+  def afterContext(actions: => Any) = new Context { after(actions) }
+
+  /** 
+   * Factory method to create contexts with after only actions
+   */
+  def context(b: => Any, a: =>Any) = new Context { before(b); after(a) }
+}
+/** 
+ * Case class holding before and after functions to be set on a system under test
+ */
+case class Context {
+  var beforeActions: () => Any = () => () 
+  var afterActions: () => Any = () => () 
+  def before(actions: =>Any) = beforeActions = () => actions
+  def after(actions: =>Any) = afterActions = () => actions
+}
 /** utility object to indent a string with 2 spaces */
 object SpecUtils {
   /** @return <code>s + "  "</code> */

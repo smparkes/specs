@@ -1,10 +1,10 @@
 package org.specs.samples
 import org.specs.runner._
+import org.scalacheck.Commands
 
 class stackTest extends JUnit4(stackSpecification)
 object stackSpecification extends StackSpec {
-  "An empty stack" should { 
-    createEmptyStack.before
+  "An empty stack" ->-(empty) should { 
     "throw an exception when sent #top" in {
       stack.top must throwA(new NoSuchElementException)
     }
@@ -12,10 +12,9 @@ object stackSpecification extends StackSpec {
       stack.pop must throwA(new NoSuchElementException)
     }
   }
-  "A non-empty stack below full capacity" should {
-    createNonEmptyStack.before
+  "A non-empty stack below full capacity" ->-(nonEmpty) should {
     "not be empty" in {
-      stack verifies {!_.isEmpty}
+      stack verifies { !_.isEmpty }
     }
     "return the top item when sent #top" in {
       stack.top mustBe lastItemAdded
@@ -33,16 +32,14 @@ object stackSpecification extends StackSpec {
       stack.pop mustBe lastItemAdded
     }
   }
-  "A stack below full capacity" should {
-    createBelowCapacityStack.before
+  "A stack below full capacity" ->-(belowCapacity) should {
     behave like "A non-empty stack below full capacity" 
     "add to the top when sent #push" in {
       stack push 3
       stack.top mustBe 3
     }
   }
-  "A full stack" should { 
-    createFullStack.before
+  "A full stack" ->-(full) should { 
     behave like "A non-empty stack below full capacity" 
     "throw an exception when sent #push" in {
       stack.push(11) must throwA(new Error)
@@ -53,10 +50,10 @@ class StackSpec extends Specification {
   val stack = new LimitedStack[Int](10)
   var lastItemAdded = 0
   def createStack(itemsNb: Int) = { stack.clear; for (i <- 1 to itemsNb) stack += i; lastItemAdded = stack.top } 
-  def createEmptyStack = stack.clear
-  def createNonEmptyStack = createStack(3)
-  def createBelowCapacityStack = createStack(3)
-  def createFullStack = createStack(stack.capacity)
+  val empty = beforeContext(stack.clear)
+  val full = beforeContext(createStack(stack.capacity))
+  val nonEmpty = beforeContext(createStack(3))
+  val belowCapacity = beforeContext(createStack(3))
 }
 
 class LimitedStack[T](val capacity: Int) extends scala.collection.mutable.Stack[T] {

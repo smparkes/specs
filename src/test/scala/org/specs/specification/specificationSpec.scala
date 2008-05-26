@@ -101,6 +101,10 @@ object advancedFeatures extends SpecificationWithSamples {
       spec.name = "This is a great spec"
       spec.name must_== "This is a great spec"
     }
+    "use 'can' instead of 'should' to describe the sut functionalities" in {
+      val spec = oneEx(that.isOk) 
+      spec.suts.first.verb must_== "can"
+    }
     "be composed of other specifications. The composite specification has subSpecifications.\n" + 
     "Use the isSpecifiedBy method to do so [alias areSpecifiedBy]."  in {
        object compositeSpec extends Specification {
@@ -170,7 +174,7 @@ trait SpecificationWithSamples extends Specification {
     }
   }
   case class oneEx(behaviours: List[(that.Value)]) extends TestSpec {
-    "This system under test" should {
+    "This system under test" can {
       "have example 1 ok" in {
         assertions(behaviours) foreach {_.apply}
       }
