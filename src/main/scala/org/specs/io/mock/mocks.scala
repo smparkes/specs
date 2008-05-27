@@ -116,7 +116,7 @@ trait MockOutput extends Output {
   override def flush = ()
   
   /** doesn't print anything */
-  override def printStackTrace(t: Throwable) = ()
+  override def printStackTrace(t: Throwable) = t.getStackTrace.foreach { messages += _.toString }
 }
 
 /**

@@ -50,10 +50,11 @@ trait Console extends ConsoleReporter with SpecsHolder {
    */
   var args: Array[String] = Array()
   def reportSpecs = {
-   // if (args.exists(List("-ns", "--nostacktrace").contains(_))) setNoStacktrace
+    if (args.exists(List("-ns", "--nostacktrace").contains(_))) setNoStacktrace
     report(specs) 
   }
   def main(arguments: Array[java.lang.String]) = {
+    args = args ++ arguments
     reportSpecs
     if (specs.exists { _.isFailing }) System.exit(1) else System.exit(0)
   }

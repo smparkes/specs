@@ -70,13 +70,27 @@ object consoleReporterSpec extends Specification with MockOutput {
     "indicate the line and class where the skipping occurred" in { 
       specWithOneExample(that.isSkipped) must existMatch("(consoleReporterSpec.scala:\\d)") 
     } 
-
+  }
+  "A console reporter" should {
+    "not print stack trace if setNoStackTrace is called" in {
+      val spec = new SpecWithOneExample(that.throwsAnException)
+      spec.setNoStacktrace
+      spec.run mustNot containMatch("org.specs.runner.SpecWithOneExample\\$")
+    }
+  }
+  "A console trait" should {
+    "setNoStackTrace on the ConsoleReporter when passed the -ns or --nostacktrace argument" in {
+      val spec = new SpecWithOneExample(that.throwsAnException)
+      object testSpecRunner extends Runner(spec) with Console with MockOutput
+      testSpecRunner.args ++= Array("-ns")
+      testSpecRunner.reportSpecs
+      testSpecRunner.messages mustNot containMatch("org.specs.runner.SpecWithOneExample\\$")
+    }
   }
 
   def specWithOneExample(assertions: (that.Value)*) = new SpecWithOneExample(assertions.toList).run
   def specWithTwoExamples(assertions: (that.Value)*) = new SpecWithTwoExamples(assertions.toList).run
 }
-
 abstract class TestSpec extends Specification with ConsoleReporter with MockOutput {
   val success = () => true mustBe true
   val isSkipped = () => skip("irrelevant")

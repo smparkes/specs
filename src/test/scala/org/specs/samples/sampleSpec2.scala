@@ -15,8 +15,9 @@ object helloWorld extends Specification("Hello world") {
      "hello world".size mustBe 11
   }
   "'hello world' matches 'h.* w.*'" in {
-     "hello world" must beMatching("h.* w.*")
+    "hello world" must beMatching("h.* w.*")
   }
 }
+
 
 
