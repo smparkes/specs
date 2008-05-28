@@ -78,7 +78,7 @@ object beforeAfterSpec extends Specification {
     }
     "use a repeated context to setup the before and after actions of a system under test and repeat the same test several times" in {
       specWithRepeatedContext.execute
-      specWithRepeatedContext.context1.data must_== 10
+      specWithRepeatedContext.data must_== 10
     }
   }
   "A specification" can {
@@ -206,11 +206,8 @@ object specWithContext extends beforeAfterTestSpec {
   }
 }
 object specWithRepeatedContext extends beforeAfterTestSpec {
-  val context1 = new Context {
-    var data = 0
-    before(data += 1)
-    until(data == 10)
-  }
+  var data = 0
+  val context1 = beforeContext(data += 1).until(data == 10)
   override def executeSpec = {
     "A specification" ->- context1 should {
       "have example 1 ok" in { }
