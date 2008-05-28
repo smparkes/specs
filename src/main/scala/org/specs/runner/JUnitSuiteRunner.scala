@@ -1,11 +1,11 @@
 package org.specs.runner;
 
-import _root_.junit.framework._;
-import org.junit.runner.Description;
-import org.junit.runner.Description._;
-import org.junit.runner.manipulation._;
-import org.junit.runner.notification._;
-
+import _root_.junit.framework._
+import org.junit.runner.Description
+import org.junit.runner.Description._
+import org.junit.runner.manipulation._
+import org.junit.runner.notification._
+import org.specs.specification.FailureException
 /**
  * The JUnitSuiteRunner provides a JUnit4 annotation to run <code>JUnitSuite</code> test suites created from specifications
  * <code>klass</code> is a JUnitSuite which implements the junit.framework.Test interface
@@ -114,9 +114,9 @@ class OldTestClassAdaptingListener(notifier: RunNotifier)  extends TestListener 
   def endTest(test: Test) = notifier.fireTestFinished(asDescription(test))
 
   /**
-   * Notifies the notifier of a test failure (an Error in JUnit3 is a Failure in JUnit4) 
+   * Notifies the notifier of a new test failure (an error in JUnit3 is a Failure in JUnit4) 
    */
-  def addError(test: Test, t: Throwable) = notifier.fireTestFailure(new Failure(asDescription(test), t))
+  def addError(test: Test, t: Throwable) = addNewFailure(test, t)
 	
   /**
    * Notifies the notifier of a test failure.
@@ -128,9 +128,10 @@ class OldTestClassAdaptingListener(notifier: RunNotifier)  extends TestListener 
       // otherwise the description created when running the test and the description creating when
       // parsing the whole suite for the first time will not match 
       case skipped: SkippedAssertionError => notifier.fireTestIgnored(makeDescription(test))
-      case _ => addError(test, t)
+      case _ => addNewFailure(test, t)
     }
   }
+  private def addNewFailure(test: Test, t: Throwable) = notifier.fireTestFailure(new Failure(asDescription(test), t))
 
 
 }

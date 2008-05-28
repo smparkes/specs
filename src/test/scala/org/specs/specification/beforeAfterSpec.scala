@@ -76,6 +76,16 @@ object beforeAfterSpec extends Specification {
       specWithContext.beforeIsCalled must beTrue
       specWithContext.afterIsCalled must beTrue
     }
+    "use a repeated context to setup the before and after actions of a system under test and repeat the same test several times" in {
+      specWithRepeatedContext.execute
+      specWithRepeatedContext.context1.data must_== 10
+    }
+  }
+  "A specification" can {
+    "use an until method to repeat the examples of a sut until a predicate is true" in {
+      specWithUntil.execute
+      specWithUntil.counter must_== 10
+    }
   }
 }
 
@@ -191,6 +201,29 @@ object specWithContext extends beforeAfterTestSpec {
   override def executeSpec = {
     "A specification" ->- context1 should {
       "have example 1 ok" in { }
+    }
+    reportSpec(this)
+  }
+}
+object specWithRepeatedContext extends beforeAfterTestSpec {
+  val context1 = new Context {
+    var data = 0
+    before(data += 1)
+    until(data == 10)
+  }
+  override def executeSpec = {
+    "A specification" ->- context1 should {
+      "have example 1 ok" in { }
+    }
+    reportSpec(this)
+  }
+}
+object specWithUntil extends beforeAfterTestSpec {
+  var counter = 0
+  override def executeSpec = {
+    "A specification" should {
+      until(counter == 10)
+      "have example 1 ok" in { counter += 1 }
     }
     reportSpec(this)
   }

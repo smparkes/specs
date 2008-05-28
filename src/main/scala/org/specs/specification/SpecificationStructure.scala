@@ -140,9 +140,10 @@ trait ExampleLifeCycle {
   def setSequential = sequential = true
   
   protected[this] var example: Option[Example] = None
+  def until = true 
   def beforeExample(ex: Example) = {} 
   def beforeTest(ex: Example)= {}
   def afterTest(ex: Example) = {}
-  def executeTest(ex: Example, t: =>Any) = {example = Some(ex); t}
+  def executeTest(ex: Example, t: =>Any): Any = { example = Some(ex); t }
   def afterExample(ex: Example) = { example = None }
 }

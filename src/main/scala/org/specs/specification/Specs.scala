@@ -114,7 +114,7 @@ abstract class Specification extends Matchers with AssertFactory with Applicatio
  * In specifications, a Sut "should" or "can" provide some functionalities which are defined in <code>Examples</code><br>
  * A Sut is "executed" during its construction and failures and errors are collected from its examples
  */
-case class Sut(description: String, cycle: org.specs.specification.ExampleLifeCycle) extends ExampleLifeCycle {
+case class Sut(description: String, var cycle: org.specs.specification.ExampleLifeCycle) extends ExampleLifeCycle {
   /** default verb used to define the behaviour of the sut */
   var verb = ""
 
@@ -133,6 +133,9 @@ case class Sut(description: String, cycle: org.specs.specification.ExampleLifeCy
   /** the after function will be invoked after each example */
   var after: Option[() => Any] = None
   
+  /** a predicate which will decide if an example must be re-executed */
+  var untilPredicate: Option[() => Boolean] = None
+
   var skippedSut: Option[Throwable] = None
   var failedSut: Option[String] = None
 
@@ -176,6 +179,9 @@ case class Sut(description: String, cycle: org.specs.specification.ExampleLifeCy
   /** @return a description of this sut with all its examples (used for the ConsoleReporter) */
   def pretty(tab: String) = tab + description + " " + verb + " " + examples.foldLeft("") {_ + _.pretty(addSpace(tab))}
   
+  /** forwards the call to the "parent" cycle */
+  override def until = { cycle.until && this.untilPredicate.getOrElse(() => true)() }
+
   /** calls the before method of the "parent" cycle, then the sut before method before an example if that method is defined. */
   override def beforeExample(ex: Example) = {
     cycle.beforeExample(ex)
@@ -186,7 +192,9 @@ case class Sut(description: String, cycle: org.specs.specification.ExampleLifeCy
   override def beforeTest(ex: Example) = { cycle.beforeTest(ex) }
 
   /** forwards the call to the "parent" cycle */
-  override def executeTest(ex: Example, t: =>Any) = { cycle.executeTest(ex, t) }
+  override def executeTest(ex: Example, t: =>Any) = { 
+    cycle.executeTest(ex, t) 
+  }
 
   /** forwards the call to the "parent" cycle */
   override def afterTest(ex: Example) = { cycle.afterTest(ex) }
@@ -255,7 +263,7 @@ case class Example(description: String, cycle: org.specs.specification.ExampleLi
    * @return a new <code>Example</code>
    */
   def in (test: => Any): Example = {
-    toRun = () => {
+    val execution = () => {
       var failed = false
       // try the "before" methods. If there is an exception, add an error and return the current example
       try { cycle.beforeExample(this) } catch {
@@ -281,6 +289,10 @@ case class Example(description: String, cycle: org.specs.specification.ExampleLi
       // try the "after" methods. If there is an exception, add an error and return the current example
       try { if (!failed) cycle.afterExample(this) } catch { case t: Throwable => addError(t) }
       this
+    }
+    toRun = () => {
+      execution()
+      while (!cycle.until) execution()
     }
     if (cycle.isSequential)
       execute
@@ -349,6 +361,11 @@ trait Contexts extends SpecificationStructure {
   def doAfter(actions: =>Any) = currentSut.after = Some(() => actions)
 
   /** 
+   * repeats examples according to a predicate 
+   */
+  def until(predicate: =>Boolean) = currentSut.untilPredicate = Some(() => predicate)
+
+  /** 
    * Syntactic sugar for before/after actions.<p>
    * Usage: <code>"a system" should { createObjects.before
    *  ...
@@ -388,6 +405,7 @@ trait Contexts extends SpecificationStructure {
       val sut = specify(s)
       usingBefore(context.beforeActions)
       usingAfter(context.afterActions)
+      until(context.predicate())
       sut
     } 
   }
@@ -412,9 +430,11 @@ trait Contexts extends SpecificationStructure {
  */
 case class Context {
   var beforeActions: () => Any = () => () 
-  var afterActions: () => Any = () => () 
+  var afterActions: () => Any = () => ()
+  var predicate: () => Boolean = () => true
   def before(actions: =>Any) = beforeActions = () => actions
   def after(actions: =>Any) = afterActions = () => actions
+  def until(predicate: =>Boolean) = this.predicate = () => predicate
 }
 /** utility object to indent a string with 2 spaces */
 object SpecUtils {
