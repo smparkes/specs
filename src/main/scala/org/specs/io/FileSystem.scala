@@ -86,15 +86,17 @@ trait FileSystem extends FileReader with FileWriter with JavaConversions {
   def removeDir(path: String): String = {
     val dir = new File(path)
     if (dir.isDirectory) { 
-      if (dir.listFiles == null) 
+      if (dir.listFiles == null || dir.listFiles.isEmpty)
         dir.delete
-      else
+      else {
         dir.listFiles.foreach { file => 
           if (file.isFile) 
             file.delete
           else 
             removeDir(file.getPath)
         }
+        dir.delete
+      }
     }
     dir.getParent
   }

@@ -2,10 +2,10 @@ package org.specs.io
 import org.specs._
 import org.specs.runner._
 
-class fileSystemTest extends JUnit3(fileSystemSpec)
+class fileSystemTest extends JUnit4(fileSystemSpec)
 object fileSystemSpec extends Specification {
   
-  "A FileSystem" should {
+  "A FileSystem" should { 
     "list all files in a directory with filePaths()" in {
       fs.filePaths("./src/test/scala/org/specs/io") mustExistMatch "fileSystemSpec"      
     }
@@ -30,7 +30,7 @@ object fileSystemSpec extends Specification {
       fs.createDir("./testingDir/directoryToRemove")
       fs.createFile("./testingDir/directoryToRemove/testFile.txt")
       fs.removeDir("./testingDir")
-      fs.filePaths("./testingDir/**/*.*") mustBe List[String]()      
+      fs.exists("./testingDir") must beFalse    
     }
     "remove a directory with removeDir and return the parent path" in {
       fs.createDir("./testingDir/directoryToRemove")
