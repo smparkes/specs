@@ -19,14 +19,11 @@ object helloWorld extends Specification("Hello world") {
   }
 }
 import org.specs.mock._
+import java.io._
 object expectationsOnly extends Specification("Hello world") with JMocker with ClassMocker {
   "hello world".size mustBe 11
-  "hello world" must beMatching("h.* w.*")
-  
-  3 must_== { 
-    val a = 1
-    val b = 2
-    a + b     }
+  3 must_== { "abc".size }
+  classOf[OutputStream].expectsOne(_.flush) in { _.flush }
 }
 
 

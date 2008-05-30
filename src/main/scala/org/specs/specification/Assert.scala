@@ -67,6 +67,7 @@ case class SkippedException(message: String) extends RuntimeException(message)
 
 /** Specialized assert class with string matchers aliases */
 class AssertString[A <: String](value: => A) extends Assertable[A] {
+
   /** alias for <code>must(beMatching(a))</code> */
   def mustMatch(a: String) = applyMatcher(beMatching(a), value)
 

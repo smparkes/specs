@@ -11,7 +11,7 @@ import org.specs.matcher._
 class jMockSpecTest extends Runner(jmockSpec) with ScalaTest with Console with JUnit with Xml 
 
 object jmockSpec extends Specification {
-  "The jMock integration".isSpecifiedBy(jmockGoodSpec, jmockBadSpec)
+  "The jMock integration".isSpecifiedBy(jmockGoodSpec, jmockBadSpec, countingNamingSchemeSpec)
 }
 object jmockGoodSpec extends Mocked {
   "The JMocker trait" should {

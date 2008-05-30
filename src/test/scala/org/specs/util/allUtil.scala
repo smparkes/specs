@@ -8,7 +8,8 @@ class allUtilTest extends JUnit4(allUtilSpec)
 object allUtilSpec extends Specification {
     "The util specifications" areSpecifiedBy (
         timerSpec,
-        ExtendedStringSpec
+        ExtendedStringSpec,
+        editDistanceSpec
     )
 }
 
