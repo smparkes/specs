@@ -19,5 +19,14 @@ object helloWorld extends Specification("Hello world") {
   }
 }
 
+object expectationsOnly extends Specification("Hello world") {
+  "hello world".size mustBe 11
+  "hello world" must beMatching("h.* w.*")
+  
+  3 must_== { 
+    val a = 1
+    val b = 2
+    a + b     }
+}
 
 

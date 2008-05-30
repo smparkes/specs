@@ -143,7 +143,7 @@ class ExampleTestCase(example: Example) extends TestCase(example.description.rep
       result.startTest(this)
       example.failures foreach {failure: FailureException => result.addFailure(this, new SpecAssertionFailedError(failure))}
       example.skipped foreach {skipped: SkippedException => result.addFailure(this, new SkippedAssertionError(skipped)) }
-      example.errors foreach {error: Throwable => result.addError(this, new SpecAssertionFailedError(error)) }
+      example.errors foreach {error: Throwable => result.addError(this, new SpecError(error)) }
       result.endTest(this)
   }
 }
@@ -152,6 +152,16 @@ class ExampleTestCase(example: Example) extends TestCase(example.description.rep
  * and provides the stackTrace of an exception which occured during the specification execution
  */
 class SpecAssertionFailedError(t: Throwable) extends AssertionFailedError(t.getMessage){
+  override def getStackTrace = t.getStackTrace
+  override def printStackTrace = t.printStackTrace
+  override def printStackTrace(w: java.io.PrintStream) = t.printStackTrace(w)
+  override def printStackTrace(w: java.io.PrintWriter) = t.printStackTrace(w)
+}
+/**
+ * This class represents errors thrown in an example. It needs to be set as something
+ * different from an AssertionFailedError so that tools like Ant can make the distinction between failures and errors
+ */
+class SpecError(t: Throwable) extends java.lang.Error(t.getMessage){
   override def getStackTrace = t.getStackTrace
   override def printStackTrace = t.printStackTrace
   override def printStackTrace(w: java.io.PrintStream) = t.printStackTrace(w)

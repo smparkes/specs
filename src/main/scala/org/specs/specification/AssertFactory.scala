@@ -59,10 +59,10 @@ trait ExampleAssertionListener extends AssertionListener {
 
   def addAssertion = {
     example match {
-      case None => forExample("for Example").addAssertion
+      case None => forExample.addAssertion
       case Some(e) => e.addAssertion
     }
   }
-  def forExample(desc: String): Example
+  def forExample: Example
 }
 	

@@ -113,6 +113,7 @@ trait SpecificationStructure extends ExampleLifeCycle with ExampleAssertionListe
     exampleContainer.addExample(newExample) 
     newExample
   }
+  def forExample: Example = forExample("example " + (currentSut.examples.size + 1))
   
   /** 
    * utility method to track the last example list being currently defined.<br>

@@ -25,16 +25,22 @@ object specificationUnit extends Specification with Scalacheck {
                                            not(beMatching("\\.")) and
                                            not(beInt))
       }
-   }  
-  "create a default sut and example if an assertion is created alone" in {
-    object nudeSpec extends Specification {
-        "name" mustEqual "name"
     }
+  }
+  "A specification with one assertion only" should {
+    object nudeSpec extends Specification { "name" mustEqual "name" }
+    "create a default sut" in {
       nudeSpec.suts.size mustBe 1
+    }
+    "create a default example" in {
       nudeSpec.suts.head.examples.size mustBe 1
+    }
+    "create a default example named 'example 1'" in {
+      nudeSpec.suts.head.examples.first.description must_== "example 1"
+    }
+    "count 1 assertion" in {
       nudeSpec.assertionsNb mustBe 1
-   }
-
+    }
   }
   def isInt(s: String): Boolean = {try {s.toInt} catch {case _ => return false}; true}
   def beInt = new Matcher[String](){
