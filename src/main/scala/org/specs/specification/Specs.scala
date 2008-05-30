@@ -402,6 +402,7 @@ trait Contexts extends SpecificationStructure {
    */
   case class ToContext(s: String) {
     def ->-(context: Context): Sut = {
+      if (context == null) throw new NullPointerException("the context is null")
       val sut = specify(s)
       usingBefore(context.beforeActions)
       usingAfter(context.afterActions)

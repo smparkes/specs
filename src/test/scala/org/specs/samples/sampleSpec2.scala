@@ -18,8 +18,8 @@ object helloWorld extends Specification("Hello world") {
     "hello world" must beMatching("h.* w.*")
   }
 }
-
-object expectationsOnly extends Specification("Hello world") {
+import org.specs.mock._
+object expectationsOnly extends Specification("Hello world") with JMocker with ClassMocker {
   "hello world".size mustBe 11
   "hello world" must beMatching("h.* w.*")
   

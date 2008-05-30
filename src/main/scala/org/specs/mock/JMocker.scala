@@ -27,7 +27,7 @@ object JMocker extends JMocker {
 /** 
  * The JMocker trait is used to give access to the mocking functionalities of the JMock library 
  */
-trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockActions with AssertionListener {
+trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockActions with AssertionListener { outer =>
 
   /**
    * the mock method is used to create a mock object
@@ -370,7 +370,63 @@ trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockAc
       this
     }
   }
-  
+  /** 
+   * One liner function for expectations.<p>
+   * Usage:<code>  
+   *   expect(classOf[List[Int]]) { one(_).size } { l =>
+   *     l.size
+   *   }
+   *</code>
+   */
+  def expect[T](c: Class[T])(f: T => Any): ExpectBlock[T] = ExpectBlock(mock(c), f)
+  case class ExpectBlock[T](mock: T, f: T => Any) {
+    def in(f2: T => Any) = isExpecting(mock)(f)(f2)
+  }
+  private def isExpecting[T](m: T)(f: T => Any)(f2: T => Any): Any = {
+    expect { f(m).isAssertion }
+    f2(m)
+  }
+  /** 
+   * Extends Class objects with the one-liner <code>expects</code>
+   * Usage:<code>  
+   *   classOf[List[Int]].expect { one(_).size } { l =>
+   *     l.size
+   *   }
+   *</code>
+   */
+  implicit def classToMock[T](c: Class[T]) = ClassToMock(c)
+  /** 
+   * Extends Class objects with the one-liner <code>expects</code>
+   * Usage:<code>  
+   *   classOf[List[Int]].expect { one(_).size } { l =>
+   *     l.size
+   *   }
+   *</code>
+   */
+  case class ClassToMock[T](c: Class[T]) {
+    private def block(f: T => Any) = ExpectBlock(mock(c), f)
+    def expects(f: T => Any) = block(f)
+    def expectsOne(f: T => Any) = block((m:T) => f(one(m)))
+    def expectsAtLeast(i: Int)(f: T => Any) = block((m:T) => f(atLeast(i).of(m)))
+    def expectsAtMost(i: Int)(f: T => Any) = block((m:T) => f(atMost(i).of(m)))
+    def expectsExactly(i: Int)(f: T => Any) = block((m:T) => f(exactly(i).of(m)))
+    def expectsBetween(min: Int, max: Int)(f: T => Any): ExpectBlock[T] = block((m:T) => f(between(min, max).of(m)))
+    def expectsBetween(range: Range)(f: T => Any): ExpectBlock[T] = expectsBetween(range.start, range.end)(f)
+    def allows[S](mockObjectMatcher: Matcher[S]): ExpectBlock[T] = block((m:T) => outer.allowing(mockObjectMatcher))
+    /** allowing any calls to a mock with method names like the passed parameter, returning default values */
+    def allowsMatch(methodName: String) = block((m:T) => outer.allowingMatch(m, methodName))
+    /** allowing any calls to the mock */
+    def isAllowed = block((m:T) => outer.allowing(m))
+    /** ignoring any calls to the mock, returning default values */
+    def isIgnored =  block((m:T) => outer.ignoring(m))
+    /** ignoring any calls to the mock, returning default values */
+    def ignores[S](mockObjectMatcher: Matcher[S]) = block((m:T) => outer.ignoring(mockObjectMatcher))
+    /** ignoring any calls to the mock with method names like the passed parameter, returning default values */
+    def ignoresMatch(methodName: String) = block((m:T) => outer.ignoringMatch(m, methodName))
+    /** forbidding any calls to the mock */
+    def neverExpects(f: T => Any) = block((m:T) => f(outer.never(m)))
+
+  }
 }
 
 /**
@@ -474,12 +530,28 @@ trait JMockerContext extends Imposterizer {
  * This trait allows to mock classes instead of interfaces only. This will require the cglib and objenesis libraries on the path. 
  */
 trait ClassMocker extends Imposterizer {
-  override def createMockery = new Mockery() { setImposteriser(ClassImposteriser.INSTANCE) }
+  override def newMockery = new Mockery() { setImposteriser(ClassImposteriser.INSTANCE) }
 }
 
+/** 
+ * Naming scheme adding a number to each anonymous mock 
+ */
+class CountingNamingScheme extends org.jmock.api.MockObjectNamingScheme {
+  private val camelCaseNamingScheme = new org.jmock.lib.CamelCaseNamingScheme
+  private var counter = 1
+  def defaultNameFor(typeToMock: Class[_]) = { 
+    var name = camelCaseNamingScheme.defaultNameFor(typeToMock)
+    if (counter > 1) {
+      name = (name + " " + counter)
+    }
+    counter += 1; 
+    name
+  }
+}
 /** 
  * Abstract trait for creating a mocking context. By default, only allows to mock interfaces 
  */
 trait Imposterizer {
-  def createMockery = new Mockery
+  def createMockery = { val mockery = newMockery; mockery.setNamingScheme(new CountingNamingScheme); mockery }
+  def newMockery = new Mockery
 }

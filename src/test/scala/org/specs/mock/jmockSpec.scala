@@ -199,6 +199,21 @@ object jmockGoodSpec extends Mocked {
       }
       mockSpec.assertionsNb must_== 2
     }
+    "provide a one-liner expression for expectations" in {
+      expect(classOf[ToMock]) { one(_).isEmpty } in { _.isEmpty }
+    }
+    "provide a one-liner expression for expectations, adding an 'expects' method on Classes returning a mock" in {
+      classOf[ToMock].expects(one(_).isEmpty willReturn false) in { _.isEmpty must beFalse}
+    }
+    "provide a one-liner expression for expectations, adding an 'expectsOne' method on Classes returning a mock" in {
+      classOf[ToMock].expectsOne(_.isEmpty) in { _.isEmpty }
+    }
+    "provide a one-liner expression for expectations, adding an 'neverExpects' method on Classes returning a mock" in {
+      classOf[ToMock].neverExpects(_.isEmpty) in { (m: ToMock) => }
+    }
+    "provide a one-liner expression for expectations, adding an 'isIgnored' method on Classes returning a mock" in {
+      classOf[ToMock].isIgnored in { _.isEmpty2 }
+    }
   }
 }
 object jmockBadSpec extends BadMocked {
@@ -280,6 +295,10 @@ trait BadMocked extends Mocked {
   }
 }
 trait Mocked extends Specification with JMocker with ExampleLifeCycle with ClassMocker {
+  class ToMock {
+    def isEmpty = true
+    def isEmpty2 = false
+  }
 
   var list: java.util.List[Object] = _
   var scalaList: List[String] = Nil
