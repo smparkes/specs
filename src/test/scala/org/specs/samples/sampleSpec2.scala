@@ -1,5 +1,6 @@
 package org.specs.samples
 import org.specs._
+import org.specs.specification._
 
 object sampleSpec2 extends Specification {
   "A sample specification2" should {
@@ -13,9 +14,11 @@ class helloWorldTest extends JUnit4(helloWorld)
 object helloWorld extends Specification("Hello world") {
   "'hello world' has 11 characters" in {
      "hello world".size mustBe 11
+    1 must_== 1
   }
   "'hello world' matches 'h.* w.*'" in {
     "hello world" must beMatching("h.* w.*")
+    detailedDiffs
   }
 }
 import org.specs.mock._

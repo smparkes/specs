@@ -28,6 +28,9 @@ trait SpecsMatchers extends Matchers with AssertFactory with DefaultAssertionLis
  *
  */
 abstract class Specification extends Matchers with AssertFactory with Application with Contexts { outer =>
+  implicit var d: Detailed = noDetails()
+  def detailedDiffs = { d = fullDetails() }
+
   /** nested reporter so that a specification is executable on the console */
   private val reporter = new ConsoleRunner(this)
 

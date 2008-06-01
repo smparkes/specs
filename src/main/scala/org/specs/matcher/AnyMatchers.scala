@@ -4,6 +4,7 @@ import org.specs.specification._
 import org.specs.matcher.MatcherUtils.{q, matches}
 import org.specs.matcher.PatternMatchers._
 import org.specs.ExtendedThrowable._
+import org.specs.util.EditDistance._
 import org.specs.collection.ExtendedIterable._
 import scala.collection.immutable.{Set => Removed}
 import scala.collection.Set
@@ -42,17 +43,22 @@ trait AnyMatchers {
   /**
    * Matches if (a == b)
    */   
-  def is_==(a: =>Any) = new Matcher[Any](){ 
+  def is_==(a: =>Any)(implicit d: Detailed) = new Matcher[Any](){ 
     def apply(v: =>Any) = {
-      val (x, y) = (a, v) 
-      ((x == y), q(y) + " is equal to " + q(x), q(y) + " is not equal to " + q(x))
+      val (x, y) = (a, v)
+      import org.specs.Products._
+      val failureMessage = d match {
+        case full: fullDetails => EditMatrix(q(y), q(x)).operations.toList.mkString(" is not equal to ")
+        case no: noDetails => q(y) + " is not equal to " + q(x)
+      }
+      ((x == y), q(y) + " is equal to " + q(x), failureMessage)
     }
   }
 
   /**
    * Alias of is_==
    */   
-  def be_==(a: =>Any) = is_==(a)
+  def be_==(a: =>Any)(implicit d: Detailed) = is_==(a)(d)
 
   /**
    * Matches if (a neq b)
@@ -62,12 +68,12 @@ trait AnyMatchers {
   /**
    * Matches if (a != b)
    */   
-  def is_!=(a: =>Any) = (is_==(a)).not 
+  def is_!=(a: =>Any)(implicit d: Detailed) = (is_==(a)(d)).not 
   
   /**
    * Matches if (a != b)
    */   
-  def be_!=(a: =>Any) = (is_==(a)).not 
+  def be_!=(a: =>Any)(implicit d: Detailed) = (is_==(a)(d)).not 
 
   /**
    * Matches if b is null
