@@ -137,6 +137,14 @@ object advancedFeatures extends SpecificationWithSamples {
           ex.subExamples must beLike { case Seq(subEx) => true }
       }
     }
+    "display detailled difference messages with the detailedDiff method" in {
+      val spec = oneEx(that.isKoWithDetailedDiffs) 
+      spec.failures.first.message must_== "'hel(l)o' is not equal to 'hel(t)o'"
+    }
+    "display detailled difference messages with with other difference separators than '(' and ')'" in {
+      val spec = oneEx(that.isKoWithDetailedDiffsAndAlternateSeparator) 
+      spec.failures.first.message must_== "'hel[l]o' is not equal to 'hel[t]o'"
+    }
   }
 }
 
@@ -146,6 +154,8 @@ trait SpecificationWithSamples extends Specification {
     val success = () => true mustBe true
     val failure1 = () => "ok" mustBe "first failure"
     val failure2 = () => "ok" mustBe "second failure"
+    val detailedFailure = () => {detailedDiffs; "hello" must_== "helto"}
+    val detailedFailureWithAlternateSeparator = () => {detailedDiffs("[]"); "hello" must_== "helto"}
     val failMethod = () => fail("failure with the fail method")
     val failMethodWithNoArgument = () => fail
     val skipMethod = () => skip("skipped with the skip method")
@@ -153,9 +163,10 @@ trait SpecificationWithSamples extends Specification {
     def assertions(behaviours: List[that.Value]) = behaviours map { case that.isOk => success
                                       case that.isKo => failure1
                                       case that.isSkipped => skipMethod
-                                      case that.isKoTwice => () => {failure1(); failure2()} 
                                       case that.isKoWithTheFailMethod => failMethod 
                                       case that.isKoWithTheFailMethodWithNoArgument => failMethodWithNoArgument 
+                                      case that.isKoWithDetailedDiffs => detailedFailure 
+                                      case that.isKoWithDetailedDiffsAndAlternateSeparator => detailedFailureWithAlternateSeparator 
                                       case that.throwsAnException => exception }
   }
   object specification extends Specification
@@ -176,13 +187,13 @@ trait SpecificationWithSamples extends Specification {
   case class oneEx(behaviours: List[(that.Value)]) extends TestSpec {
     "This system under test" can {
       "have example 1 ok" in {
-        assertions(behaviours) foreach {_.apply}
+        assertions(behaviours).foreach { _.apply }
       }
     }
   }
   case class SpecWithTwoEx(behaviours1: List[(that.Value)], behaviours2: List[(that.Value)]) extends TestSpec {
     "This system under test" should {
-      "have example 2.1 ok" in { assertions(behaviours1).head.apply}
+      "have example 2.1 ok" in { assertions(behaviours1).head.apply }
       "have example 2.2 ok" in { assertions(behaviours2).last.apply }
     }
   }
@@ -200,7 +211,10 @@ trait SpecificationWithSamples extends Specification {
   }
 }
 object that extends Enumeration {
-  val isKo, isOk, isSkipped, isKoTwice, isKoWithTheFailMethod, isKoWithTheFailMethodWithNoArgument, throwsAnException = Value
+  val isKo, isOk, isSkipped, isKoTwice, isKoWithTheFailMethod, 
+      isKoWithDetailedDiffs, 
+      isKoWithDetailedDiffsAndAlternateSeparator, 
+      isKoWithTheFailMethodWithNoArgument, throwsAnException = Value
 }
 
 

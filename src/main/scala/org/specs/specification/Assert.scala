@@ -61,9 +61,6 @@ class Assert[T](value: => T) extends Assertable[T] {
   /** alias for <code>must is_==(other)</code>  */
   def mustEqual(otherValue: Any)(implicit details: Detailed) = must(is_==(otherValue)(details))
 }
-abstract class Detailed
-case class noDetails extends Detailed
-case class fullDetails extends Detailed
 /** RuntimeException carrying a matcher ko message */
 case class FailureException(message: String) extends RuntimeException(message)
 

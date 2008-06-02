@@ -1,6 +1,7 @@
 package org.specs.mock
 import org.specs._
 import org.specs.runner._
+import org.specs._
 
 class CountingNamingSchemeTest extends JUnit4(countingNamingSchemeSpec)
 object countingNamingSchemeSpec extends NamingSchemeContext {

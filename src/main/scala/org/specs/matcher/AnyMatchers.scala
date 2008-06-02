@@ -48,7 +48,7 @@ trait AnyMatchers {
       val (x, y) = (a, v)
       import org.specs.Products._
       val failureMessage = d match {
-        case full: fullDetails => EditMatrix(q(y), q(x)).operations.toList.mkString(" is not equal to ")
+        case full: fullDetails => EditMatrix(q(y), q(x)).showDistance(full.separators).toList.mkString(" is not equal to ")
         case no: noDetails => q(y) + " is not equal to " + q(x)
       }
       ((x == y), q(y) + " is equal to " + q(x), failureMessage)

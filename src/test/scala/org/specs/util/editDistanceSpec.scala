@@ -6,6 +6,11 @@ import org.specs.matcher._
 
 class editDistanceTest extends JUnit4(editDistanceSpec)
 object editDistanceSpec extends Specification with EditDistance {
+  "The edit distance" should {
+    "return 0 if there's no insertions" in {
+      editDistance("kitte", "kitte") must_== 0
+    }
+  }
   "The show distance" should {
     "work on insertions" in {
       editDistance("kitte", "kittei") must_== 1
@@ -20,6 +25,9 @@ object editDistanceSpec extends Specification with EditDistance {
     "work on substitutions" in {
      editDistance("kitten", "kitsin") must_== 2
      showDistance("kitten", "kitsin") must_== ("kit(te)n", "kit(si)n")
+    }
+    "not show any difference for the same string" in {
+      showDistance("kitte", "kitte") must_== ("kitte", "kitte")
     }
   }
 }

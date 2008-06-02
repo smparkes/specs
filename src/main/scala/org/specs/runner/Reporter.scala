@@ -7,6 +7,7 @@ import org.specs.util.SimpleTimer
 import org.specs.io._
 import java.util.Calendar
 import org.specs.ExtendedThrowable._
+import org.specs.specification._
 
 /**
  * Generic trait for reporting the result of a list of specifications
