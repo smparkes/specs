@@ -162,6 +162,7 @@ trait SpecificationWithSamples extends Specification {
     val exception = () => error("new Error")
     def assertions(behaviours: List[that.Value]) = behaviours map { case that.isOk => success
                                       case that.isKo => failure1
+                                      case that.isKoTwice => () => { failure1(); failure2() }
                                       case that.isSkipped => skipMethod
                                       case that.isKoWithTheFailMethod => failMethod 
                                       case that.isKoWithTheFailMethodWithNoArgument => failMethodWithNoArgument 

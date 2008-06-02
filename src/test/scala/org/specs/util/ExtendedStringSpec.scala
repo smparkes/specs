@@ -13,5 +13,15 @@ object ExtendedStringSpec extends Specification {
       "H".uncapitalize must_== "h"     
     }
   }
-
+  "the removeAll function" should {
+    "remove a simple character" in {
+      "hello".removeAll("l") must_== "heo"
+    }
+    "remove two characters" in {
+      "hello".removeAll("lo") must_== "hel"
+    }
+    "remove regexp characters" in {
+      "he(l)(l)o".removeAll(")(") must_== "he(ll)o"
+    }
+  }
 }
