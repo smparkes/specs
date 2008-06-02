@@ -103,7 +103,7 @@ abstract class Specification extends Matchers with AssertFactory
 /**
  * This trait can be reused in any test based framework to access Matchers functionalities
  */
-trait SpecsMatchers extends Matchers with AssertFactory with DefaultAssertionListener
+trait SpecsMatchers extends Matchers with AssertFactory with DefaultAssertionListener with DetailedFailures 
 
 /** utility object to indent a string with 2 spaces */
 object SpecUtils {
