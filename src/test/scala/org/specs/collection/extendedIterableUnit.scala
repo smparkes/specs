@@ -15,9 +15,14 @@ object extendedIterableUnit extends Specification with Sugar with Scalacheck {
     }
   }
   "A sameElementsAs function" should {
-    val sameIterables = for (i1 <- listOf(elements(1, 2, 3, listOf(elements(1, 2, 3))));
-                             val i2 = i1.scramble)
-                          yield (i1, i2)
+    val sameIterables = for (i0 <- listOf(elements(1, 2, 3));
+                             i1 <- listOf(elements(1, 4, 5, i0));
+                             i2 <- listOf(elements(i0, i1, 2, 3));
+                             val i3 = i2.scramble)
+                          yield (i2, i3)
+    "match deeply nested lists with the same elements but in a different order" in {
+      List(1, List(2, 3, List(4)), 5) must haveSameElementsAs(List(5, List(List(4), 2, 3), 1))
+    }
     "return true if the 2 iterables are the same" in {
       sameIterables must pass { t: (Iterable[Any], Iterable[Any]) => val (i1, i2) = t
         i1 must haveSameElementsAs(i2)

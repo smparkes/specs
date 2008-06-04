@@ -67,8 +67,12 @@ object ExtendedIterable {
         case (a: anyIterable, b: anyIterable) => {
           if (a.firstOption.isDefined && b.firstOption.isDefined) {
             val (x, y, resta, restb) = (a.head, b.head, a.drop(1), b.drop(1))
-            ((f(x, y)) && (resta sameElementsAs restb)) || 
-            ((resta.exists(f(_, y))  && restb.exists(f(_, x))) && (resta.removeFirst(f(_, y)) sameElementsAs restb.removeFirst(f(_, x))))
+            val testXandY = (x, y)  match {
+              case (u: Iterable[A], v: Iterable[A]) => u.sameElementsAs(v, f)
+              case _ => f(x, y) 
+            }
+            (testXandY && resta.sameElementsAs(restb, f)) || 
+            (resta.exists(f(_, y)) && restb.exists(f(_, x)) && resta.removeFirst(f(_, y)).sameElementsAs(restb.removeFirst(f(_, x)), f))
           }
           else
             false
