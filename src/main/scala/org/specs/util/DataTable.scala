@@ -9,19 +9,19 @@ import org.specs.specification.FailureException
  */
 trait DataTables {
   /**
-   * @returns a table header which first column is the string <code>a</code> 
+   * @return a table header which first column is the string <code>a</code> 
    */
   implicit def toTableHeader(a: String) = TableHeader(List(a))
 
   /**
-   * @returns a table row whose type will be <code>T</code> for each element and
+   * @return a table row whose type will be <code>T</code> for each element and
    * which starts with <code>a</code> as the first element 
    */
   implicit def toDataRow[T](a: T) = DataRow1(a)
 }
 
 /**
- * The TableHeader case class models the header of a data table which should be a list of strings
+ * The TableHeader case class models the header of a data table which should be a list of strings.<p>
  * A header can be created using the | operator a separator between strings<pre>
  * "a" | "b" | "c = a + b"|
  * </pre>
@@ -61,7 +61,7 @@ case class TableHeader(h: List[String]) {
 }
 
 /**
- * The DataRow and DataTable classes are created with the following Ruby script:
+ * The DataRow and DataTable classes are created with the following Ruby script:<p><pre>
  * N=20
  * def types(n)
  *   (1..n).map{|i| "T#{i-1}"}.join(", ")
@@ -159,7 +159,7 @@ case class TableHeader(h: List[String]) {
  * puts datarow
  * puts datatable
  * puts datarows
- * 
+ * </pre>
  * 
  */
 
@@ -189,13 +189,13 @@ trait ExecutableDataTable {
 
 /**
  * A DataTable contains: a header describing the columns, datarows containing values, a function to execute on each row
- * In the following example of a DataTable:<pre>
+ * In the following example of a DataTable:<code>
  * val datatable = "a" | "b" | "c = a + b" |>
  *                  1  !  2  !     3       | 
  *                  2  !  2  !     4       | 
  *                  3  !  2  !     5       | {
  *                (a: Int, b: Int, c: Int) => c must_== calc.add(a, b)
- *                 } </pre>
+ *                 } </code>
  * The header defines 3 columns, there are 3 rows of type (Int, Int, Int) and a function taking its values in each row.
  * The '>' sign added to the header means that the function will be executed on each row when the table is defined. The result
  * of the execution will be available via a <code>results</code> function returning a string.<p>

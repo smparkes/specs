@@ -59,6 +59,13 @@ object ExtendedIterable {
      * @return true if the 2 iterables contain the same elements (according to a comparision function f) recursively, in any order 
      */
     def sameElementsAs(that: Iterable[A], f: (A, A) => Boolean): Boolean = {
+	  	def matchTwo(x: Any, y: Any): Boolean = {
+				(x, y) match {
+					case (a: Iterable[A], b:Iterable[A]) => a.sameElementsAs(b, f)
+					case (a: A, b: A) => f(a, b)
+					case _ => false
+				}
+	  	}
       val ita = xs.elements.toList
       val itb = that.elements.toList
       var res = true
@@ -71,8 +78,8 @@ object ExtendedIterable {
               case (u: Iterable[A], v: Iterable[A]) => u.sameElementsAs(v, f)
               case _ => f(x, y) 
             }
-            (testXandY && resta.sameElementsAs(restb, f)) || 
-            (resta.exists(f(_, y)) && restb.exists(f(_, x)) && resta.removeFirst(f(_, y)).sameElementsAs(restb.removeFirst(f(_, x)), f))
+            (testXandY && resta.sameElementsAs(restb, f)) ||
+            (resta.exists(matchTwo(_, y)) && restb.exists(matchTwo(_, x)) && resta.removeFirst(matchTwo(_, y)).sameElementsAs(restb.removeFirst(matchTwo(_, x)), f))
           }
           else
             false
