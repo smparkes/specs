@@ -59,7 +59,7 @@ object ExtendedIterable {
      * @return true if the 2 iterables contain the same elements (according to a comparision function f) recursively, in any order 
      */
     def sameElementsAs(that: Iterable[A], f: (A, A) => Boolean): Boolean = {
-	  	def matchTwo(x: Any, y: Any): Boolean = {
+	  	def matchTwo(x: A, y: A): Boolean = {
 				(x, y) match {
 					case (a: Iterable[A], b:Iterable[A]) => a.sameElementsAs(b, f)
 					case (a: A, b: A) => f(a, b)
