@@ -11,9 +11,9 @@ import org.specs.log.Log
 object fs extends FileSystem
 
 /**
- * The FileSystem trait abstract file system operations to allow easier mocking of file system related operations.
+ * The FileSystem trait abstracts file system operations to allow easier mocking of file system related functionalities.
  * <p>
- * It mixes the <code>FileReader</code> and <code>FileWrite</code> traits to provide easy read/write operations to files  
+ * It mixes the <code>FileReader</code> and <code>FileWriter</code> traits to provide easy read/write operations.  
  */
 trait FileSystem extends FileReader with FileWriter with JavaConversions {
   object logger extends Log with ConsoleOutput
@@ -35,7 +35,7 @@ trait FileSystem extends FileReader with FileWriter with JavaConversions {
    * @param file current file being examined
    * @param pattern regular expression which should be matching the file path
    */
-  def collectFiles(result: Queue[String], file: File, pattern: String): Unit = {
+  private def collectFiles(result: Queue[String], file: File, pattern: String): Unit = {
     logger.debug("try to accept " + file.getPath.replace("\\", "/") + " with " + pattern)
     if (file.isFile && file.getPath.replace("\\", "/").matches(pattern)) {
       logger.debug("got a match")

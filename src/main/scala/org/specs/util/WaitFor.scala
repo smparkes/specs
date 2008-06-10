@@ -2,10 +2,10 @@ package org.specs.util
 import java.util.concurrent.TimeUnit._
 
 /** 
- * The WaitFor trait can be used to add some Thread.sleep instructions to an executed specificiation.
- * Usage:<code>
+ * The WaitFor trait can be used to add some Thread.sleep instructions to an executed specification.<p>
+ * Usage:<pre>
  * waitFor(10.ms) // wait for 10 milliseconds
- * </code>
+ * </pre>
  */
 trait WaitFor {
   /** 

@@ -53,5 +53,25 @@ object objectMatchersSpec extends MatchersSpecification {
       assertion(nullString must beAlsoNull("not null")) must failWith("'not null' is not null")
       assertion("not null" must beAlsoNull(nullString)) must failWith("'not null' is not null")
     }
+    "provide a haveClass matcher checking if any.getClass == c" in {
+      val a: Any = 1
+      a must haveClass(classOf[Integer])
+      assertion(a must haveClass(classOf[String])) must failWith("'1' doesn't have class 'java.lang.String' but 'java.lang.Integer'")
+    }
+    "provide a haveClass matcher checking if any.getClass == c - with String" in {
+      val a: Any = "string"
+      a must haveClass(classOf[String])
+      assertion(a must haveClass(classOf[Integer])) must failWith("'string' doesn't have class 'java.lang.Integer' but 'java.lang.String'")
+    }
+    "provide a haveSuperClass matcher checking if c isAssignableFrom any.getClass" in {
+      val a: Any = new java.io.FileOutputStream(new java.io.FileDescriptor) { override def toString = "FileOutputStream"}
+      a must haveSuperClass(classOf[java.io.OutputStream])
+      assertion(a must haveSuperClass(classOf[java.lang.String])) must failWith("'FileOutputStream' doesn't have super class 'java.lang.String'")
+    }
+    "provide a beAssignableFrom matcher checking if any.getClass isAssignableFrom c" in {
+      val a: Object = new java.io.FileOutputStream(new java.io.FileDescriptor)
+      classOf[java.io.OutputStream] must beAssignableFrom(a.getClass)
+      assertion(classOf[java.io.OutputStream] must beAssignableFrom(classOf[String])) must failWith("'java.io.OutputStream' is not assignable from 'java.lang.String'")
+    }
   }   
 }

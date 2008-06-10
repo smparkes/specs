@@ -3,7 +3,7 @@ import java.util.ArrayList
 object JavaCollectionsConversion extends JavaConversions
 
 /**
- * This trait provides some implicit conversions between some java collections (Vector, Enumeration and Array) to List
+ * This trait provides some implicit conversions between Java collections and scala.collection.List
  */
 trait JavaConversions {
   /**

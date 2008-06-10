@@ -195,7 +195,54 @@ trait AnyMatchers {
         (isThrown(value, exception, (e => e == exception)).isDefined, exception + " was thrown", exception + " should have been thrown")
     }
   }
-    
+  
+  /**
+   * Matches if v.getClass == c
+   */   
+  def haveClass[T](c: Class[T]) = new Matcher[Any](){
+    def apply(v: =>Any) = {
+      val x: Any = v
+      val xClass = x.asInstanceOf[java.lang.Object].getClass
+      (xClass == c, q(x) + " has class" + q(c.getName), q(x) + " doesn't have class " + q(c.getName) + " but " + q(xClass.getName))
+    } 
+  } 
+
+  /**
+   * Matches if v.getClass != c
+   */   
+  def notHaveClass[T](c: Class[T]) = haveClass(c).not
+
+  /**
+   * Matches if v.isAssignableFrom(c)
+   */   
+  def beAssignableFrom[T](c: Class[T]) = new Matcher[Class[_]](){
+    def apply(v: =>Class[_]) = {
+      val x: Class[_] = v
+      (x.isAssignableFrom(c), q(x.getName) + " is assignable from " + q(c.getName), q(x.getName) + " is not assignable from " + q(c.getName))
+    } 
+  } 
+
+  /**
+   * Matches if v.isAssignableFrom(c)
+   */   
+  def notBeAssignableFrom[T](c: Class[T]) = beAssignableFrom(c).not
+
+  /**
+   * Matches if c.isAssignableFrom(v)
+   */   
+  def haveSuperClass[T](c: Class[T]) = new Matcher[Any](){
+    def apply(v: =>Any) = {
+      val x: Any = v
+      val xClass = x.asInstanceOf[java.lang.Object].getClass
+      (c.isAssignableFrom(xClass), q(x) + " has super class" + q(c.getName), q(x) + " doesn't have super class " + q(c.getName))
+    } 
+  } 
+
+  /**
+   * Matches if c.isAssignableFrom(v)
+   */   
+  def notHaveSuperClass[T](c: Class[T]) = haveSuperClass(c).not
+
   /**
    * @returns an Option with the expected exception if it satisfies function <code>f</code>
    * <br>rethrows the exception otherwise

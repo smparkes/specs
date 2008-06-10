@@ -1,16 +1,23 @@
 package org.specs
+/**
+ * The Products object allows the following declarations:<ul>
+ *   <li>val list0 = ()
+ *   <li>val list1 = ("a")
+ *   <li>val list2 = ("a", "b")</ul>
+ */
 object Products extends Products
+/**
+ * The Products trait allows the following declarations:<ul>
+ *   <li>val list0 = ()
+ *   <li>val list1 = ("a")
+ *   <li>val list2 = ("a", "b")</ul>
+ *  Produced with the following ruby code:<pre>
+ *   (1..19).each do |i|
+ *     puts "implicit def productToList#{i}[T](t: Product#{i}[#{(1..i).map{|x|"T"}.join(", ")}]) = List(#{(1..i).map {|j| "t._" + j.to_s}.join(", ")})"
+ *    end
+ *   </pre>
+ */
 trait Products {
-  /**
-    This allows the following declarations:<ul>
-    <li>val list0 = ()
-    <li>val list1 = ("a")
-    <li>val list2 = ("a", "b")</ul>
-    Produced with the following ruby code:
-    (1..19).each do |i|
-      puts "implicit def productToList#{i}[T](t: Product#{i}[#{(1..i).map{|x|"T"}.join(", ")}]) = List(#{(1..i).map {|j| "t._" + j.to_s}.join(", ")})"
-     end
-  */
   implicit def unitToList(a: Unit) = List()
   implicit def anyToList[T](a: T) = List[T](a)
   implicit def productToList1[T](t: Product1[T]) = List(t._1)

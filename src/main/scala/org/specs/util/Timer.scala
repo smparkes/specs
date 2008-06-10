@@ -1,14 +1,37 @@
 package org.specs.util
 import java.util.Calendar
 
+/**
+ * This trait provides Timer functionalities based on the Java Calendar milliseconds
+ */
 trait HmsTimer extends Timer {
+  /** elapsed time since the last stop */
   var elapsed = 0L
+
+  /** current number of millis when instantiating the object using this Trait */
   var millis = Calendar.getInstance.getTime.getTime
-  def stop = { 
+
+  
+  /** 
+   * restarts the Timer with no elapsed time
+   */
+  def restart = {
+    elapsed = 0L
+    millis = Calendar.getInstance.getTime.getTime
+  }
+
+  /** 
+   * Stop the timer, store the number of elapsed millis and return a String representing the time as hour/minute/second/ms
+   * @return the elapsed time as a String
+   */
+  def stop: String = { 
     elapsed = Calendar.getInstance.getTime.getTime - millis
     preciseTime
   }
     
+  /** 
+   * @return a tuple with the elapsed hours, minutes, seconds and millis 
+   */
   def hourMinutesSecondsMillis = {
     var totalMillis = elapsed
     val hours = totalMillis / 1000 / 3600
@@ -20,7 +43,10 @@ trait HmsTimer extends Timer {
     (hours, minutes, seconds, millis)
   }
   
-  def hms = {
+  /** 
+   * @return a formatted string showing the hours, minutes and seconds 
+   */
+  def hms: String = {
     val (hours, minutes, seconds, millis) = hourMinutesSecondsMillis
     def plural(v: long) = if (v > 1) "s" else ""
     var result = ""
@@ -30,16 +56,26 @@ trait HmsTimer extends Timer {
     result
   }
   
-  def preciseTime = {
+  /** 
+   * @return a formatted string showing the hours, minutes, seconds and millis 
+   */
+  def preciseTime: String = {
     val (hours, minutes, seconds, millis) = hourMinutesSecondsMillis
     hms + ", " + millis + " ms"
   }
 }
 
+/** 
+ * The Timer trait acts as a simple stopwatch. It can be stopped to get the elapsed time as a formatted String.
+ */
 trait Timer {
   def stop: String
   def hms: String
+  def restart
 }
 
+/** 
+ * Default class for the HmsTimer trait
+ */
 class SimpleTimer extends HmsTimer
 

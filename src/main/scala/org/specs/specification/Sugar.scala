@@ -1,9 +1,13 @@
 package org.specs
 
+/**
+ * Synctactic sugar for specifications. Since it makes heavy uses of implicit definitions,<br>
+ * The name reminds that it must be used with caution
+ */
 object Sugar extends Sugar
 
 /**
- * Synctactic sugar for specifications. Since it makes heavy uses of implicit definitions.<br>
+ * Synctactic sugar for specifications. Since it makes heavy uses of implicit definitions,<br>
  * The name reminds that it must be used with caution
  */
 trait Sugar extends Products {
@@ -14,10 +18,9 @@ trait Sugar extends Products {
   /** alias for the value false. Allows to write <code> myObject.status mustBe ko </code>*/
   val ko = false
 
-
   /** 
-   * This implicit definition allows to write short loops, ruby-style:<br>
-   * <code> 3.times { i => doThis() } </code>. <br>
+   * This implicit definition allows to write short loops, ruby-style:<br/>
+   * <code> 3.times { i => doThis() } </code>. 
    * Warning: an integer variable i must be declared otherwise there will be a runtime exception
    */
   implicit def integerToRange(n: Int): RangeInt = new RangeInt(n)
@@ -26,8 +29,8 @@ trait Sugar extends Products {
   }
   
   /** 
-   * This implicit definition allows to print any object to the console with:<br>
-   * <code> myObject.pln </code> or <code> myObject.println </code>  
+   * This implicit definition allows to print any object to the console with:<br/>
+   * <code>myObject.pln</code> or <code>myObject.println</code>  
    */
   implicit def anyPrintable[T](a: T) = new Printable(a)
   class Printable[T](a: T){

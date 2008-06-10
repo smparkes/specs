@@ -106,10 +106,10 @@ trait MockOutput extends Output {
   /** list of messages representing the output */
   val messages : Queue[String] = new Queue[String]
 
-  /** adds m.toString to a list of messages */
+  /** adds <code>m.toString</code> to a list of messages */
   override def println(m : Any) : Unit = messages += m.toString
 
-  /** prints several objects according to a format string (see Console.printf) */
+  /** prints several objects according to a format string (see <code>Console.printf</code>) */
   override def printf(format: String, args: Any*) = messages += (format + ":" + args)
 
   /** doesn't flush */
@@ -120,7 +120,7 @@ trait MockOutput extends Output {
 }
 
 /**
- * The MockWriter writes all the content written with the Writer interface to a Queue of Strings
+ * The MockWriter writes all the content written with the Writer interface to the <code>messages: Queue[String]</code> attribute.
  */
 trait MockWriter extends java.io.Writer {
 

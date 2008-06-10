@@ -2,7 +2,7 @@ package org.specs.io;
 import java.io._
 
 /**
- * The FileReader trait provides a simple function to read a String from a file
+ * The FileReader trait provides functions to read files
  */
 trait FileReader {
 

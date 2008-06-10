@@ -379,8 +379,9 @@ trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockAc
    *</code>
    */
   def expect[T](c: Class[T])(f: T => Any): ExpectBlock[T] = ExpectBlock(mock(c), f)
-  case class ExpectBlock[T](mock: T, f: T => Any) {
-    def in(f2: T => Any) = isExpecting(mock)(f)(f2)
+  case class ExpectBlock[T](mocked: T, f: T => Any) {
+    def in(f2: T => Any) = isExpecting(mocked)(f)(f2)
+    def mock: T = isExpecting(mocked)(f)(t => t).asInstanceOf[T]
   }
   private def isExpecting[T](m: T)(f: T => Any)(f2: T => Any): Any = {
     expect { f(m).isAssertion }

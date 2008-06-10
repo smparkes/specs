@@ -1,8 +1,8 @@
 package org.specs
 
 /**
- * Those functions are added to the Function 0..9 Traits in the standard Scala distribution
- * The code is generated with the following Ruby script:
+ * The Function10 to Function20 traits are a complement to the exising Function0 to 9 traits in the standard Scala distribution.<p>
+ * The code is generated with the following Ruby script:<pre>
  * N=20
  * def values_decl(n)
  *   (1..n).map{|i| "v#{i-1}: T#{i-1}"}.join(", ")
@@ -15,6 +15,7 @@ package org.specs
  * end
  * functions = (10..N).map{|i| Function(i)}.join("\n")
  * puts functions
+ * </pre>
  */
 trait Function10[-T0, -T1, -T2, -T3, -T4, -T5, -T6, -T7, -T8, -T9, +R] extends AnyRef {
   def apply(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4, v5: T5, v6: T6, v7: T7, v8: T8, v9: T9): R

@@ -1,9 +1,35 @@
 package org.specs.util
 import org.specs.util.ExtendedString._
+
+/** 
+ * The EditDistance object provides methods to compute and display the shortest distance between 2 strings.<p>
+ * Usage:<pre>
+ * showDistance("kitten", "sitting") // returns ("(k)itt(e)n", "(s)itt(i)n(g)")
+ * 
+ * // with different separators
+ * showDistance("kitten", "sitting", "[]") // returns ("[k]itt[e]n", "[s]itt[i]n[g]")
+ * </pre>
+ */
 object EditDistance extends EditDistance
+
+/** 
+ * The EditDistance trait provides methods to compute and display the shortest distance between 2 strings.<p>
+ * Usage:<pre>
+ * showDistance("kitten", "sitting") // returns ("(k)itt(e)n", "(s)itt(i)n(g)")
+ * 
+ * // with different separators
+ * showDistance("kitten", "sitting", "[]") // returns ("[k]itt[e]n", "[s]itt[i]n[g]")
+ * </pre>
+ */
 trait EditDistance {
+  /**
+   * Class encapsulating the functions related to the edit distance of 2 strings
+   */
   case class EditMatrix(s1: String, s2: String) {
+    /* matrix containing the edit distance for any prefix of s1 and s2: matrix(i)(j) = edit distance(s1[0..i], s[0..j])*/
     val matrix = new Array[Array[int]](s1.length + 1, s2.length + 1)
+
+    /* initializing the matrix */
     for (i <- 0 to s1.length;
          j <- 0 to s2.length) {
       if (i == 0) matrix(i)(j) = j // j insertions
@@ -13,7 +39,10 @@ trait EditDistance {
                               matrix(i)(j - 1) + 1) // insertion
     
     }
+    /** @return the edit distance between 2 strings */
     def distance = matrix(s1.length)(s2.length)
+
+    /** prints the edit matrix of 2 strings */
     def print = { 
       for (i <- 0 to s1.length) {
         def row = for (j <- 0 to s2.length) yield matrix(i)(j)
@@ -21,7 +50,17 @@ trait EditDistance {
       }
       this
     }
+
+    /** @return a (String, String) displaying the differences between each input strings. The used separators are parenthesis: '(' and ')'*/
     def showDistance: (String, String) = showDistance("()") 
+
+    /**
+     * @param sep separators used to hightlight differences. If sep is empty, then no separator is used. If sep contains 
+     * one character, it is taken as the unique separator. If sep contains 2 or more characters, the first 2 characters are taken as
+     * opening separator and closing separator.
+     * 
+     * @return a (String, String) displaying the differences between each input strings. The used separators are specified by the caller.<p>
+     */
     def showDistance(sep: String) = {
       val (firstSeparator, secondSeparator) = separators(sep)
 	  def modify(s: String, c: Char): String = modifyString(s, c.toString)
@@ -56,12 +95,24 @@ trait EditDistance {
       else subst
     }
   }
+  /** @return the edit distance between 2 strings = the minimum number of insertions/suppressions/substitutions to pass from one string to the other */
   def editDistance(s1: String, s2: String): Int = EditMatrix(s1, s2).distance
-  def showMatrix(s1: String, s2: String) = EditMatrix(s1, s2).print
-  def showDistance(s1: String, s2: String) = EditMatrix(s1, s2).showDistance
-  def showDistance(s1: String, s2: String, sep: String) = EditMatrix(s1, s2).showDistance(sep)
-  def separators(s: String) = (firstSeparator(s), secondSeparator(s))
-  def firstSeparator(s: String) = if (s.isEmpty) "" else s(0).toString
-  def secondSeparator(s: String) = if (s.size < 2) firstSeparator(s) else s(1).toString
 
+  /** prints on the console the edit matrix for 2 strings */
+  def showMatrix(s1: String, s2: String) = EditMatrix(s1, s2).print
+
+  /** @return a (String, String) displaying the differences between each input strings. The used separators are parenthesis: '(' and ')'*/
+  def showDistance(s1: String, s2: String) = EditMatrix(s1, s2).showDistance
+  /**
+   * @param sep separators used to hightlight differences. If sep is empty, then no separator is used. If sep contains 
+   * one character, it is taken as the unique separator. If sep contains 2 or more characters, the first 2 characters are taken as
+   * opening separator and closing separator.
+   * 
+   * @return a (String, String) displaying the differences between each input strings. The used separators are specified by the caller.<p>
+   */
+  def showDistance(s1: String, s2: String, sep: String) = EditMatrix(s1, s2).showDistance(sep)
+
+  private def separators(s: String) = (firstSeparator(s), secondSeparator(s))
+  private def firstSeparator(s: String) = if (s.isEmpty) "" else s(0).toString
+  private def secondSeparator(s: String) = if (s.size < 2) firstSeparator(s) else s(1).toString
 }

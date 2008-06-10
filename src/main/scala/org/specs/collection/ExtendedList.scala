@@ -4,8 +4,8 @@ import scala.collection.immutable._
 /**
  * This object provides useful functions for Lists, like:<ul>
  * <li><code>everyOrder</code>: returns all permutations of the list elements 
- * <li><code>mix</code>: returns all the lists made by adding one element at any place of an existing list
- * <li><code>removeFirst</code>: returns a list minus the first elements matching a given element
+ * <li><code>mix</code>: from one list and one element, returns all the lists created by inserting this element in the original list
+ * <li><code>removeFirst</code>: returns a list minus the first element matching a given element according to a predicate
  * </ul>
  */
 object ExtendedList {
@@ -34,7 +34,8 @@ object ExtendedList {
    */
   class ExtendedList[T](l: List[T]) {
     /**
-     * @return a list minus the first element satisfying the predicateof lists containing permutations of the initial list
+     * remove the first element satifying the predicate
+     * @return a list minus the first element satisfying the predicate
      */
     def removeFirst(predicate: T => Boolean): List[T] = {
       l match {
@@ -45,7 +46,8 @@ object ExtendedList {
       }
     }
     /**
-     * @return a list minus the first occurence of the sublist
+     * remove the first occurence of <code>sublist</code> from this list
+     * @return a list minus the first occurence of a sublist
      */
     def removeFirstSeq(sublist: List[T]): List[T] = {
       l match {
@@ -67,7 +69,8 @@ object ExtendedList {
     }
 
     /**
-     * @return a map where all the keys are the list element and having a default value for all keys
+     * @param defaultValue default value for the map
+     * @return a map where the keys are the list elements and the values are set to <code>defaultValue</code>
      */
     def toMap[D](defaultValue: D): scala.collection.immutable.Map[T, D] = {
       var newMap: scala.collection.immutable.Map[T, D] = new HashMap[T, D]
@@ -80,5 +83,6 @@ object ExtendedList {
      */
     def scramble = l.sort((a, b) => (new java.util.Random).nextInt(1) > 0)
   }
+  /** @return an ExtendedList object with more functionalities */
   implicit def listToExtendedList[T](l: List[T]) = new ExtendedList(l)
 }

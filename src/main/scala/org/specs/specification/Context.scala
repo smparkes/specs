@@ -86,26 +86,32 @@ trait Contexts extends SpecificationStructure {
     } 
   }
 
-  /** Factory method to create contexts with before only actions */
+  /** Factory method to create a context with before only actions */
   def beforeContext(actions: => Any) = new Context { before(actions) }
 
-  /** Factory method to create contexts with before only actions and an until predicate */
+  /** Factory method to create a context with before only actions and an until predicate */
   def beforeContext(actions: => Any, predicate: =>Boolean) = new Context { before(actions); until(predicate()) }
 
-  /** Factory method to create contexts with after only actions */
+  /** Factory method to create a context with after only actions */
   def afterContext(actions: => Any) = new Context { after(actions) }
 
-  /** Factory method to create contexts with after only actions and an until predicate */
+  /** Factory method to create a context with after only actions and an until predicate */
   def afterContext(actions: => Any, predicate: =>Boolean) = new Context { after(actions); until(predicate()) }
 
-  /** Factory method to create contexts with after only actions */
+  /** Factory method to create a context with after only actions */
   def context(b: => Any, a: =>Any) = new Context { before(b); after(a) }
 
-  /** Factory method to create contexts with after only actions and an until predicate */
+  /** Factory method to create a context with after only actions and an until predicate */
   def context(b: => Any, a: =>Any, predicate: =>Boolean) = new Context { before(b); after(a); until(predicate()) }
 }
 /** 
- * Case class holding before and after functions to be set on a system under test
+ * Case class holding before and after functions to be set on a system under test.<p>
+ * Context objects are usually created using the factory methods of the Contexts trait:<pre>
+ * 
+ * // this method returns a context object which can be passed to a System under test (with "a system" ->(context) should {... )
+ * // so that initSystem is done before each example and so that each example is repeated until enoughTestsAreExecuted is true 
+ * beforeContext(initSystem).until(enoughTestsAreExecuted)
+ * </pre>
  */
 case class Context {
   var beforeActions: () => Any = () => () 
