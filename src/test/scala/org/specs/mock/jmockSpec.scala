@@ -214,6 +214,19 @@ object jmockGoodSpec extends Mocked {
     "provide a one-liner expression for expectations, adding an 'isIgnored' method on Classes returning a mock" in {
       classOf[ToMock].isIgnored in { _.isEmpty2 }
     }
+    "provide a one-liner expression for expectations, returning the mock object with 'mock'" in {
+      val mock = classOf[ToMock].expectsOne(_.isEmpty).mock
+      mock.isEmpty
+    }
+  }
+  val withMockInContext = new Context() {
+    var mock: ToMock = _
+    before(mock = classOf[ToMock].expectsOne(_.isEmpty).mock)
+  }
+  "The JMocker trait" ->-(withMockInContext) should {
+    "allow mocks to be declared in the sut context" in {
+      withMockInContext.mock.isEmpty
+    }
   }
 }
 object jmockBadSpec extends BadMocked {

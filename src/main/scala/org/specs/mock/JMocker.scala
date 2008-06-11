@@ -328,7 +328,25 @@ trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockAc
 
     /** set up a JMock action to be executed */
     def will(action: Action) = expectations.will(action)
+    
+    def willReturnParam[T](stored: StoredParam[T]) = will(stored.value)
+
   }
+  
+  def aParam[T](stored: StoredParam[T]) = stored.matcher
+  def aParam[T](stored: StoredParam[T], paramIndex: Int) = stored.matcher(paramIndex)
+  class StoredParam[T] extends org.hamcrest.TypeSafeMatcher[T]() {
+    private var storedValue: T = _
+    private var parameterIndex  = 0
+    def value = new ReturnValueAction[T]() {
+      override def invoke(i: Invocation) = i.getParameter(parameterIndex)
+    }
+    def matchesSafely(a: T): Boolean = { storedValue = a; true }
+    def describeTo(desc: Description) = {} 
+    def matcher = `with`(this)
+    def matcher(i: Int) = { parameterIndex = i; `with`(this) }
+  }
+
 
   /** set up a jMock action to be executed */
   def will(action: Action) = expectations.will(action)
