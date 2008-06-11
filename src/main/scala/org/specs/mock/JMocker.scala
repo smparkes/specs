@@ -329,22 +329,27 @@ trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockAc
     /** set up a JMock action to be executed */
     def will(action: Action) = expectations.will(action)
     
-    def willReturnParam[T](stored: StoredParam[T]) = will(stored.value)
+    def willReturn[T](stored: CaptureParam[T]) = will(stored.value)
 
   }
   
-  def aParam[T](stored: StoredParam[T]) = stored.matcher
-  def aParam[T](stored: StoredParam[T], paramIndex: Int) = stored.matcher(paramIndex)
-  class StoredParam[T] extends org.hamcrest.TypeSafeMatcher[T]() {
-    private var storedValue: T = _
+  def captureParam[T] = new CaptureParam[T]
+  def aParam[T](stored: CaptureParam[T], paramIndex: Int) = stored.capture(paramIndex)
+  class CaptureParam[T] extends org.hamcrest.TypeSafeMatcher[T]() {
+    private var capturedValue: T = _
     private var parameterIndex  = 0
+    private var function: Option[T => _] = None
     def value = new ReturnValueAction[T]() {
-      override def invoke(i: Invocation) = i.getParameter(parameterIndex)
+      override def invoke(i: Invocation) = function match {
+        case None => i.getParameter(parameterIndex)
+        case Some(f) => f(i.getParameter(parameterIndex).asInstanceOf[T])
+      }
     }
-    def matchesSafely(a: T): Boolean = { storedValue = a; true }
+    def matchesSafely(a: T): Boolean = { capturedValue = a; true }
     def describeTo(desc: Description) = {} 
-    def matcher = `with`(this)
-    def matcher(i: Int) = { parameterIndex = i; `with`(this) }
+    def capture = `with`(this)
+    def capture(i: Int) = { parameterIndex = i; `with`(this) }
+    def map[S](f: T => S) = {function = Some(f); this}
   }
 
 

@@ -218,6 +218,24 @@ object jmockGoodSpec extends Mocked {
       val mock = classOf[ToMock].expectsOne(_.isEmpty).mock
       mock.isEmpty
     }
+    "provide a willReturn method returning the value captured by a parameter" in {
+      val s = captureParam[String]
+      classOf[ToMock].expects(one(_).method0(s.capture) willReturn s) in { 
+        _.method0("b") must_== "b"
+      }
+    }
+    "provide a willReturn method returning the value captured by the second parameter of a method" in {
+      val s = captureParam[String]
+      classOf[ToMock].expects(one(_).method1(anyString, s.capture(1)) willReturn s) in { 
+        _.method1("a", "b") must_== "b"
+      }
+    }
+    "provide a willReturn method returning the value captured by a parameter mapped with another function" in {
+      val s = captureParam[String]
+      classOf[ToMock].expects(one(_).method2(s.capture) willReturn s.map(_.size + 1)) in { 
+        _.method2("b") must_== 2
+      }
+    }
   }
   val withMockInContext = new Context() {
     var mock: ToMock = _
@@ -311,6 +329,9 @@ trait Mocked extends Specification with JMocker with ExampleLifeCycle with Class
   class ToMock {
     def isEmpty = true
     def isEmpty2 = false
+    def method0(p1: String) = p1
+    def method1(p1: String, p2: String) = p1
+    def method2(p1: String) = p1.size
   }
 
   var list: java.util.List[Object] = _
