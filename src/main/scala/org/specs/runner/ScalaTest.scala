@@ -87,10 +87,7 @@ class SutSuite(sut: Sut) extends Suite {
                          stopper: Stopper, 
                          properties: Map[java.lang.String, Any]): Unit = {
       val example = sut.examples find {_.description == testName}
-      example match {
-        case Some(e) => runExample(e, reporter)      
-        case None => ()
-      }
+      example.map(e => runExample(e, reporter))
     }
     
   /**

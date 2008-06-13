@@ -46,18 +46,18 @@ trait AssertFactory extends AssertionListener {
 }
 /** trait declaring the ability to listen to a new assertion */
 trait AssertionListener {
-  def addAssertion
+  def addAssertion: Example
 }
 /** trait doing nothing on a new assertion */
 trait DefaultAssertionListener extends AssertionListener {
-  def addAssertion = ()
+  def addAssertion: Example = null
 }
 /** trait adding the new assertion to an example */
 trait ExampleAssertionListener extends AssertionListener {
     /** utility variable to track the last example being currently defined, in order to be able to add assertions to it */ 
   protected[this] var example: Option[Example] 
 
-  def addAssertion = {
+  def addAssertion: Example = {
     example match {
       case None => forExample.addAssertion
       case Some(e) => e.addAssertion

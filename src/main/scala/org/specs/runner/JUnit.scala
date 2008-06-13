@@ -125,10 +125,7 @@ class ExamplesTestSuite(description: String, examples: Iterable[Example], skippe
    * and the JUnitSuiteRunner will interpret this as an ignored test (this functionality wasn't available in JUnit3)
    */
   override def run(result: TestResult) = {
-    skipped match {
-      case Some(skipException) => result.addFailure(this, new SkippedAssertionError(skipException))
-      case None => ()                                    
-    }
+    skipped.map(e => result.addFailure(this, new SkippedAssertionError(e)))
     super.run(result)
   }
 }

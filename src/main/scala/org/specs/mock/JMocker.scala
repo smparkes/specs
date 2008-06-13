@@ -21,7 +21,7 @@ import org.specs.collection.JavaCollectionsConversion._
  * For example the trait Suite in ScalaTest uses an expect method too
  */
 object JMocker extends JMocker {
-  def addAssertion = {}
+  def addAssertion = null
 }
 
 /** 
@@ -93,13 +93,13 @@ trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockAc
   /** 
    * Adds an isAssertion method to any mock expectation to better count the number of assertions
    */
-  implicit def anyToAssertionCounter(a: Any) = AssertionCounter(a)
+  implicit def anyToAssertionCounter(a: =>Any) = new AssertionCounter(a)
   /** 
    * Adds an isAssertion method to any mock expectation to better count the number of assertions
    */
-  case class AssertionCounter(a: Any) {
+  class AssertionCounter(a: =>Any) {
     /** adds an assertion to the AssertionListener trait */
-    def isAssertion = addAssertion
+    def isAssertion = { addAssertion; a }
   }
 
   /** 
@@ -201,6 +201,17 @@ trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockAc
   /** shortcut for expectations.`with`(new IsInstanceOf[T]) */
   def an[T](t: java.lang.Class[T]) = a(t)
 
+  private def trueMatcher[T] = new org.hamcrest.TypeSafeMatcher[T]() {
+    def matchesSafely(a: T) = true
+    def describeTo(d: org.hamcrest.Description) = {}
+  }
+  /** always match the parameter */
+  def a[T] = `with`(trueMatcher[T])
+
+  /** always match the parameter */
+  def an[T] = `with`(trueMatcher[T])
+
+  
   /** shortcut for expectations.`with`(new IsNull[T]) */
   def aNull[T](t: java.lang.Class[T]) = {expectations.`with`(new IsNull[T]); null.asInstanceOf[T]}
 
@@ -214,7 +225,7 @@ trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockAc
   def same[T](value: T)  = {expectations.`with`(new IsSame[T](value)); value}
   
   /** Adapter class to use specs matchers as Hamcrest matchers */
-  class HamcrestMatcherAdapter[T](m: org.specs.matcher.Matcher[T]) extends org.hamcrest.TypeSafeMatcher[T] {
+  case class HamcrestMatcherAdapter[T](m: org.specs.matcher.Matcher[T]) extends org.hamcrest.TypeSafeMatcher[T] {
      var resultMessage: String = ""
      def matchesSafely(item: T) = {
        val result = m.apply(item)
@@ -329,27 +340,70 @@ trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockAc
     /** set up a JMock action to be executed */
     def will(action: Action) = expectations.will(action)
     
-    def willReturn[T](stored: CaptureParam[T]) = will(stored.value)
+    def willReturn[T](stored: CapturingParam[T]) = will(stored.value)
 
   }
-  
-  def captureParam[T] = new CaptureParam[T]
-  def aParam[T](stored: CaptureParam[T], paramIndex: Int) = stored.capture(paramIndex)
-  class CaptureParam[T] extends org.hamcrest.TypeSafeMatcher[T]() {
-    private var capturedValue: T = _
+  /** factory method to create a new capturing parameter */
+  def capturingParam[T] = new CapturingParam[T]
+
+  /** 
+   * Capturing Parameters allow to capture the value of a parameter passed to a mock method.<p/>
+   * The most frequent usage for this is to be able to return the parameter as the return value of the method.<p/>
+   * Usage:<pre>
+   * val s = capturingParam[String]
+   * classOf[ToMock].expects(one(_).method(s.capture) willReturn s)
+   * </pre>
+   * It is also possible to use the <code>map</code> function to return a value of a different type:<pre> 
+   * willReturn s.map(_.size)
+   * </pre>
+   * And the capturing parameter can still be checked for its validity using <code>must(specs matcher)</code>:<pre>
+   * classOf[ToMock].expects(one(_).method(s.must(beMatching("h.*")).capture) willReturn s)
+   * </pre>
+   */
+  class CapturingParam[T] extends org.hamcrest.TypeSafeMatcher[T]() {
+    /** stores the captured value, to be able to return it later */
+    var captured: T = _
+
+    /** by default the captured parameter is the first parameter of the mocked method */
     private var parameterIndex  = 0
+
+    /** option mapping function to apply before returning the value */
     private var function: Option[T => _] = None
+
+    /** optional matcher checking the captured value */
+    private var matcher: Option[HamcrestMatcherAdapter[T]] = None
+
+    /** the returned value as a ReturnValueAction object */
     def value = new ReturnValueAction[T]() {
       override def invoke(i: Invocation) = function match {
         case None => i.getParameter(parameterIndex)
         case Some(f) => f(i.getParameter(parameterIndex).asInstanceOf[T])
       }
     }
-    def matchesSafely(a: T): Boolean = { capturedValue = a; true }
-    def describeTo(desc: Description) = {} 
+
+    /** this method stores the parameter value and apply the optional matcher */
+    def matchesSafely(a: T): Boolean = { 
+      captured = a
+      matcher match {
+        case None => true
+        case Some(m) => m.matchesSafely(a) 
+      } 
+    }
+
+    /** this describes the result of the optional matchers */
+    def describeTo(desc: Description) = matcher.map(_.describeTo(desc))
+
+    /** capture will add this as a new Matcher to expect */
     def capture = `with`(this)
+
+    /** capture will add this as a new Matcher to expect, with the user-specified index of the parameter */
     def capture(i: Int) = { parameterIndex = i; `with`(this) }
-    def map[S](f: T => S) = {function = Some(f); this}
+
+    /** adds a function to use when returning the captured value */
+    def map[S](f: T => S) = { function = Some(f); this }
+
+    /** adds a matcher to use when checking the parameter */
+    def must(m: org.specs.matcher.Matcher[T]) = { matcher = Some(HamcrestMatcherAdapter(m)); this }
   }
 
 
@@ -403,12 +457,16 @@ trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockAc
    */
   def expect[T](c: Class[T])(f: T => Any): ExpectBlock[T] = ExpectBlock(mock(c), f)
   case class ExpectBlock[T](mocked: T, f: T => Any) {
+    
     def in(f2: T => Any) = isExpecting(mocked)(f)(f2)
     def mock: T = isExpecting(mocked)(f)(t => t).asInstanceOf[T]
   }
-  private def isExpecting[T](m: T)(f: T => Any)(f2: T => Any): Any = {
-    expect { f(m).isAssertion }
-    f2(m)
+  private def isExpecting[T](m: =>T)(f: T => Any)(f2: T => Any): Any = {
+    val lastExample: Example = addAssertion
+    var result: Any = null
+    expect { f(m) }
+    lastExample.in { result = f2(m) }.failures
+    result
   }
   /** 
    * Extends Class objects with the one-liner <code>expects</code>
@@ -431,6 +489,8 @@ trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockAc
     private def block(f: T => Any) = ExpectBlock(mock(c), f)
     def expects(f: T => Any) = block(f)
     def expectsOne(f: T => Any) = block((m:T) => f(one(m)))
+    def expectsSome(f: T => Any) = block((m:T) => f(atLeast(0).of(m)))
+    def expectsAtLeastOne(f: T => Any) = block((m:T) => f(atLeast(1).of(m)))
     def expectsAtLeast(i: Int)(f: T => Any) = block((m:T) => f(atLeast(i).of(m)))
     def expectsAtMost(i: Int)(f: T => Any) = block((m:T) => f(atMost(i).of(m)))
     def expectsExactly(i: Int)(f: T => Any) = block((m:T) => f(exactly(i).of(m)))

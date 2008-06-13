@@ -1,4 +1,5 @@
 package org.specs.specification
+
 import org.specs.util._
 import org.specs.util.ExtendedString._
 import scala.xml._
@@ -48,7 +49,7 @@ case class Example(description: String, cycle: org.specs.specification.ExampleLi
   def assertionsNb = { execute; assertionsNumber }
 
   /** increment the number of assertions in this example */
-  def addAssertion = { assertionsNumber += 1 }
+  def addAssertion = { assertionsNumber += 1; this }
 
   /** sub-examples created inside the <code>in</code> method */
   private[this] var subExs = new Queue[Example]

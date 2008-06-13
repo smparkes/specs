@@ -78,6 +78,12 @@ object jmockGoodSpec extends Mocked {
       expect { 1.of(listString).mkString(a(classOf[String])) }
       listString.mkString(",")
     } 
+    "provide an a[T] matcher which can be used to specify that any instance of type X will match - alias an[T]" in {
+      val listString: List[String] = mock(classOf[List[String]], "list of strings")
+      expect { 0.atLeastOf(listString).mkString(a[String]) }
+      listString.mkString(",")
+      listString.mkString("+")
+    } 
     "provide an aNull(classOf[X]) matcher which can be used to specify that a null value of class X will be used as a parameter" in {
       val listString: List[String] = mock(classOf[List[String]], "list of strings")
       expect { 1.of(listString).mkString(aNull(classOf[String])) }
@@ -218,22 +224,28 @@ object jmockGoodSpec extends Mocked {
       val mock = classOf[ToMock].expectsOne(_.isEmpty).mock
       mock.isEmpty
     }
-    "provide a willReturn method returning the value captured by a parameter" in {
-      val s = captureParam[String]
+    "provide a willReturn method returning the value captured by a parameter as a return value action" in {
+      val s = capturingParam[String]
       classOf[ToMock].expects(one(_).method0(s.capture) willReturn s) in { 
         _.method0("b") must_== "b"
       }
     }
     "provide a willReturn method returning the value captured by the second parameter of a method" in {
-      val s = captureParam[String]
+      val s = capturingParam[String]
       classOf[ToMock].expects(one(_).method1(anyString, s.capture(1)) willReturn s) in { 
         _.method1("a", "b") must_== "b"
       }
     }
     "provide a willReturn method returning the value captured by a parameter mapped with another function" in {
-      val s = captureParam[String]
+      val s = capturingParam[String]
       classOf[ToMock].expects(one(_).method2(s.capture) willReturn s.map(_.size + 1)) in { 
         _.method2("b") must_== 2
+      }
+    }
+    "provide a willReturn method returning the value captured by a parameter, but checked with a matcher before" in {
+      val s = capturingParam[String]
+      classOf[ToMock].expects(one(_).method0(s.must(beMatching("b")).capture) willReturn s) in { 
+        _.method0("b")
       }
     }
   }
@@ -319,7 +331,7 @@ trait BadMocked extends Mocked {
     }
   }
   override def afterTest(ex: Example) = {
-    if (checkAfterTest) 
+    if (checkAfterTest)
       { context.assertIsSatisfied } must throwA(new org.jmock.api.ExpectationError("unexpected", null))
     else
       checkAfterTest = true
@@ -332,6 +344,7 @@ trait Mocked extends Specification with JMocker with ExampleLifeCycle with Class
     def method0(p1: String) = p1
     def method1(p1: String, p2: String) = p1
     def method2(p1: String) = p1.size
+    def method3(p1: String) = List(p1)
   }
 
   var list: java.util.List[Object] = _
