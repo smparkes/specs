@@ -16,5 +16,19 @@ object ExtendedString {
      */
     def removeAll(remove: String) = s.replaceAll(toReplace(remove), "")
     private def toReplace(c: String) = c.map { letter => if ("()[]{}+-\\^$|?.*".contains(letter)) ("\\" + letter) else letter }.mkString("")
+    
+    def groups(pattern: String): List[String] = {
+      if (pattern == null) return List[String]()
+      val matcher = java.util.regex.Pattern.compile(pattern).matcher(s)
+      val groupsFound = new scala.collection.mutable.ListBuffer[String]()
+      while (matcher.find) { 
+        try {
+         groupsFound += matcher.group(1) 
+        } catch { case _ => }
+      }
+      groupsFound.toList
+    }
+    
+    def findAll(group: String): List[String] = groups("(" + group + ")")
   }
 }

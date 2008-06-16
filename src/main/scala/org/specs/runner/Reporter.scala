@@ -102,7 +102,7 @@ trait OutputReporter extends Reporter with Output {
   /**
    * reports one sut results: print the sut specifications, then the statistics
    */
-  def reportSut(sut: Sut, padding: String) = { printSut(sut, padding); printStats(sut, padding) }
+  def reportSut(sut: Sut, padding: String) = { timer.restart; (sut, padding); printStats(sut, padding) }
 
   /**
    * prints one sut specification

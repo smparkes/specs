@@ -7,6 +7,7 @@ import scala.collection.mutable._
 import org.specs.io.mock.MockOutput
 import org.specs.Sugar._
 import org.specs.matcher.MatcherUtils._
+import org.specs.util.ExtendedString._
 
 class consoleReporterTest extends Runner(consoleReporterSpec) with JUnit with Console
 object consoleReporterSpec extends Specification with MockOutput {
@@ -52,6 +53,10 @@ object consoleReporterSpec extends Specification with MockOutput {
     "report the elapsed time" in { 
       specWithOneExample(that.isOk) mustExistMatch "Finished in"
     }
+    "report the time for each system and add times for the total" in { 
+      val sutTime1 :: sutTime2 :: total :: Nil = specWithTwoSystems.elapsedTimes
+      sutTime1 + sutTime2 must_== total
+    }
     "report failures created with the 'fail' method" in {
       specWithOneExample(that.isKoWithTheFailMethod) mustExistMatch "1 failure" 
     }
@@ -90,6 +95,7 @@ object consoleReporterSpec extends Specification with MockOutput {
 
   def specWithOneExample(assertions: (that.Value)*) = new SpecWithOneExample(assertions.toList).run
   def specWithTwoExamples(assertions: (that.Value)*) = new SpecWithTwoExamples(assertions.toList).run
+  def specWithTwoSystems = new SpecWithTwoSystems().run
 }
 abstract class TestSpec extends Specification with ConsoleReporter with MockOutput {
   val success = () => true mustBe true
@@ -131,6 +137,21 @@ class SpecWithTwoExamples(behaviours: List[(that.Value)]) extends TestSpec {
     messages
   }   
 }
+class SpecWithTwoSystems extends TestSpec {
+  def elapsedTimes = messages.flatMap(_.groups("Finished in .* (\\d+) ms")).filter(!_.isEmpty).toList.map(_.toInt)
+  def run = {
+    "A specification" should {
+      "have example 2.1 ok" in { assertions(that.isOk).head.apply }
+      "have example 2.2 ok" in { assertions(that.isOk).head.apply }
+    }
+    "A specification" should {
+      "have example 2.1 ok" in { assertions(that.isOk).head.apply }
+      "have example 2.2 ok" in { assertions(that.isOk).head.apply }
+    }
+    reportSpec(this)
+    this
+  }   
+}
 class SpecWithLiteralDescription(behaviours: List[(that.Value)]) extends TestSpec {
   def run = {
     "The specification" is <p> 
@@ -140,6 +161,7 @@ class SpecWithLiteralDescription(behaviours: List[(that.Value)]) extends TestSpe
     messages
   }   
 }
+
 object that extends Enumeration {
   val isKo, isOk, isKoTwice, isKoWithTheFailMethod, throwsAnException, isSkipped, isSkippedBecauseOfAFaultyMatcher = Value
 }

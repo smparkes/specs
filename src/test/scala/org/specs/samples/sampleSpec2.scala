@@ -26,20 +26,6 @@ object expectationsOnly extends Specification("Hello world") with JMocker with C
   3 must_== { "abc".size }
   classOf[OutputStream].expectsOne(_.flush) in { _.flush }
   "this example should also work" in { classOf[OutputStream].expectsOne(_.flush) in { _.flush} }
-  
-   val s = capturingParam[String]
-   classOf[ToMock].expects(one(_).method0(s.must(beMatching("a")).capture) willReturn s) in { 
-     _.method0("a")
-   }
 }
-  class ToMock {
-    def isEmpty = true
-    def isEmpty2 = false
-    def method0(p1: String) = p1
-    def method1(p1: String, p2: String) = p1
-    def method2(p1: String) = p1.size
-    def method3(p1: String) = List(p1)
-  }
-
 class expectationsOnlyTest extends JUnit4(expectationsOnly)
 
