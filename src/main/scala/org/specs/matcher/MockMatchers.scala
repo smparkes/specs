@@ -11,7 +11,7 @@ trait MockMatchers {
   def beMet = new Matcher[Protocol](){
     def apply(protocol: => Protocol) = {
       val failures = protocol.failures
-      (failures.isEmpty, "all expectations are met", failures)
+      (failures.lenght == 0, "all expectations are met", failures)
     }
   }
   /**
