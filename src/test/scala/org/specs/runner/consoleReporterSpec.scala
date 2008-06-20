@@ -53,10 +53,6 @@ object consoleReporterSpec extends Specification with MockOutput {
     "report the elapsed time" in { 
       specWithOneExample(that.isOk) mustExistMatch "Finished in"
     }
-    "report the time for each system and add times for the total" in { 
-   //   val sutTime1 :: sutTime2 :: total :: Nil = specWithTwoSystems.elapsedTimes
-   //   sutTime1 + sutTime2 must beCloseTo(total, 1) // to account for rounding errors
-    }
     "report failures created with the 'fail' method" in {
       specWithOneExample(that.isKoWithTheFailMethod) mustExistMatch "1 failure" 
     }
@@ -75,6 +71,10 @@ object consoleReporterSpec extends Specification with MockOutput {
     "indicate the line and class where the skipping occurred" in { 
       specWithOneExample(that.isSkipped) must existMatch("(consoleReporterSpec.scala:\\d)") 
     } 
+    "report the time for each system and add times for the total" in {
+      val sutTime1 :: sutTime2 :: total :: Nil = specWithTwoSystems.elapsedTimes
+      sutTime1 + sutTime2 must beCloseTo(total, 1) // to account for rounding errors
+    }
   }
   "A console reporter" should {
     "not print stack trace if setNoStackTrace is called" in {
@@ -142,14 +142,15 @@ class SpecWithTwoSystems extends TestSpec {
   def run = {
     messages.clear
     "A specification" should {
-      "have example 2.1 ok" in { assertions(that.isOk).head.apply }
-      "have example 2.2 ok" in { assertions(that.isOk).head.apply }
+      "have example 2.1 ok" in { Thread.sleep(10) }
+      "have example 2.2 ok" in { Thread.sleep(10) }
     }
     "A specification" should {
-      "have example 2.1 ok" in { assertions(that.isOk).head.apply }
-      "have example 2.2 ok" in { assertions(that.isOk).head.apply }
+      "have example 2.1 ok" in { Thread.sleep(10) }
+      "have example 2.2 ok" in { Thread.sleep(10) }
     }
     reportSpec(this)
+    messages
     this
   }   
 }
@@ -166,4 +167,3 @@ class SpecWithLiteralDescription(behaviours: List[(that.Value)]) extends TestSpe
 object that extends Enumeration {
   val isKo, isOk, isKoTwice, isKoWithTheFailMethod, throwsAnException, isSkipped, isSkippedBecauseOfAFaultyMatcher = Value
 }
-
