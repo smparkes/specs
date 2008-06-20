@@ -56,8 +56,8 @@ trait EditDistance {
 
     /**
      * @param sep separators used to hightlight differences. If sep is empty, then no separator is used. If sep contains 
-     * one character, it is taken as the unique separator. If sep contains 2 or more characters, the first 2 characters are taken as
-     * opening separator and closing separator.
+     * one character, it is taken as the unique separator. If sep contains 2 or more characters, half of them are taken for the opening separator and
+     * the rest for the closing separator.
      * 
      * @return a (String, String) displaying the differences between each input strings. The used separators are specified by the caller.<p>
      */
@@ -105,14 +105,14 @@ trait EditDistance {
   def showDistance(s1: String, s2: String) = EditMatrix(s1, s2).showDistance
   /**
    * @param sep separators used to hightlight differences. If sep is empty, then no separator is used. If sep contains 
-   * one character, it is taken as the unique separator. If sep contains 2 or more characters, the first 2 characters are taken as
-   * opening separator and closing separator.
+   * one character, it is taken as the unique separator. If sep contains 2 or more characters, the first half of the characters are taken as
+   * opening separator and the second half as closing separator.
    * 
    * @return a (String, String) displaying the differences between each input strings. The used separators are specified by the caller.<p>
    */
   def showDistance(s1: String, s2: String, sep: String) = EditMatrix(s1, s2).showDistance(sep)
 
   private def separators(s: String) = (firstSeparator(s), secondSeparator(s))
-  private def firstSeparator(s: String) = if (s.isEmpty) "" else s(0).toString
-  private def secondSeparator(s: String) = if (s.size < 2) firstSeparator(s) else s(1).toString
+  private def firstSeparator(s: String) = if (s.isEmpty) "" else s.substring(0, s.size / 2 + s.size % 2)
+  private def secondSeparator(s: String) = if (s.size < 2) firstSeparator(s) else s.substring(s.size / 2 + s.size % 2, s.size)
 }

@@ -35,6 +35,15 @@ object editDistanceSpec extends Specification with EditDistance with DataTables 
     "not show any difference for the same string" in {
       showDistance("kitte", "kitte") must_== ("kitte", "kitte")
     }
+    "show the differences with another separator" in {
+      showDistance("kitten", "kitsin", "[]") must_== ("kit[te]n", "kit[si]n")
+    }
+    "show the differences with another separator like <<>>" in {
+      showDistance("kitten", "kitsin", "<<>>") must_== ("kit<<te>>n", "kit<<si>>n")
+    }
+    "show the differences with another separator like <<+" in {
+      showDistance("kitten", "kitsin", "<<+") must_== ("kit<<te+n", "kit<<si+n")
+    }
     "work on 0-sized strings" in {
        "a"	| "b" 		| "result" 			|>
        "" 	! ""	   	! ("", "")    		|
