@@ -54,15 +54,14 @@ trait DefaultAssertionListener extends AssertionListener {
 }
 /** trait adding the new assertion to an example */
 trait ExampleAssertionListener extends AssertionListener {
-    /** utility variable to track the last example being currently defined, in order to be able to add assertions to it */ 
-  protected[this] var example: Option[Example] 
 
   def addAssertion: Example = {
-    example match {
+    lastExample match {
       case None => forExample.addAssertion
       case Some(e) => e.addAssertion
     }
   }
   def forExample: Example
+  def lastExample: Option[Example]
 }
 	

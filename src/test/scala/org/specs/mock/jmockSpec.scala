@@ -345,6 +345,7 @@ trait Mocked extends Specification with JMocker with ExampleLifeCycle with Class
     def method1(p1: String, p2: String) = p1
     def method2(p1: String) = p1.size
     def method3(p1: String) = List(p1)
+    def methodWithLazy(p1: =>String) = p1
   }
 
   var list: java.util.List[Object] = _

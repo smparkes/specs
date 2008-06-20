@@ -114,6 +114,7 @@ trait SpecificationStructure extends ExampleLifeCycle with ExampleAssertionListe
     newExample
   }
   def forExample: Example = forExample("example " + (currentSut.examples.size + 1))
+  def lastExample: Option[Example] = example
   
   /** 
    * utility method to track the last example list being currently defined.<br>

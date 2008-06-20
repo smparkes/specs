@@ -219,7 +219,7 @@ trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockAc
   def aNonNull[T](t: java.lang.Class[T]) = {expectations.`with`(new IsNot(new IsNull[T])); null.asInstanceOf[T]}
 
   /** shortcut for expectations.`with`(new IsEqual[T](value)) */
-  def equal[T](value: T)  = {expectations.`with`(new IsEqual[T](value)); value}
+  def equal[T](value: T)  = { expectations.`with`(new IsEqual[T](value)); value }
 
   /** shortcut for expectations.`with`(new IsSame[T](value)) */
   def same[T](value: T)  = {expectations.`with`(new IsSame[T](value)); value}
@@ -459,7 +459,7 @@ trait JMocker extends JMockerExampleLifeCycle with HamcrestMatchers with JMockAc
   case class ExpectBlock[T](mocked: T, f: T => Any) {
     
     def in(f2: T => Any) = isExpecting(mocked)(f)(f2)
-    def mock: T = isExpecting(mocked)(f)(t => t).asInstanceOf[T]
+    def mock: T = { expect { f(mocked) }; mocked }
   }
   private def isExpecting[T](m: =>T)(f: T => Any)(f2: T => Any): Any = {
     val lastExample: Example = addAssertion
