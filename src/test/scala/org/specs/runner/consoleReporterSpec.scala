@@ -54,8 +54,7 @@ object consoleReporterSpec extends Specification with MockOutput {
       specWithOneExample(that.isOk) mustExistMatch "Finished in"
     }
     "report the time for each system and add times for the total" in { 
-//      val sutTime1 :: sutTime2 :: total :: Nil = specWithTwoSystems.elapsedTimes
-      // commenting out that test temporarily for release
+   //   val sutTime1 :: sutTime2 :: total :: Nil = specWithTwoSystems.elapsedTimes
    //   sutTime1 + sutTime2 must beCloseTo(total, 1) // to account for rounding errors
     }
     "report failures created with the 'fail' method" in {
@@ -142,7 +141,6 @@ class SpecWithTwoSystems extends TestSpec {
   def elapsedTimes = messages.flatMap(_.groups("Finished in .* (\\d+) ms")).filter(!_.isEmpty).toList.map(_.toInt)
   def run = {
     messages.clear
-    timer.restart
     "A specification" should {
       "have example 2.1 ok" in { assertions(that.isOk).head.apply }
       "have example 2.2 ok" in { assertions(that.isOk).head.apply }

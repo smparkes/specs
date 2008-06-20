@@ -103,7 +103,7 @@ trait OutputReporter extends Reporter with Output {
   /**
    * reports one sut results: print the sut specifications, then the statistics
    */
-  def reportSut(sut: Sut, padding: String) = { timer.start; printStats(sut, padding) }
+  def reportSut(sut: Sut, padding: String) = { timer.start; printSut(sut, padding); printStats(sut, padding) }
 
   /**
    * prints one sut specification
@@ -143,7 +143,7 @@ trait OutputReporter extends Reporter with Output {
    * reports a list of examples and indent subexamples if there are some
    */
   def reportExamples(examples: Iterable[Example], padding: String): Unit = {
-		for (example <- examples) {
+    for (example <- examples) {
       reportExample(example, padding)
       reportExamples(example.subExamples, padding + "  ")
     }
