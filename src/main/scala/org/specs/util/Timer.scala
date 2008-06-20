@@ -1,23 +1,30 @@
 package org.specs.util
 import java.util.Calendar
-
+import scala.collection.mutable.Stack
 /**
  * This trait provides Timer functionalities based on the Java Calendar milliseconds
  */
 trait HmsTimer extends Timer {
   /** elapsed time since the last stop */
-  var elapsed = 0L
+  var elapsed: Long = 0L
 
   /** current number of millis when instantiating the object using this Trait */
-  var millis = Calendar.getInstance.getTime.getTime
-
+  var millis: Stack[Long] = new Stack[Long]
   
+  /** 
+   * starts the with new elapsed time
+   */
+  def start = {
+    elapsed = 0L
+    millis.push(Calendar.getInstance.getTime.getTime)
+  }
+
   /** 
    * restarts the Timer with no elapsed time
    */
   def restart = {
     elapsed = 0L
-    millis = Calendar.getInstance.getTime.getTime
+    millis = new Stack[Long]
   }
 
   /** 
@@ -25,7 +32,8 @@ trait HmsTimer extends Timer {
    * @return the elapsed time as a String
    */
   def stop: String = { 
-    elapsed = Calendar.getInstance.getTime.getTime - millis
+    elapsed = Calendar.getInstance.getTime.getTime - millis.first
+    millis.pop
     preciseTime
   }
     
@@ -71,6 +79,7 @@ trait HmsTimer extends Timer {
 trait Timer {
   def stop: String
   def hms: String
+  def start
   def restart
 }
 

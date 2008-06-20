@@ -49,6 +49,7 @@ trait OutputReporter extends Reporter with Output {
    * has subSpecifications, hence the <code>padding</code> will be incremented
    */
   def reportSpec(spec: Specification, padding: String): Unit = {
+    timer.start
     println(padding + "Specification \"" + spec.name + "\"")
     report(spec.subSpecifications, padding + "  ")
     reportSuts(spec.suts, padding + "  ")
@@ -102,7 +103,7 @@ trait OutputReporter extends Reporter with Output {
   /**
    * reports one sut results: print the sut specifications, then the statistics
    */
-  def reportSut(sut: Sut, padding: String) = { timer.restart; (sut, padding); printStats(sut, padding) }
+  def reportSut(sut: Sut, padding: String) = { timer.start; printStats(sut, padding) }
 
   /**
    * prints one sut specification

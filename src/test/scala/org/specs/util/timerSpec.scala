@@ -9,17 +9,25 @@ object timerSpec extends Specification {
     "display 0 seconds if not stopped after being created" in { 
       TestTimer().hms must_== "0 second"
     }
-    "display the elapsed time if stopped after being created" in { 
+    "display the elapsed time if stopped after being started" in { 
       val timer = TestTimer()
-      Thread.sleep(1500)
+      timer.start
+      Thread.sleep(1000)
       timer.stop
       timer.hms must_== "1 second"
       timer.preciseTime must beMatching("1 second, \\d+ ms")
     }
-    "returns the elapsed time with its stop method" in { 
+    skip("to get better execution time")
+    "allow several nested starts and stops returning cumulated times" in { 
       val timer = TestTimer()
+      timer.start
+      timer.start
       Thread.sleep(1000)
       timer.stop mustMatch "1 second"
+      timer.start
+      Thread.sleep(1000)
+      timer.stop mustMatch "1 second"
+      timer.stop mustMatch "2 seconds"
     }
   }
   case class TestTimer extends SimpleTimer
