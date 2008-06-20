@@ -17,7 +17,6 @@ object timerSpec extends Specification {
       timer.hms must_== "1 second"
       timer.preciseTime must beMatching("1 second, \\d+ ms")
     }
-    skip("to get better execution time")
     "allow several nested starts and stops returning cumulated times" in { 
       val timer = TestTimer()
       timer.start

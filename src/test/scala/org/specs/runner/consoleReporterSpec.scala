@@ -140,6 +140,8 @@ class SpecWithTwoExamples(behaviours: List[(that.Value)]) extends TestSpec {
 class SpecWithTwoSystems extends TestSpec {
   def elapsedTimes = messages.flatMap(_.groups("Finished in .* (\\d+) ms")).filter(!_.isEmpty).toList.map(_.toInt)
   def run = {
+    messages.clear
+    timer.restart
     "A specification" should {
       "have example 2.1 ok" in { assertions(that.isOk).head.apply }
       "have example 2.2 ok" in { assertions(that.isOk).head.apply }
