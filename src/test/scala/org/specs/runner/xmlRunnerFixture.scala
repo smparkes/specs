@@ -6,7 +6,7 @@ import scala.xml._
 
 trait RunnerFixture extends LiteralSpecification with RunnerTestData {
   def createSimpleSpecRunner = runner = simpleSpecRunner
-  def executeCompositeSpecRunner = {runner = compositeSpecRunner; executeRunner}
+  def executeCompositeSpecRunner = { runner = compositeSpecRunner; executeRunner }
   def executeRunner = { runner.reset; runner.reportSpec.shh }
   def runnerOutputDir = { runner.outputDir_= _ }
   def checkXml = XML.loadString(runner.readFile(runner.files.keys.next)) must \\(xml()) 

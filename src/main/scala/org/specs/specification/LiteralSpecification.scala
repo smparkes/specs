@@ -1,5 +1,7 @@
 package org.specs.specification
 import scala.xml._
+import org.specs.util.Property
+import org.specs.util.DataTables
 import org.specs.util._
 import org.specs.Sugar._
 
@@ -24,7 +26,6 @@ trait LiteralSpecification  extends Specification with DataTables {
   class Silenced {
     def shh = ""
   }
-
   /**
    * This method is used setup a property value, in order to avoid repeting a string. For example: <pre>
    * The name of the person should be {"john" as personName in checkPersonName}
@@ -50,7 +51,37 @@ trait LiteralSpecification  extends Specification with DataTables {
       }
       desc + "\n" + table.toString
     }
-  }                
+  }    
+  
+  /** create an anonymous example which will be skipped until it is implemented */
+  def notImplemented = forExample in { skip ("not implemented yet")}
+  implicit def toSut(e: => Elem) = new Object { def isSut = toLiteralSut("") ->> e }
+  
+  implicit def toLiteralSut(string: String) = new LiteralSut(specify(string))
+  
+  /** This class acts as an extension of a Sut to provide a literal description of a sut as an xml specification */
+  class LiteralSut(sut: Sut) {
+    def ->>(e: => Elem)= {
+      sut.verb = ""
+      format(e)
+    }
+    private def format(e: => Elem) = {
+      val content = e
+      val anonymous = sut.examples.filter(_.description.matches("example \\d"))
+      val exNodes = content.\("ex")
+      exNodes.theSeq.toList.zip(anonymous.toList).foreach( pair => pair._2.description = pair._1.first.text)
+      sut.literalDescription = Some(content.text)
+    }
+    /** specifies the system with a literal description and embedded assertions */
+    def is(e: => Elem)= {
+      sut.verb = "specifies"
+      format(e)
+    }
+  }
+  
+  def check(test: =>Any) = (forExample in test).shh
+  def consoleOutput(pad: String, messages: Seq[String]): String = { pad + consoleOutput(messages) }
+  def consoleOutput(messages: Seq[String]): String = messages.map("> " + _.toString).mkString("\n")
 }
 
 

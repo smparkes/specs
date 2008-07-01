@@ -1,6 +1,7 @@
 package org.specs.runner
 
 import org.specs._
+import org.specs.specification._
 import org.specs.runner._
 import org.specs.util._
 import scala.collection.mutable._
@@ -97,7 +98,7 @@ object consoleReporterSpec extends Specification with MockOutput {
   def specWithTwoExamples(assertions: (that.Value)*) = new SpecWithTwoExamples(assertions.toList).run
   def specWithTwoSystems = new SpecWithTwoSystems().run
 }
-abstract class TestSpec extends Specification with ConsoleReporter with MockOutput {
+abstract class TestSpec extends LiteralSpecification with ConsoleReporter with MockOutput {
   val success = () => true mustBe true
   val isSkipped = () => skip("irrelevant")
   val isSkippedBecauseOfAFaultyMatcher = () => 1 must be(0).orSkipExample

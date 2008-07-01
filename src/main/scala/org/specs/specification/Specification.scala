@@ -99,11 +99,30 @@ abstract class Specification extends Matchers with AssertFactory
   
   /** @return true if there are failures or errors */
   def isFailing: Boolean = !this.failures.isEmpty || !this.errors.isEmpty
+  
+  override def accept(s: String*) = { 
+    super.accept(s:_*)
+    this.subSpecifications.foreach(_.tagWith(this))
+    this.suts.foreach(_.tagWith(this))
+    this
+  }
+  override def addTag(t: String) = { 
+    super.addTag(t)
+    this.subSpecifications.foreach(_.addTag(t))
+    this.suts.foreach(_.addTag(t))
+    this
+  }
+  override def reject(s: String*) = {
+    super.reject(s:_*)
+    this.subSpecifications.foreach(_.tagWith(this))
+    this.suts.foreach(_.tagWith(this))
+    this
+  }
 }
 /**
  * This trait can be reused in any test based framework to access Matchers functionalities
  */
-trait SpecsMatchers extends Matchers with AssertFactory with DefaultAssertionListener with DetailedFailures 
+trait SpecsMatchers extends Matchers with AssertFactory with DefaultExampleAssertionListener with DetailedFailures
 
 /** utility object to indent a string with 2 spaces */
 object SpecUtils {

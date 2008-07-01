@@ -4,13 +4,25 @@ import org.specs.matcher.Matchers._
 import org.specs.ExtendedThrowable._
 
 trait Assertable[T] {
-  def applyMatcher[S >: T](m: => Matcher[S], value: => T) = {
-    val (result, _, koMessage) = m.apply(value) 
-    result match {
-      case false => FailureException(koMessage).rethrowFrom(this)
-      case _ => true
+  private var example: Option[Example] = None
+  def applyMatcher[S >: T](m: => Matcher[S], value: => T): boolean = {
+    def executeMatch = {
+      val (result, _, koMessage) = m.apply(value) 
+      result match {
+        case false => FailureException(koMessage).rethrowFrom(this)
+        case _ => true
+      }
+    }
+    example match {
+      case None => executeMatch
+      case Some(e) => {
+        var res: Boolean = true
+        e in { res = executeMatch}
+        res
+      }
     }
   }  
+  def setExample[T](ex: Example) = example = Some(ex)
 }
 /**
  * The assert class adds matcher methods to objects which are being specified<br>
@@ -21,7 +33,6 @@ trait Assertable[T] {
  *
  */
 class Assert[T](value: => T) extends Assertable[T] {
-  
   /**
    * applies a matcher to the current value and throw a failure is the result is not true 
    */

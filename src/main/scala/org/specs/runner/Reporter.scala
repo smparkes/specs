@@ -41,14 +41,14 @@ trait OutputReporter extends Reporter with Output {
   def report(specs: Iterable[Specification], padding: String): Unit = specs foreach (reportSpec(_, padding))
 
   /** reports a specification with no padding */
-  def reportSpec(spec: Specification): Unit = reportSpec(spec, "")
+  def reportSpec(spec: Specification): this.type = reportSpec(spec, "")
 
   /**
    * reports a specification with a given space separator to display before the results.<br>
    * This method may be called recursively by the <code>reportSpec</code> method if a specification
    * has subSpecifications, hence the <code>padding</code> will be incremented
    */
-  def reportSpec(spec: Specification, padding: String): Unit = {
+  def reportSpec(spec: Specification, padding: String): this.type = {
     timer.start
     println(padding + "Specification \"" + spec.name + "\"")
     report(spec.subSpecifications, padding + "  ")
@@ -56,6 +56,7 @@ trait OutputReporter extends Reporter with Output {
     
     println(padding + "Total for specification \"" + spec.name + "\":")
     printStats(stats(spec), padding)   
+    this
   }
    
   /** utility implicit definition to be able to add tuples */ 
