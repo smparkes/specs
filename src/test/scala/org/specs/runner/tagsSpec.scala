@@ -1,8 +1,8 @@
 package org.specs.runner
-import org.specs.specification.LiteralSpecification
+import org.specs.specification.LiterateSpecification
 import org.specs.specification._
 
-object tagsSpec extends LiteralSpecification with Fixtures { 
+object tagsSpec extends LiterateSpecification with Fixtures { 
   
 <t>Tags can be attached to examples to classify them.
     
@@ -31,7 +31,7 @@ object tagsSpec extends LiteralSpecification with Fixtures {
       "example 1" in { 1 must_== 1 }
       "example 2" in { 2 must_== 2 } tag("only this")
     } 
-    mySpec accepts ("only this")  """ }{onlyTaggedExamples}
+    mySpec accept ("only this")  """ }{onlyTaggedExamples}
   
   This will output: 
  { specOutput }
@@ -47,7 +47,7 @@ object tagsSpec extends LiteralSpecification with Fixtures {
   
 </t> isSut
 }
-trait Fixtures extends LiteralSpecification {
+trait Fixtures extends LiterateSpecification {
    object mySpec extends Specification with Scalacheck {
      "example 1" in { 1 must_== 2 }
      "example 2" in {

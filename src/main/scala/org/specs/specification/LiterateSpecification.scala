@@ -6,7 +6,7 @@ import org.specs.util._
 import org.specs.Sugar._
 
 /**
- * This trait is experimental. It is supposed to help writing some literal specifications
+ * This trait is experimental. It is supposed to help writing some literate specifications
  * using the xml capabilities of Scala.
  * Several "toy" specifications have been written using this style:<ul>
  * <li>bizSpecificationSpec
@@ -14,8 +14,9 @@ import org.specs.Sugar._
  * <li>xmlRunnerSpec
  * </ul>
  */
-trait LiteralSpecification  extends Specification with DataTables {
+class LiterateSpecification extends Specification with DataTables {
   setSequential
+  def this(n: String) = { this(); name = n; description = n; this }
   
   /**
    * This method is used to silence the result of a call in an action. For example: <pre>
@@ -40,7 +41,7 @@ trait LiteralSpecification  extends Specification with DataTables {
   }
   
   /**
-   * This method allows to embbed a DataTable in a literal specification and display the results of its execution
+   * This method allows to embbed a DataTable in a literate specification and display the results of its execution
    */
   implicit def makeTable(s: String) = new TableExample(s)
   case class TableExample(desc: String) {
@@ -55,12 +56,12 @@ trait LiteralSpecification  extends Specification with DataTables {
   
   /** create an anonymous example which will be skipped until it is implemented */
   def notImplemented = forExample in { skip ("not implemented yet")}
-  implicit def toSut(e: => Elem) = new Object { def isSut = toLiteralSut("") ->> e }
+  implicit def toSut(e: => Elem) = new Object { def isSut = toLiterateSut("") ->> e }
   
-  implicit def toLiteralSut(string: String) = new LiteralSut(specify(string))
+  implicit def toLiterateSut(string: String) = new LiterateSut(specify(string))
   
-  /** This class acts as an extension of a Sut to provide a literal description of a sut as an xml specification */
-  class LiteralSut(sut: Sut) {
+  /** This class acts as an extension of a Sut to provide a literate description of a sut as an xml specification */
+  class LiterateSut(sut: Sut) {
     def ->>(e: => Elem)= {
       sut.verb = ""
       format(e)
@@ -70,9 +71,9 @@ trait LiteralSpecification  extends Specification with DataTables {
       val anonymous = sut.examples.filter(_.description.matches("example \\d"))
       val exNodes = content.\("ex")
       exNodes.theSeq.toList.zip(anonymous.toList).foreach( pair => pair._2.description = pair._1.first.text)
-      sut.literalDescription = Some(content.text)
+      sut.literateDescription = Some(content.text)
     }
-    /** specifies the system with a literal description and embedded assertions */
+    /** specifies the system with a literate description and embedded assertions */
     def is(e: => Elem)= {
       sut.verb = "specifies"
       format(e)
@@ -82,7 +83,4 @@ trait LiteralSpecification  extends Specification with DataTables {
   def check(test: =>Any) = (forExample in test).shh
   def consoleOutput(pad: String, messages: Seq[String]): String = { pad + consoleOutput(messages) }
   def consoleOutput(messages: Seq[String]): String = messages.map("> " + _.toString).mkString("\n")
-}
-
-
-
+} 
