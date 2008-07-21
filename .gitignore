@@ -1,0 +1,12 @@
+*.svn*
+.classpath
+.project
+.manager
+*.class
+.svnignore
+javarebel.lic
+all.txt
+allWithoutScala.txt
+text.rb
+.gitignore
+target*
