@@ -48,7 +48,7 @@ h2 {
 h3 {
   padding: 4px 4px 4px 6px;
   border: 1px solid #aaa;
-  color: #900;
+  color: #36a;
   background-color: #eee;
   font-weight: normal;
   font-size: large;
@@ -56,14 +56,14 @@ h3 {
 h4 {
   padding: 4px 4px 4px 6px;
   border: 1px solid #bbb;
-  color: #900;
+  color: #36a;
   background-color: #fff;
   font-weight: normal;
   font-size: large;
 }
 h5 {
   padding: 4px 4px 4px 6px;
-  color: #900;
+  color: #36a;
   font-size: normal;
 }
 p {
@@ -114,6 +114,13 @@ table.nested td.noBorder {
 table.nested td.failureMessage {
   border: 1px #900 dashed;
   color: #900;
+}
+table td.navTitle {
+  border: 0px #666666 
+  background-color: #fff;
+  color: #36a;
+  text-align: center;
+  font-size: large;
 }
 .source {
   border: 1px solid #999;

@@ -3,6 +3,11 @@ package org.specs.runner
 object htmlRunnerSpec extends htmlRunnerRules { "the html runner specification" is <spec>
   
   A specification can be run and its output displayed as an Html page.
+  On this html page we should be able to see:
+    
+    -statistics about the specification execution
+    -the list of all examples, sorted by sub-specifications and systems
+    -an overview list of all sub-specifications and systems with a status icon to allow a rapid access
   
     1. Specification Title
     
@@ -33,27 +38,39 @@ object htmlRunnerSpec extends htmlRunnerRules { "the html runner specification" 
 
     <ex>The rows must alternate in style for better visibility</ex>{rowsAlternation}
 
-    5. Output directory
+        4.1 Subexamples
+          
+    <ex>An example can also have sub-examples. In that case, the description of the example must be
+        displayed as a title and sub-examples displayed in a table</ex>{subExamples}
     
-       5.1 File name
+        4.2 DataTables
+      
+        <ex>DataTables failures should be displayed as an inner table in the message cell</ex>{dataTableFailure}
+    
+    5. Summary
+    
+   <ex>A column with the list of systems should be available on the left to access a given system directly</ex>{systemsList}
+      
+    6. Output directory
+    
+       6.1 File name
       
        The output of an HtmlRunner can be specified by specifiying an output directory.
        In that case, <ex>the runner generates a file named specs-report.html in that directory.</ex>{outputFile} 
     
-       5.2 Stylesheets and images
+       6.2 Stylesheets and images
       
        <ex>The stylesheets for the report must be created in a directory named css, relative to the output directory.</ex>{cssDir} 
        <ex>The images for the report must be created in a directory named images, relative to the output directory.</ex>{imagesDir} 
    
-    6. DataTables
-      
-       <ex>DataTables failures should be displayed as an inner table in the message cell</ex>{dataTableFailure}
 </spec>
 }
  
 import org.specs.specification._
 import org.specs.Sugar._
 import org.specs.io.mock._
+import scala.xml._
+
 trait htmlRunnerRules extends LiterateSpecification {
   
   def title = run must \\(<title>{specification.name}</title>)
@@ -76,6 +93,9 @@ trait htmlRunnerRules extends LiterateSpecification {
   def cssDir = createdDirs must contain("./target/css")
   def imagesDir = createdDirs must contain("./target/images")
   def dataTableFailure = run must (\\(<td>a</td>) and \\(<td>b</td>) and \\(<td>result</td>))
+  def subExamples = run must (beMatching("subex1")^^((_: Iterable[Node]).toString) 
+                              and \\(<h4>this example has sub-examples</h4>))   
+  def systemsList = run must (\\(<div id="leftColumn"/>) and \\(<td>{specification.name}</td>))
     
   object specification extends Specification("Sample Specification") {
     include(subSpecification)
@@ -92,6 +112,10 @@ trait htmlRunnerRules extends LiterateSpecification {
             a + b must_== c 
           }
       }
+      "this example has sub-examples" in {
+         "subex1" in { 1 must_== 1 }
+         "subex2" in { 1 must_== 1 }
+      } 
     }
   }
   object subSpecification extends Specification("Sample subspecification") {
