@@ -5,11 +5,11 @@ import org.specs.matcher._
 import org.specs.Sugar._
 import org.specs.runner._
 import org.specs.util._
+import org.specs.ExtendedThrowable._
 import scala.collection.mutable._
 import scalacheck.Gen._
 import org.specs.matcher.MatcherUtils._
 
-class specificationUnitTest extends Runner(specificationUnit) with JUnit with Console
 object specificationUnit extends Specification with Scalacheck {
 
   "A specification" should {
@@ -42,12 +42,19 @@ object specificationUnit extends Specification with Scalacheck {
       nudeSpec.assertionsNb mustBe 1
     }
   }
+  "the location of a failure" should {
+    "indicate the precise location if it is an anonymous example" in {
+      object spec extends Specification { 1 must_== 0 }
+      spec.failures(0).location must_== "specificationUnit.scala:48"
+    }
+  }
   def isInt(s: String): Boolean = {try {s.toInt} catch {case _ => return false}; true}
   def beInt = new Matcher[String](){
     def apply(s: => String) = (isInt(s), q(s) + " is an integer", q(s) + " is not an integer")
   }
   object specification extends Specification
 }
+class specificationUnitTest extends JUnit4(specificationUnit)
 
 
 
