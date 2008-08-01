@@ -45,7 +45,18 @@ object specificationUnit extends Specification with Scalacheck {
   "the location of a failure" should {
     "indicate the precise location if it is an anonymous example" in {
       object spec extends Specification { 1 must_== 0 }
-      spec.failures(0).location must_== "specificationUnit.scala:48"
+      spec.failures
+      spec.failures(0).location must_== "specificationUnit.scala:47"
+    }
+    "indicate the precise location if it is in a sut" in {
+      object spec extends Specification { "it" should { 1 must_== 0; "" in {} } }
+      spec.failures
+      spec.failures(0).location must_== "specificationUnit.scala:52"
+    }
+    "indicate the precise location if it is in an example" in {
+      object spec extends Specification { "it" should { "do" in { 1 must_== 0 } } }
+      spec.failures
+      spec.failures(0).location must_== "specificationUnit.scala:57"
     }
   }
   def isInt(s: String): Boolean = {try {s.toInt} catch {case _ => return false}; true}
