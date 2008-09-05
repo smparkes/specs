@@ -116,7 +116,11 @@ table.nested td.failureMessage {
   color: #900;
 }
 table td.navTitle {
+<<<<<<< HEAD:src/main/resources/css/maven-theme.css
+  border: 0px #666666 
+=======
   border: 0px #666666;
+>>>>>>> develop:src/main/resources/css/maven-theme.css
   background-color: #fff;
   color: #36a;
   text-align: center;
