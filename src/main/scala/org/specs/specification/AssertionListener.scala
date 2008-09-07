@@ -5,6 +5,21 @@ package org.specs.specification
  */
 trait AssertionListener {
   def addAssertion: Example
+  /** 
+   * Adds an isAssertion method to any block of code (mock expectation, scalacheck property) to better count the number of assertions
+   */
+  implicit def anyToAssertionCounter[T](a: =>T) = new AssertionCounter(a)
+  /** 
+   * Declares a block of code to count as an assertion
+   */
+  def isAssertion[T](a: =>T) = anyToAssertionCounter(a).isAssertion
+  /** 
+   * Adds an isAssertion method to any block of code to better count the number of assertions
+   */
+  class AssertionCounter[T](a: =>T) {
+    /** adds an assertion to the AssertionListener trait */
+    def isAssertion = { addAssertion; a }
+  }
 }
 /** 
  * Trait adding the new assertion to an example, creating one if necessary. 
