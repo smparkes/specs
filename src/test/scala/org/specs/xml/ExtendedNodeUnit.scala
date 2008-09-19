@@ -40,7 +40,7 @@ object extendedNodeUnit extends Specification {
       <a> 
       </a> ==/ <a></a> mustBe true
     }
-    "return true for unordered sequences of notdes <a><b/><c/></a> ==/ <a><c/><b/></a>" in {
+    "return true for unordered sequences of nodes <a><b/><c/></a> ==/ <a><c/><b/></a>" in {
       <a><b/><c/></a> ==/ <a><c/><b/></a> must beTrue 
     }
     "return false for <a>1</a> ==/ <a></a>" in {
@@ -51,6 +51,14 @@ object extendedNodeUnit extends Specification {
     }
     "return false for Text(1) ==/ Text(2)" in {
       Text("1").isEqualIgnoreSpace(Text("2")) must beFalse
+    }
+  }
+  "An isEqualIgnoreSpaceOrdered function" should {
+    "return true for <a><b/><c/></a> ==/ <a><b/><c/></a>" in {
+      <a><b/><c/></a>.isEqualIgnoreSpaceOrdered(<a><b/><c/></a>) must beTrue
+    }
+    "return false for <a><b/><c/></a> ==/ <a><c/><d/></a>" in {
+      <a><b/><c/></a>.isEqualIgnoreSpaceOrdered(<a><c/><b/></a>) must beFalse
     }
   }
 }
