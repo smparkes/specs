@@ -1,18 +1,18 @@
 package org.specs.matcher
-import org.specs.runner._
 import org.specs.Sugar._
 import org.specs.xml.NodeFunctions._
 import org.specs.collection.ExtendedIterable._
 import scala.xml._
+
 object xmlMatchersUnit extends MatchersSpecification with XmlMatchers {
   "A equals ignore spaces matcher" should { 
     "not take care of spaces when comparing nodes [Alias ==/]" in {
-      <a><b/></a> must equalIgnoreSpace(<a> <b/></a>)  
+      <a><b/></a> must beEqualToIgnoringSpace(<a> <b/></a>)  
       <a><b/></a> must ==/(<a> <b/></a>)  
     }
     "fail if 2 nodes are not equal, even ignoring spaces" in {
-      expectation(<a><b/></a> must equalIgnoreSpace(<a> <c/></a>)) must failWith("<a><b></b></a> is not equal to <a> <c></c></a>")
-      expectation(<a><b/></a> aka "the node" must equalIgnoreSpace(<a> <c/></a>)) must failWith("the node <a><b></b></a> is not equal to <a> <c></c></a>")
+      expectation(<a><b/></a> must beEqualToIgnoringSpace(<a> <c/></a>)) must failWith("<a><b></b></a> is not equal to <a> <c></c></a>")
+      expectation(<a><b/></a> aka "the node" must beEqualToIgnoringSpace(<a> <c/></a>)) must failWith("the node <a><b></b></a> is not equal to <a> <c></c></a>")
     }
     "fail if 2 nodes are a Text and an Atom with different data" in {
       expectation(new Atom("hello").toSeq must ==/(new Text("world").toSeq)) must failWith("hello is not equal to world")
@@ -147,4 +147,5 @@ object xmlMatchersUnit extends MatchersSpecification with XmlMatchers {
     }
   }
 }
+import org.specs.runner._
 class xmlMatchersTest extends JUnit4(xmlMatchersUnit)

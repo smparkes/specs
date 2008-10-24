@@ -1,17 +1,14 @@
 package org.specs.matcher
-import org.specs._
-import org.specs.runner._
 
-class stringMatchersTest extends JUnit3(stringMatchersUnit)
 object stringMatchersUnit extends MatchersSpecification {
   "An equalsIgnoreCase matcher" should {
     "be ok even with null values" in {
       val s: String = null
-      expectation("name" must equalIgnoreCase(s)) must failWith("'name' is not equal ignoring case to 'null'")
-      expectation(s must equalIgnoreCase("name")) must failWith("'null' is not equal ignoring case to 'name'")
+      expectation("name" must beEqualToIgnoringCase(s)) must failWith("'name' is not equal ignoring case to 'null'")
+      expectation(s must beEqualToIgnoringCase("name")) must failWith("'null' is not equal ignoring case to 'name'")
     }
     "not evaluate the expressions twice" in {
-      equalIgnoreCase("") must evalOnce(exp(""))
+      beEqualToIgnoringCase("") must evalOnce(exp(""))
     }
   }
   "An include matcher" should {
@@ -55,3 +52,5 @@ object stringMatchersUnit extends MatchersSpecification {
     }
   }
 }
+import org.specs.runner._
+class stringMatchersTest extends JUnit4(stringMatchersUnit)

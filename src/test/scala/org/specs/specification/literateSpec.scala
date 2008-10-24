@@ -48,6 +48,15 @@ the text of the description.
 * <ex>The text format @"text"@ indicates text interpreted as simple text</ex>{isText}
 * <ex>The wiki format @"wiki"@ indicates text interpreted as a markup language</ex>{isWiki}
 * <ex>The html format @"html"@ indicates text interpreted as a html</ex>{isHtml}
-  
+
+h3. Properties
+    
+<ex>Part of the text can be stored as properties and reused later as expected values</ex>:  
+  { """<ex>After prompting for a name like {"Peter".a}, the system must greet the visitor with the person name: {"hello Peter".it}{ it must be_==(hello(a))  }</ex>""" >@ }
+gives:
+   {"<ex class=\"success\">"}After prompting for a name like _{"Peter".a}_, the system must greet the visitor with the person name: _{"hello Peter".it}_{ it must be_==(hello(a)) }{"</ex>"}
+    
 </wiki> isSus
 }
+import org.specs.runner._
+class LiterateSpecTest extends HtmlSuite(literateSpec, "target") with JUnit with Console

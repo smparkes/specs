@@ -9,7 +9,7 @@ import org.specs.matcher.MatcherUtils._
 import org.specs.SpecUtils._
 import org.specs.specification._
 import org.specs.ExtendedThrowable._
-
+import scala.reflect.Manifest
 /**
  * This traits adds before / after capabilities to specifications, so that a context can be defined for
  * each system under test being specified.
@@ -82,7 +82,7 @@ trait Contexts extends SpecificationStructure { outer =>
    * </code>
    * In that case before/after actions defined in the context will be set on the defined sus.
    */
-  implicit def toContext(s: String) = ToContext(s) 
+  implicit def when(s: String) = ToContext(s) 
 
   /** 
    * Syntactic sugar to create pass a new context before creating a sus.<p>
@@ -91,17 +91,38 @@ trait Contexts extends SpecificationStructure { outer =>
    * </code>
    * In that case before/after actions defined in the context will be set on the defined sus.
    */
-  case class ToContext(s: String) {
-    def ->-(context: Context): Sus = {
+  case class ToContext(desc: String) {
+    def ->-[S](context: Context): Sus = {
       if (context == null) throw new NullPointerException("the context is null")
-      val sus = specify(s)
-      doFirst(context.first())
+      specifySut(context, desc)
+    } 
+    def definedAs[S](context: SystemContext[S]): Sus = specifySutWithContext(context, desc)
+    def isAn[S](context: SystemContext[S]): Sus = specifySutWithContext(context, desc)
+    def isA[S](context: SystemContext[S]): Sus = specifySutWithContext(context, desc)
+    def whenIn[S](context: SystemContext[S]): Sus = specifySutWithContext(context, desc)
+    def whenIs[S](context: SystemContext[S]): Sus = specifySutWithContext(context, desc)
+    def whenHas[S](context: SystemContext[S]): Sus = specifySutWithContext(context, desc)
+    def whenHaving[S](context: SystemContext[S]): Sus = specifySutWithContext(context, desc)
+    def when[S](context: SystemContext[S]): Sus = specifySutWithContext(context, desc)
+  }
+  
+  private def specifySut(context: Context, desc: String): Sus = {
+      if (context == null) throw new NullPointerException("the context is null")
+      val sus = specify(desc)
+      doFirst(context.firstActions())
       doBefore(context.beforeActions())
       doAfter(context.afterActions())
-      doLast(context.last())
+      doLast(context.lastActions())
       until(context.predicate())
       sus
-    } 
+  }
+  private def specifySutWithContext[S](context: SystemContext[S], desc: String): Sus = {
+      if (context == null) throw new NullPointerException("the context is null")
+      val sus = specify(context, desc)
+      doFirst(context.firstActions())
+      doLast(context.lastActions())
+      until(context.predicate())
+      sus
   }
 
   /** Factory method to create a context with beforeAll only actions */
@@ -140,6 +161,17 @@ trait Contexts extends SpecificationStructure { outer =>
  * beforeContext(initSystem).until(enoughTestsAreExecuted)
  * </pre>
  */
+abstract class SystemContext[S] extends Context with java.lang.Cloneable {
+  var systemOption: Option[S] = None
+  def init = systemOption = Some(newSystem)
+  def system: S = systemOption match {
+    case None => throw new FailureException("There is no system set on the context")
+    case Some(s) => s
+  }
+  def newSystem: S
+  def before(s: S) = {}
+  def newInstance: SystemContext[S] = this.clone.asInstanceOf[SystemContext[S]]
+}
 case class Context {
   var firstActions: () => Any = () => () 
   var lastActions: () => Any = () => ()
@@ -152,3 +184,5 @@ case class Context {
   def last(actions: =>Any) = { lastActions = () => actions; this }
   def until(predicate: =>Boolean) = { this.predicate = () => predicate; this }
 }
+
+

@@ -156,7 +156,6 @@ trait OutputReporter extends Reporter with Output {
     }
 
     println(padding + status(example) + example.description)
-    if (stacktrace && example.errors.size > 0) example.errors foreach { printStackTrace(_) }
     
     // if the failure, skip or the error message has linefeeds they must be padded too
     def parens(f: Throwable) = " (" + f.location + ")"
@@ -164,8 +163,9 @@ trait OutputReporter extends Reporter with Output {
       if (f.getMessage != null)
         println(padding + "  " + f.getMessage.replaceAll("\n", "\n" + padding + "  ") + parens(f)) 
       else
-        println(padding + "  exception message is null" + parens(f)) 
+        println(padding + "  the exception message is null" + parens(f)) 
     }
+    if (stacktrace && example.errors.size > 0) example.errors foreach { printStackTrace(_) }
   }
 }
 

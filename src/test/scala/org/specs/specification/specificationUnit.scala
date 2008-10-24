@@ -10,7 +10,7 @@ import scala.collection.mutable._
 import scalacheck.Gen._
 import org.specs.matcher.MatcherUtils._
 
-object specificationUnit extends Specification with Scalacheck {
+object specificationUnit extends Specification with ScalaCheck {
 
   "A specification" should {
     "have a description corresponding to its unqualified class name, whatever the class name" in {
@@ -50,12 +50,14 @@ object specificationUnit extends Specification with Scalacheck {
     }
     "indicate the precise location if it is in a sus" in {
       object spec extends Specification { "it" should { 1 must_== 0; "" in {} } }
-      spec.failures
+      spec.failures 
       spec.failures(0).location must_== "specificationUnit.scala:52"
     }
     "indicate the precise location if it is in an example" in {
       object spec extends Specification { "it" should { "do" in { 1 must_== 0 } } }
       spec.failures
+      //spec.failures(0).printStackTrace
+      spec.failures(0).getMessage must_== "'1' is not equal to '0'"
       spec.failures(0).location must_== "specificationUnit.scala:57"
     }
   }

@@ -99,15 +99,15 @@ object jmockGoodSpec extends Mocked {
       list.get(0)
     } 
     "provide a will method, using a specs matcher, to specify that a specific value will be used as a parameter" in {
-      expect { 1.of(list).get(will(beEqual(0))) }
+      expect { 1.of(list).get(will(beEqualTo(0))) }
       list.get(0)
     } 
     "provide a willReturn method to specify the value which must be returned" in {
-      expect { 1.of(list).get(will(beEqual(0))) willReturn "new" }
+      expect { 1.of(list).get(will(beEqualTo(0))) willReturn "new" }
       list.get(0) must_== "new"
     } 
     "provide a willThrow method to specify the exception which must be thrown" in {
-      expect { 1.of(list).get(will(beEqual(0))) willThrow new java.lang.Exception("ouch") }
+      expect { 1.of(list).get(will(beEqualTo(0))) willThrow new java.lang.Exception("ouch") }
       list.get(0) must throwAn[Exception]
     } 
     "provide a willReturn method to specify the a returned iterator" in {
@@ -117,7 +117,7 @@ object jmockGoodSpec extends Mocked {
     }
     "provide a willReturn method to specify a returned iterable" in {
       expect { 1.of(scalaList).take(anyInt) willReturn List("hey") }
-      scalaList.take(1) must existMatch("hey")
+      scalaList.take(1) must containMatch("hey")
     }
     "provide a willReturn method accepting a block to return another mock and specify it too" in {
       case class Module(name: String)
@@ -244,16 +244,17 @@ object jmockGoodSpec extends Mocked {
       }
     }
   }
-  val withMockInContext = new Context() {
+  object mockContext extends Context {
     var mock: ToMock = _
     before(mock = classOf[ToMock].expectsOne(_.isEmpty).mock)
   }
-  "The JMocker trait" ->-(withMockInContext) should {
+  "The JMocker trait" ->-(mockContext)  should {
     "allow mocks to be declared in the sus context" in {
-      withMockInContext.mock.isEmpty
+      mockContext.mock.isEmpty
     }
   }
 }
+
 object jmockBadSpec extends BadMocked {
   "The JMocker trait" should {
     "provide a 'one' method failing if no method is called" in {

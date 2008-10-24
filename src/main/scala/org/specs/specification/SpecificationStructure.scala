@@ -1,6 +1,7 @@
 package org.specs.specification
 import org.specs.matcher.MatcherUtils._
 import org.specs.SpecUtils._
+import scala.reflect.Manifest
 
 /** 
  * This trait provides a structure to a specification.<br>
@@ -92,11 +93,18 @@ trait SpecificationStructure extends ExampleLifeCycle with ExampleExpectationsLi
    * Alternatively, it could be created with:
    * <code>specify("my system under test").should {}</code>
    */
-  implicit def specify(desc: String): Sus = { 
-    systems = systems:::List(new Sus(desc, this))
+  implicit def specify[S](context: SystemContext[S], desc: String) : Sus = { 
+    addSus(new SusWithContext(context, desc, this))
+  }
+  implicit def specify(desc: String): Sus = {
+    addSus(new Sus(desc, this))
+  }
+  private def addSus(sus: Sus): Sus = {
+    systems = systems:::List(sus)
     if (this.isSequential)
       systems.last.setSequential
     systems.last
+
   }
 
   /** utility method to track the last sus being currently defined, in order to be able to add examples to it */ 
@@ -113,10 +121,8 @@ trait SpecificationStructure extends ExampleLifeCycle with ExampleExpectationsLi
    * Alternatively, it could be created with:
    * <code>forExample("return 0 when asked for (0+0)").in {...}</code>
    */
-  implicit def forExample(desc: String): Example = {
-    val newExample = new Example(desc, currentLifeCycle)
-    exampleContainer.addExample(newExample) 
-    newExample
+  implicit def forExample(desc: String) = {
+    exampleContainer.createExample(desc, currentLifeCycle) 
   }
   
   /**
@@ -125,16 +131,31 @@ trait SpecificationStructure extends ExampleLifeCycle with ExampleExpectationsLi
   def forExample: Example = forExample("example " + (currentSus.examples.size + 1))
   
   /**
+   * Create an anonymous example with a function on a System, 
+   * giving it a number depending on the existing created examples/
+   */
+  def forExample[S](function: S => Any): Example = forExample in function
+  /**
    * Return the example being currently executed if any
    */
   def lastExample: Option[Example] = example
   
+  /**
+   * add a textual complement to the sus verb.
+   * For example, it is possible to declare:
+   * <code>"the system" should provide {...}</code>
+   * if the following function is declared:
+   * <code>def provide = addToSusVerb("provide")</code>
+   */
+  def addToSusVerb(complement: String) = new Function1[Example, Example] { 
+    def apply(e: Example) = { currentSus.verb += " " + complement; e } 
+  }
   /** 
    * utility method to track the last example list being currently defined.<br>
    * It is either the list of examples associated with the current sus, or
    * the list of subexamples of the current example being defined 
    */ 
-  protected[this] def exampleContainer: Any {def addExample(e: Example)} = {
+  protected[this] def exampleContainer: Any {def createExample(desc: String, lifeCycle: ExampleLifeCycle): Example} = {
     example match {
       case Some(e) => e
       case None => currentSus 

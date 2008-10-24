@@ -1,11 +1,8 @@
 package org.specs.matcher
-import scala.collection.mutable.Queue
-import org.specs.runner._
 import org.specs.Sugar._
 
-class objectMatchersTest extends Runner(objectMatchersSpec) with JUnit 
 object objectMatchersSpec extends MatchersSpecification {
-  "Object matchers" should { doBefore { clearExample }
+  "Object matchers" should { clearExample.before
     "provide a 'must_==' matcher: 'name' must_== 'name'" in {
       "string" must_== "string"
       expectation("string" must_== "string2") must failWith("'string' is not equal to 'string2'")  
@@ -51,15 +48,15 @@ object objectMatchersSpec extends MatchersSpecification {
       
       {throw new RuntimeException("e");()} must throwA[RuntimeException]
     } 
-    "provide a beAlsoNull matcher which will check if 2 objects are null at the same time" in {
+    "provide a beAsNullAs matcher which will check if 2 objects are null at the same time" in {
       val nullString: String = null 
-      nullString must beAlsoNull(nullString)
-      1 must beAlsoNull(1)
-      expectation(nullString must beAlsoNull("not null")) must failWith("'not null' is not null")
-      expectation(nullString aka "the string" must beAlsoNull("not null")) must failWith("'not null' is not null but the string is null")
+      nullString must beAsNullAs(nullString)
+      1 must beAsNullAs(1)
+      expectation(nullString must beAsNullAs("not null")) must failWith("'not null' is not null")
+      expectation(nullString aka "the string" must beAsNullAs("not null")) must failWith("'not null' is not null but the string is null")
 
-      expectation("not null" must beAlsoNull(nullString)) must failWith("'not null' is not null")
-      expectation("not null" aka "the string" must beAlsoNull(nullString)) must failWith("the string 'not null' is not null")
+      expectation("not null" must beAsNullAs(nullString)) must failWith("'not null' is not null")
+      expectation("not null" aka "the string" must beAsNullAs(nullString)) must failWith("the string 'not null' is not null")
     }
     "provide a haveClass matcher checking if any.getClass == c" in {
       val a: Any = 1
@@ -86,3 +83,5 @@ object objectMatchersSpec extends MatchersSpecification {
     }
   }   
 }
+import org.specs.runner._
+class objectMatchersTest extends JUnit4(objectMatchersSpec)

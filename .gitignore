@@ -10,3 +10,4 @@ allWithoutScala.txt
 text.rb
 .gitignore
 target*
+.settings

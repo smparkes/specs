@@ -32,7 +32,7 @@ trait Html extends File {
   }
  
   /** define the html content for this specification execution. */
-  def specOutput(spec: Specification): String = new PrettyPrinter(200, 2).format(asHtml(spec)) 
+  def specOutput(spec: Specification): String = asHtml(spec).toString 
   
   /** 
    * Create the html content for this specification execution.
@@ -160,7 +160,7 @@ trait Html extends File {
         <table class="bodyTable">
            {exampleRows(sus.examples, sus.isFullSuccess)}
          </table>}
-      case Some(_) => {
+      case Some(_) if !sus.examples.isEmpty => {
         <h3><img src="images/collapsed.gif" onclick={"toggleImage(this); showHideTable('sus:" + System.identityHashCode(sus) + "')"}/>Examples summary</h3>
 	    <div id={"sus:" + System.identityHashCode(sus)} style="display:none">
           <table class="bodyTable">
@@ -168,6 +168,7 @@ trait Html extends File {
           </table>
         </div>
       }
+      case _ => NodeSeq.Empty
     }
   }
   def literateDesc(sus: Sus): NodeSeq = sus.literateDescription match {
@@ -244,7 +245,7 @@ trait Html extends File {
       case regular => exceptionText(regular) 
     }
   }
-  def stackTrace(e: Throwable) = if (!e.isInstanceOf[FailureException]) e.stackToJs else ""
+  def stackTrace(e: Throwable) = if (!e.isInstanceOf[FailureException]) e.stackToString("\r", "\r", "") else ""
   def exceptionText(e: Throwable) = <a title={e.fullLocation + stackTrace(e)}>{if (e.getMessage != null) new Text(e.getMessage) else new Text("null")}</a>
   /** Alias for DataTable with all type parameters. */
   type DT = DataTable[T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19] forSome { type T0; type T1; type  T2; type T3; type T4; type T5; type T6; type T7; type T8; type T9; type T10; type T11; type T12; type T13; type T14; type T15; type T16; type T17; type T18; type T19 } 

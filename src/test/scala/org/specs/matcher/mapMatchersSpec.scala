@@ -1,10 +1,7 @@
 package org.specs.matcher
-import org.specs.runner._
 
-class mapMatchersSpecTest extends JUnit3(mapMatchersSpec)
-object mapMatchersSpecRunner extends ConsoleRunner(mapMatchersSpec) 
 object mapMatchersSpec extends MatchersSpecification {
-  "Map matchers" should { usingBefore { () => clearExample }
+  "Map matchers" should { clearExample.before
     "provide an 'haveKey' matcher on maps: Map('one' -> 1, 'two' -> 2) must haveKey('one') [alias for not + haveKey = notHaveKey]" in {
       Map("one" -> 1, "two" -> 2) must haveKey("one")
       expectation(Map("one" -> 1, "two" -> 2) must haveKey("three")) must failWith("Map(one -> 1, two -> 2) doesn't have the key 'three'")
@@ -31,6 +28,10 @@ object mapMatchersSpec extends MatchersSpecification {
       expectation(Map("one" -> 1, "two" -> 2) must not(havePair("one" -> 1))) must failWith("Map(one -> 1, two -> 2) has the pair '(one,1)'")
       expectation(Map("one" -> 1, "two" -> 2) must notHavePair("one" -> 1)) must failWith("Map(one -> 1, two -> 2) has the pair '(one,1)'")
     }
+    "provide an 'havePairs' matcher on maps: Map('one' -> 1, 'two' -> 2) must havePairs('one' -> 1, 'two' -> 2) [alias for not + havePairs = notHavePairs]" in {
+      Map("one" -> 1, "two" -> 2) must havePairs("one" -> 1, "two" -> 2)
+      expectation(Map("one" -> 1, "two" -> 2) must havePairs("one" -> 3)) must failWith("Map(one -> 1, two -> 2) doesn't have the pairs '(one,3)'")
+    }
     val f = new PartialFunction[Int, String] {
         def isDefinedAt(i: Int) = i % 2 == 0
         def apply(i: Int) = (i*2).toString
@@ -43,3 +44,5 @@ object mapMatchersSpec extends MatchersSpecification {
     }
   }
 }
+import org.specs.runner._
+class mapMatchersSpecTest extends JUnit4(mapMatchersSpec)

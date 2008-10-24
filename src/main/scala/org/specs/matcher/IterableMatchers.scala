@@ -3,49 +3,100 @@ import org.specs.matcher.MatcherUtils._
 import org.specs.collection.ExtendedIterable._
 import org.specs.matcher.AnyMatchers._
 import org.specs.specification._
+import org.specs.util.EditDistance._
+
 /**
  * The <code>IterableMatchers</code> trait provides matchers which are applicable to Iterable objects
  */
 trait IterableMatchers {
    
   /**
-   * Matches if (iterable.exists(_ == a)
+   * Matches if iterable.exists(_ == a)
    */   
   def contain[T](a: T) = new Matcher[Iterable[Any]](){ 
     def apply(v: => Iterable[Any]) = {val iterable = v; (iterable.exists(_ == a), d(iterable) + " contains " + q(a), d(iterable) + " doesn't contain " + q(a))} 
   }
 
   /**
-   * Matches if not(iterable.exists(_ == a)
+   * Matches if not(iterable.exists(_ == a))
    */   
   def notContain[T](a: T) = contain(a).not 
 
   /**
-   * Matches if there is one element in the iterable verifying the <code>function</code> parameter: <code>(iterable.exists(function(_))</code>
+   * Matches if all the elements of l are included in the actual iterable
    */   
-  def exist[T](function: T => Boolean) = new Matcher[Iterable[T]](){ 
-    def apply(v: => Iterable[T]) = {val iterable = v; (iterable.exists{function(_)}, "at least one element verifies the property in " + d(iterable), "no element verifies the property in " + d(iterable))} 
+  def containAll[T](l: Iterable[T])(implicit details: Detailed) = new Matcher[Iterable[T]]() { 
+    def apply(v: => Iterable[T]) = {
+      val iterable = v; 
+      import org.specs.Products._
+      val failureMessage = details match {
+        case full: fullDetails => EditMatrix(d(iterable.mkString("\n")), q(l.mkString("\n"))).showDistance(full.separators).toList.mkString(" doesn't contain all of ")
+        case no: noDetails => d(iterable) + " doesn't contain all of " + q(l)
+      }
+      (l.forall(x => iterable.exists(_ == x)), d(iterable) + " contains all of " + q(l), failureMessage)
+    } 
   }
 
+  /**
+   * Alias for containAll.not
+   */   
+  def notContainAll[T](l: Iterable[T])(implicit details: Detailed) = containAll(l)(details).not
+
+  /**
+   * Matches if all the elements of l are included in the actual iterable in that order
+   */   
+  def containInOrder[T](l: Iterable[T])(implicit details: Detailed) = new Matcher[Iterable[T]](){ 
+    def apply(v: => Iterable[T]) = {
+      val iterable = v; 
+      import org.specs.Products._
+      val failureMessage = details match {
+        case full: fullDetails => EditMatrix(d(iterable.mkString("\n")), q(l.mkString("\n"))).showDistance(full.separators).toList.mkString("", " doesn't contain all of ", " in order")
+        case no: noDetails => d(iterable) + " doesn't contain all of " + q(l) + " in order"
+      }
+      (iterable.containsInOrder(l), d(iterable) + " contains all of " + q(l) + " in order", failureMessage)
+    } 
+  }
+  
+  /**
+   * Matches if there is one element in the iterable verifying the <code>function</code> parameter: <code>(iterable.exists(function(_))</code>
+   */   
+  def have[T](function: T => Boolean) = new Matcher[Iterable[T]](){ 
+    def apply(v: => Iterable[T]) = {val iterable = v; (iterable.exists{function(_)}, "at least one element verifies the property in " + d(iterable), "no element verifies the property in " + d(iterable))} 
+  }
   /**
    * Matches if there is no element in the iterable verifying the <code>function</code> parameter: <code>!(iterable.exists(function(_))</code>
    */   
-  def notExist[T](function: T => Boolean) = exist(function).not 
+  def notHave[T](function: T => Boolean) = have(function).not 
+  /**
+   * Matches if there is one element in the iterable verifying the <code>function</code> parameter: <code>(iterable.exists(function(_))</code>
+   * @deprecated  use have instead
+   */   
+  def exist[T](function: T => Boolean) = have(function)
 
+  /**
+   * Matches if there is no element in the iterable verifying the <code>function</code> parameter: <code>!(iterable.exists(function(_))</code>
+   * @deprecated use notHave instead instead
+   */   
+  def notExist[T](function: T => Boolean) = notHave(function) 
+  /**
+   * Alias for existMatch
+   * @deprecated: use containMatch instead
+   */   
+  def existMatch(pattern: String) = containMatch(pattern)
   /**
    * Matches if there is one element in the iterable[String] matching the <code>pattern</code> parameter: <code> iterable.exists(matches(pattern) _)</code>
    */   
-  def existMatch(pattern: String) = new Matcher[Iterable[String]](){
+  def containMatch(pattern: String) = new Matcher[Iterable[String]](){
     def apply(v: => Iterable[String]) = {val iterable = v; (iterable.exists( matches(pattern) _), "at least one element matches " + q(pattern) + " in " + d(iterable), "no element matches " + q(pattern) + " in " + d(iterable))}
-  }
-
-  /**
-   * Alias for existMatch
-   */   
-  def containMatch(pattern: String) = existMatch(pattern) 
-
+  } 
   /**
    * Matches if not(existMatch(a))
+   */   
+  def notContainMatch(pattern: String) = containMatch(pattern).not 
+
+  /**
+   * Alias for notExistMatch
+   * @deprecated: use notContainMatch instead
    */   
   def notExistMatch(pattern: String) = existMatch(pattern).not
 

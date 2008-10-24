@@ -1,13 +1,11 @@
 package org.specs.matcher
-import org.specs.runner._
 
-class stringMatchersSpecTest extends Runner(stringMatchersSpec) with JUnit 
 object stringMatchersSpec extends MatchersSpecification {
-  "String matchers" should { usingBefore { () => clearExample }
+  "String matchers" should { clearExample.before
     "provide a 'must_==/' matcher: 'hello' must_==/ 'HeLLo' " + 
-    "[alias: must equalIgnoreCase]" in {
+    "[alias: must beEqualToIgnoringCase]" in {
       "string" must_==/ "sTring"
-      "string" must equalIgnoreCase("sTring")
+      "string" must beEqualToIgnoringCase("sTring")
       expectation("string" must_==/ "striNg2") must failWith("'string' is not equal ignoring case to 'striNg2'")  
       expectation("string" aka "the string" must be_==/("striNg2")) must failWith("the string 'string' is not equal ignoring case to 'striNg2'")  
     }
@@ -18,10 +16,10 @@ object stringMatchersSpec extends MatchersSpecification {
       expectation("string" must_!=/ "strinG") must failWith("'string' is equal ignoring case to 'strinG'")  
       expectation("string" aka "the string" must be_!=/("strinG")) must failWith("the string 'string' is equal ignoring case to 'strinG'")  
     }
-    "provide a 'equalIgnoreSpace' matcher: 'hello' must equalIgnoreSpace ' hello\t' " in {
-      "string" must equalIgnoreSpace(" string ")
-      expectation("string" must equalIgnoreSpace(" string2")) must failWith("'string' is not equal ignoring space to ' string2'")  
-      expectation("string" aka "the string" must equalIgnoreSpace(" string2")) must failWith("the string 'string' is not equal ignoring space to ' string2'")  
+    "provide a 'beEqualToIgnoringSpace' matcher: 'hello' must beEqualToIgnoringSpace ' hello\t' " in {
+      "string" must beEqualToIgnoringSpace(" string ")
+      expectation("string" must beEqualToIgnoringSpace(" string2")) must failWith("'string' is not equal ignoring space to ' string2'")  
+      expectation("string" aka "the string" must beEqualToIgnoringSpace(" string2")) must failWith("the string 'string' is not equal ignoring space to ' string2'")  
     }
     "provide a 'beMatching' matcher to match a pattern inside a string: " +
     " 'name' must beMatching('.*am.*') [alias: mustMatch]" in {
@@ -83,3 +81,5 @@ object stringMatchersSpec extends MatchersSpecification {
     }
   }
 }
+import org.specs.runner._
+class stringMatchersSpecTest extends JUnit4(stringMatchersSpec) 

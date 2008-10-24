@@ -27,13 +27,13 @@ class LiterateSpecification extends Specification with ExpectableFactory with Da
   implicit def anyToShh(a: Any) = new Silenced
   
   class Silenced {
-    def shh = ""
+    def shh = () 
     
     /** the pipe bar must be interpreted visually as a stop and the < sign as a pike. */
     def <| = shh
   }
   /** This silence function allows to silence calls with this style: shh { a call } */
-  def shh(a: =>Any) = { a; "" }
+  def shh(a: =>Any) = { a; () }
 
   /**
    * This method is used setup a property value, in order to avoid repeting a string. For example: <pre>
@@ -41,11 +41,12 @@ class LiterateSpecification extends Specification with ExpectableFactory with Da
    * </pre>. 
    */
   implicit def anyToAs[T](a: T) = new AsProperty(a)
-  class AsProperty[T](a: T) { 
-    def as(p: Property[T]) = {p() = a; p.toString }
-    def apply(p: Property[T]) = {p() = a; p.toString }
-    def apply(f: T => Any)= {f(a); a.toString }
-    def as(f: T => Any)= {f(a); a.toString }
+  implicit def propertyToValue[T](p: Property[T]):T = p()
+  case class AsProperty[T](a: T) { 
+    def as(p: Property[T]) = {p() = a; a }
+    def apply(p: Property[T]) = {p() = a; a}
+    def apply(f: T => Any)= {f(a); a }
+    def as(f: T => Any)= {f(a); a }
   }
   
   /**
@@ -66,7 +67,8 @@ class LiterateSpecification extends Specification with ExpectableFactory with Da
   def notImplemented = forExample in { skip ("not implemented yet")}
   implicit def toSus(e: => Elem) = new Object { def isSus = toLiterateSus("") ->> e }
   
-  implicit def toLiterateSus(string: String) = new LiterateSus(specify(string))
+  implicit def toLiterateSusWithDesc(string: String) = new LiterateSus(specify(string))
+  implicit def toLiterateSus(sus: Sus) = new LiterateSus(sus)
   
   /** This class acts as an extension of a Sus to provide a literate description of a sus as an xml specification */
   class LiterateSus(sus: Sus) {
@@ -100,12 +102,147 @@ class LiterateSpecification extends Specification with ExpectableFactory with Da
     }
   }
   
+  /**
+   * Create an anonymous example with a function on a System, 
+   * giving it a number depending on the existing created examples/
+   */
+  def eg[S](function: S => Any): Unit = (forExample in function).shh
+  /** 
+   * embeddeds a test into a new example and silence the result
+   * @deprecated
+   */
+  def check[S](function: S => Any): Unit = eg(function)
+
   /** embeddeds a test into a new example and silence the result */
-  def check(test: =>Any) = (forExample in test).shh
+  def eg(test: =>Any): Unit = (forExample in test).shh
+  /** 
+   * embeddeds a test into a new example and silence the result
+   * @deprecated
+   */
+  def check(test: =>Any): Unit = eg(test)
 
   /** return a String containing the output messages from the console with a given padding such as a newline for instance */
   def consoleOutput(pad: String, messages: Seq[String]): String = { pad + consoleOutput(messages) }
 
   /** return a String containing the output messages from the console */
   def consoleOutput(messages: Seq[String]): String = messages.map("> " + _.toString).mkString("\n")
+
+  def includeSus(susName: String) = "include " + susName + " not implemented yet"
+}
+/**
+ * This trait provides String properterties with alphabetical names.
+ */
+trait StringProperties { outer =>
+  val a = Property[String]("")
+  val b = Property[String]("")
+  val c = Property[String]("")
+  val d = Property[String]("")
+  val e = Property[String]("")
+  val f = Property[String]("")
+  implicit def stringToAlpha(value: String) = StringToAlpha(value)
+  case class StringToAlpha(value: String) {
+    def a = { outer.a() = value; value }
+    def b = { outer.b() = value; value }
+    def c = { outer.c() = value; value }
+    def d = { outer.d() = value; value }
+    def e = { outer.e() = value; value }
+    def f = { outer.f() = value; value }
+  } 
+}
+/**
+ * This trait provides Int properterties with alphabetical names.
+ */
+trait IntProperties { outer =>
+  val i = Property[Int](0)
+  val j = Property[Int](0)
+  val k = Property[Int](0)
+  val l = Property[Int](0)
+  val m = Property[Int](0)
+  val n = Property[Int](0)
+  implicit def intToAlpha(value: Int) = IntToAlpha(value)
+  case class IntToAlpha(value: Int) {
+    def i = { outer.i() = value; value }
+    def j = { outer.j() = value; value }
+    def k = { outer.k() = value; value }
+    def l = { outer.l() = value; value }
+    def m = { outer.m() = value; value }
+    def n = { outer.n() = value; value }
+  } 
+}
+/**
+ * This trait provides Boolean properterties with alphabetical names.
+ */
+trait BooleanProperties { outer =>
+  val o = Property[Boolean](true)
+  val p = Property[Boolean](true)
+  val q = Property[Boolean](true)
+  val r = Property[Boolean](true)
+  val s = Property[Boolean](true)
+  val t = Property[Boolean](true)
+  implicit def booleanToAlpha(value: Boolean) = BooleanToAlpha(value)
+  case class BooleanToAlpha(value: Boolean) {
+    def o = { outer.o() = value; value }
+    def p = { outer.p() = value; value }
+    def q = { outer.q() = value; value }
+    def r = { outer.r() = value; value }
+    def s = { outer.s() = value; value }
+    def t = { outer.t() = value; value }
+  } 
+}
+/**
+ * This trait provides Double properterties with alphabetical names.
+ */
+trait DoubleProperties { outer =>
+  val u = Property[Double](0.0)
+  val v = Property[Double](0.0)
+  val w = Property[Double](0.0)
+  val x = Property[Double](0.0)
+  val y = Property[Double](0.0)
+  val z = Property[Double](0.0)
+  implicit def doubleToAlpha(value: Double) = DoubleToAlpha(value)
+  case class DoubleToAlpha(value: Double) {
+    def u = { outer.u() = value; value }
+    def v = { outer.v() = value; value }
+    def w = { outer.w() = value; value }
+    def x = { outer.x() = value; value }
+    def y = { outer.w() = value; value }
+    def z = { outer.z() = value; value }
+  } 
+}
+/**
+ * This trait one String property for a current value.
+ */
+trait CurrentProperty { outer => 
+  val it = Property[String]("")
+  implicit def stringToIt(s: String) = StringToIt(s)
+  case class StringToIt(s: String) {
+    def it = { outer.it() = s; s }
+  } 
+  
+}
+/**
+ * This trait adds all properties.
+ */
+trait AllProperties extends StringProperties with IntProperties with DoubleProperties with BooleanProperties with CurrentProperty
+object AllProperties extends AllProperties
+/**
+ * This trait provides functions which can be used to ease the use of wiki markup
+ */
+trait Wiki {
+  implicit def toWikiString(a: Any) = new WikiString(a.toString) 
+  class WikiString(s: String) {
+    def >@ = wikiCode(s)
+  }
+  /** 
+   * This function can be used to format code in a wiki description.
+   * Using this function avoid issues like quotes insides brackets ['something']
+   * being displayed as question marks.
+   */
+  def wikiCode(stringToFormat: String) = "<code>"+stringToFormat+"</code>"
+  /** 
+   * Alias for wikiCode
+   */
+  def >@(stringToFormat: String) = wikiCode(stringToFormat)
+
+  def linkTo(susName: String) = "link to " + susName + " not implemented yet"
 }

@@ -9,7 +9,7 @@ import org.specs.matcher.MatcherUtils._
 import org.specs.SpecUtils._
 import org.specs.specification._
 import org.specs.ExtendedThrowable._
-
+import scala.reflect.Manifest
 /**
  * The <code>Sus</code> class represents a system under specification<br>
  * It has:<ul>
@@ -20,8 +20,29 @@ import org.specs.ExtendedThrowable._
  * In specifications, a Sus "should" or "can" provide some functionalities which are defined in <code>Examples</code><br>
  * A Sus is "executed" during its construction and failures and errors are collected from its examples
  */
-case class Sus(description: String, var cycle: org.specs.specification.ExampleLifeCycle) extends ExampleLifeCycle 
+case class SusWithContext[S](val context: SystemContext[S], desc: String, var cyc: ExampleLifeCycle) extends Sus(desc, cyc) {
+  override def createExample(desc: String, lifeCycle: ExampleLifeCycle): Example = {
+    val newContext = context.newInstance
+    val ex = new ExampleWithContext[S](newContext, ExampleDescription(desc), lifeCycle)
+    addExample(ex)
+    ex
+  }
+  override def beforeExample(ex: Example) = {
+    super.beforeExample(ex)
+    ex.before
+  }
+  override def executeTest(ex: Example, t: =>Any) = {
+    ex.execute(t)
+  }
+  override def afterExample(ex: Example) = {
+    ex.after
+    super.afterExample(ex)
+  }
+
+} 
+case class Sus(description: String, var cycle: ExampleLifeCycle) extends ExampleLifeCycle 
                                       with Tagged with HasResults {
+
   /** default verb used to define the behaviour of the sus */
   var verb = ""
 
@@ -36,7 +57,11 @@ case class Sus(description: String, var cycle: org.specs.specification.ExampleLi
 
   /** add an example to the list of examples. */
   def addExample(e: Example) = examples += e
-  
+  def createExample(desc: String, lifeCycle: ExampleLifeCycle) = {
+    val ex = new Example(ExampleDescription(desc), lifeCycle)
+    addExample(ex)
+    ex
+  }
   /** the before function will be invoked before each example */
   var before: Option[() => Any] = None
 

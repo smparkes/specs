@@ -57,7 +57,7 @@ trait Expectable[T] {
       matcher.setDescription(description)
       val (result, _, koMessage) = matcher.apply(value) 
       result match {
-        case false => new FailureException(koMessage).rethrowBy("must", failureTemplate)
+        case false => new FailureException(koMessage).throwWithStackTraceOf(failureTemplate.removeTracesAsFarAsNameMatches("must"))
         case _     => SuccessValue(successValueToString)
       }
     }
@@ -157,21 +157,33 @@ class StringExpectable[A <: String](value: => A) extends Expectable[A] {
   /** alias for <code>must(not(beMatching(a)))</code> */
   def mustNotMatch(a: String) = applyMatcher(not(beMatching(a)), value)
   
-  /** alias for <code>must(equalIgnoreCase(a))</code> */
-  def must_==/(a: String) = applyMatcher(equalIgnoreCase(a), value)
+  /** alias for <code>must(beEqualToIgnoringCase(a))</code> */
+  def must_==/(a: String) = applyMatcher(beEqualToIgnoringCase(a), value)
 
-  /** alias for <code>must(notEqualIgnoreCase(a))</code> */
-  def must_!=/(a: String) = applyMatcher(notEqualIgnoreCase(a), value)
+  /** alias for <code>must(notBeEqualToIgnoringCase(a))</code> */
+  def must_!=/(a: String) = applyMatcher(notBeEqualToIgnoringCase(a), value)
 }
 /** Specialized expectable class with iterable matchers aliases */
 class IterableExpectable[I <: AnyRef](value: =>Iterable[I]) extends Expectable[Iterable[I]] {
   def createClone = new IterableExpectable(value)
 
   /** alias for <code>must(exist(function(_))</code> */
-  def mustExist(function: I => Boolean) = applyMatcher(exist {x:I => function(x)}, value)
+  def mustHave(function: I => Boolean) = applyMatcher(have(function((_:I))), value)
 
   /** alias for <code>must(notExist(function(_))</code> */
-  def mustNotExist(function: I => Boolean) = applyMatcher(notExist{x:I => function(x)}, value)
+  def mustNotHave(function: I => Boolean) = applyMatcher(notHave(function((_:I))), value)
+
+  /** 
+   * alias for <code>must(exist(function(_))</code>
+   * @deprecated use mustHave instead
+   */
+  def mustExist(function: I => Boolean) = mustHave(function)
+
+  /** 
+   * alias for <code>must(notExist(function(_))</code> 
+   * @deprecated use mustNotHave instead
+   */
+  def mustNotExist(function: I => Boolean) = mustNotHave(function)
 
   /** alias for <code>must(contain(a))</code> */
   def mustContain(elem: I) = applyMatcher(contain(elem), value)
@@ -183,17 +195,29 @@ class IterableExpectable[I <: AnyRef](value: =>Iterable[I]) extends Expectable[I
 class IterableStringExpectable(value: =>Iterable[String]) extends Expectable[Iterable[String]] {
   def createClone = new IterableStringExpectable(value)
 
-  /** alias for <code>must(existMatch(pattern))</code> */
-  def mustHaveMatch(pattern: String) = applyMatcher(existMatch(pattern), value)
+  /** alias for <code>must(containMatch(pattern))</code> */
+  def mustContainMatch(pattern: String) = applyMatcher(containMatch(pattern), value)
 
-  /** alias for <code>must(notExistMatch(pattern))</code> */
-  def mustNotHaveMatch(pattern: String) = applyMatcher(notExistMatch(pattern), value)
+  /** alias for <code>must(notContainMatch(pattern))</code> */
+  def mustNotContainMatch(pattern: String) = applyMatcher(notContainMatch(pattern), value)
 
-  /** alias for <code>must(existMatch(pattern))</code> */
-  def mustExistMatch(pattern: String) = applyMatcher(existMatch(pattern), value)
+  /** alias for <code>must(containMatch(pattern))</code> */
+  def mustHaveMatch(pattern: String) = applyMatcher(containMatch(pattern), value)
 
-  /** alias for <code>must(notExistMatch(pattern))</code> */
-  def mustNotExistMatch(pattern: String) = applyMatcher(notExistMatch(pattern), value)
+  /** alias for <code>must(notContainMatch(pattern))</code> */
+  def mustNotHaveMatch(pattern: String) = applyMatcher(notContainMatch(pattern), value)
+
+  /** 
+   * alias for <code>must(containMatch(pattern))</code>
+   * @deprecated: use mustContainMatch or mustHaveMatch instead 
+   */
+  def mustExistMatch(pattern: String) = applyMatcher(containMatch(pattern), value)
+
+  /** 
+   * alias for <code>must(notContainMatch(pattern))</code> 
+   * @deprecated: use mustNotContainMatch or mustNotHaveMatch instead 
+   */
+  def mustNotExistMatch(pattern: String) = applyMatcher(notContainMatch(pattern), value)
 }
 /**
  * By default the result value of an expectable expression doesn't output anything when 
