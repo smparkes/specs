@@ -21,7 +21,7 @@ case class SpecsFinder(path: String, pattern: String, asOneSpecification: Boolea
 
   lazy val specs = collectSpecs(asOneSpecification)
 
-  private def collectSpecs(asOneSpecification: Boolean) = {
+  protected def collectSpecs(asOneSpecification: Boolean) = {
     val collected = new scala.collection.mutable.ListBuffer[Specification]
     val specNames = specificationNames(path, pattern)
     specNames foreach {className => 

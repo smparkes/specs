@@ -3,7 +3,6 @@ package org.specs.runner
 import scala.collection.mutable.Queue
 import org.specs.log.ConsoleLog
 import org.specs.specification._
-import _root_.org.junit.runner._
 
 /**
  * The SpecsHolder trait is used by any class providing access to a sequence of specifications 
@@ -36,7 +35,6 @@ trait SpecsHolder {
  * to allow the chaining of several reporters as traits: 
  * object runner extends Runner(spec) with Html with Xml for example
  */  
-@RunWith(classOf[JUnitSuiteRunner])
 trait Reporter extends SpecsHolder with ConsoleLog {  
 
   /** this variable controls if stacktraces should be printed. */
