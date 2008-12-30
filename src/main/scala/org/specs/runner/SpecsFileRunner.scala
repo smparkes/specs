@@ -1,7 +1,6 @@
 package org.specs.runner
 
 import org.specs._
-import org.specs.collection.ExtendedSeq._
 import org.specs.specification._
 import java.util.regex.Pattern.compile
 
@@ -36,7 +35,7 @@ class SpecsFileRunner(path: String, specFilterPattern: String, susFilterPattern:
   
   /** filter a list of specifications. */
   def filter(specifications: List[Specification]): List[Specification] = {
-    specifications.mapFilter(filter(_)).toList
+    specifications.flatMap(filter(_)).toList
   }
 
   /** 
@@ -44,8 +43,8 @@ class SpecsFileRunner(path: String, specFilterPattern: String, susFilterPattern:
    * @return None if the resulting specification has no SUS or systems
    */
   def filter(specification: Specification): Option[Specification] = {
-    specification.subSpecifications = specification.subSpecifications.mapFilter(filter(_)).toList
-    specification.systems = specification.systems.mapFilter(filter(_)).toList
+    specification.subSpecifications = specification.subSpecifications.flatMap(filter(_)).toList
+    specification.systems = specification.systems.flatMap(filter(_)).toList
     if (specification.subSpecifications.isEmpty && specification.systems.isEmpty)
       None
     else
@@ -75,7 +74,7 @@ class SpecsFileRunner(path: String, specFilterPattern: String, susFilterPattern:
     if (exampleFilterPattern == ".*") // to speed up the execution
       sus
     else {
-      sus.examples_=(sus.examples.mapFilter(filterExample(_)).toList)
+      sus.examples_=(sus.examples.flatMap(filterExample(_)).toList)
       sus
     }
   }
