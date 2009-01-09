@@ -30,9 +30,9 @@ trait TeamCityOutput extends Output {
   /** create a message for the end of a test */
   def testFinished(name: String) = message("testFinished", "name" -> name)
   /** create a message for an ignored test */
-  def testIgnored(name: String, args: (String, String)*) = message("testIgnored", args:_*)
+  def testIgnored(name: String, args: (String, String)*) = message("testIgnored", Seq("name" -> name) ++ args: _*)
   /** create a message for a failed test (failure or error) */
-  def testFailed(name: String, args: (String, String)*) = message("testFailed", args:_*)
+  def testFailed(name: String, args: (String, String)*) = message("testFailed", Seq("name" -> name) ++ args: _*)
 
   import TeamCityUtils._
   /** create a message with one argument */

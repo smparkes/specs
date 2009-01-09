@@ -55,7 +55,7 @@ trait Reporter extends SpecsHolder with ConsoleLog {
    * Then it calls the reportSpecs method and exit the System with the appropriate error code,
    * depending on the specification success or not.
    */
-  def main(arguments: Array[java.lang.String]) = {
+  def main(arguments: Array[String]) = {
     if (arguments != null)
       args = args ++ arguments
     reportSpecs

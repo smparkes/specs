@@ -40,16 +40,16 @@ When executed, <ex>the TeamCity runner should notify the start of a specificatio
 <ex>A failed example must be reported with its failure message</ex>:
 
 {List("##teamcity[testStarted name='specification name.failed example']",
-      "##teamcity[testFailed message='the value is true (teamCityRunnerRules.scala:10)']",
+      "##teamcity[testFailed name='specification name.failed example' message='the value is true (teamCityRunnerRules.scala:10)']",
       "##teamcity[testFinished name='specification name.failed example']").as(messages).mkString("\n") >@}{messagesMustBeCreated}
 
 <ex>An example with an exception must be reported with its error message</ex>:
 
 {List("##teamcity[testStarted name='specification name.exception example']",
-      "##teamcity[testFailed message='error (teamCityRunnerRules.scala:19)']",
+      "##teamcity[testFailed name='specification name.exception example' message='error (teamCityRunnerRules.scala:19)']",
       "##teamcity[testFinished name='specification name.exception example']").as(messages).mkString("\n") >@}{messagesMustBeCreated}
 
-<ex>An example with sub examples must be reported as one example with aggregated messages</ex>. sFor example, for the following subexamples:
+<ex>An example with sub examples must be reported as one example with aggregated messages</ex>. For example, for the following subexamples:
   
 {""""sub examples" >> { 
   "good sub" in { true must beTrue }
@@ -60,7 +60,7 @@ When executed, <ex>the TeamCity runner should notify the start of a specificatio
 The messages should be:
 
 {List("##teamcity[testStarted name='specification name.sub examples']",
-      "##teamcity[testFailed message='bad sub1: the value is true (teamCityRunnerRules.scala:10); bad sub2: the value is false (teamCityRunnerRules.scala:10)']",
+      "##teamcity[testFailed name='specification name.sub examples' message='bad sub1: the value is true (teamCityRunnerRules.scala:10); bad sub2: the value is false (teamCityRunnerRules.scala:10)']",
       "##teamcity[testFinished name='specification name.sub examples']").as(messages).mkString("\n")}{messagesMustBeCreated}
 
 </wiki>
@@ -68,5 +68,6 @@ The messages should be:
 class teamCityRunnerTest extends JUnit4(teamCityRunnerSpec) with Html {
   override def outputDir = "target/"
 }
+
 
 
