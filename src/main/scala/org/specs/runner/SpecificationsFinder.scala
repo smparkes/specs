@@ -87,5 +87,5 @@ trait SpecificationsFinder extends FileSystem {
    * Tries to load the class name and cast it to a specification
    * @return None in case of an exception. 
    */
-  def createSpecification(className: String): Option[Specification] = createObject[Specification](className, false)
+  def createSpecification(className: String): Option[Specification] = createObject[Specification](className)
 }

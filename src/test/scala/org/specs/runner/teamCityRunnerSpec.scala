@@ -7,7 +7,7 @@ h3. Introduction
 The TeamCity runner is a Specification runner designed to create TeamCity formatted messages to the standard output when running specifications.
 Those messages are then picked up by TeamCity and used to report the status of the current build
   
-A specification for the TeamCity output messages can be found "here":http://www.jetbrains.net/confluence/display/TCD3/Build+Script+Interaction+with+TeamCity#BuildScriptInteractionwithTeamCity-testReporting.
+A specification for the TeamCity output messages can be found "here":http://www.jetbrains.net/confluence/display/TCD4/Build+Script+Interaction+with+TeamCity
 
 h3. Notifying specifications and sus as Test suites
    
