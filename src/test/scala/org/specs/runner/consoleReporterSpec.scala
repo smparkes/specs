@@ -80,7 +80,7 @@ object consoleReporterSpec extends Specification with MockOutput {
   "A console reporter" should {
     "not print stack trace if setNoStackTrace is called" in {
       val spec = new SpecWithOneExample(that.throwsAnException)
-      spec.setNoStacktrace
+      spec.setNoStacktrace()
       spec.run mustNot containMatch("org.specs.runner.SpecWithOneExample\\$")
     }
   }
@@ -105,6 +105,13 @@ object consoleReporterSpec extends Specification with MockOutput {
     "accept a -acc argument to only exclude examples having some tags in the specification" in {
       runWith("-acc", "in") must (containMatch("\\+ included") and containMatch("o excluded")) 
     }
+    "accept a -xOnly (--failedOnly) argument to only show failed and error examples" in {
+      runWith("-xOnly") must (notContainMatch("\\+ included") and containMatch("x failed") and containMatch("x error")) 
+      runWith("--failedOnly") must (notContainMatch("\\+ included") and containMatch("x failed") and containMatch("x error")) 
+    }
+    "not display the sus at all if all examples are ok with the -xOnly flag" in {
+      runWith("-acc", "in", "-xOnly") must (notContainMatch("this sus")) 
+    }
   }
   "A console trait" should { clean.before
     "print a warning message if a accept/reject argument is not followed by tags" in {
@@ -120,14 +127,18 @@ object consoleReporterSpec extends Specification with MockOutput {
     specRunner.messages.toList
   }
   def clean = {
-    specRunner.args = Array()
+    specRunner.resetOptions()
     spec.acceptAnyTag
     spec.resetForExecution
     specRunner.messages.clear
   }
-  object spec extends Specification { 
-    ("excluded" in {}).tag("out") 
-    ("included" in {}).tag("in") 
+  object spec extends Specification {
+    "this sus" should {
+      ("excluded" in {}).tag("out") 
+      ("included" in {}).tag("in") 
+      "failed" in {throw new FailureException("failed")} 
+      "error" in {throw new Error("error")}
+    } 
   }
   object specRunner extends ConsoleRunner(spec) with MockOutput
 
@@ -207,3 +218,4 @@ class SpecWithLiterateDescription(behaviours: List[(that.Value)]) extends TestSp
 object that extends Enumeration {
   val isKo, isOk, isKoTwice, isKoWithTheFailMethod, throwsAnException, isSkipped, isSkippedBecauseOfAFaultyMatcher = Value
 }
+class consoleReporterSpecTest extends JUnit4(consoleReporterSpec)
