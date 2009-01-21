@@ -66,6 +66,10 @@ object iterableMatchersSpec extends MatchersSpecification {
       expectation(List("one", "two") mustNotContainMatch("[n-o]")) must failWith("at least one element matches '[n-o]' in 'List(one, two)'")
       expectation(List("one", "two") aka "the list" must notContainMatch("[n-o]")) must failWith("at least one element matches '[n-o]' in the list 'List(one, two)'")
     }
+    "provide a 'must containMatchOnlyOnce' matcher on iterables checking if there is only one match" in {
+      List("one", "three") must containMatchOnlyOnce("[n-o]")
+      expectation(List("one", "two") must containMatchOnlyOnce("[n-o]")) must failWith("more than one element matches '[n-o]' in 'List(one, two)'")
+    }
     "provide a 'haveSize' matcher checking the size of a collection" in {
       List("one", "two") must haveSize(2)
       expectation(List("one", "two") must haveSize(3)) must failWith("'List(one, two)' doesn't have size 3")

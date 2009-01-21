@@ -27,9 +27,12 @@ object consoleReporterSpec extends Specification with MockOutput {
     "indicate the line and class where the failure occurred" in { 
       specWithOneExample(that.isKo) must containMatch("(consoleReporterSpec.scala:\\d)") 
     } 
-    "display the first failure of an example having several ones" in { 
+    "display the first failure of an example having several failures" in { 
       specWithOneExample(that.isKo, that.isKo) must containMatch("first failure") 
       specWithOneExample(that.isKo, that.isKo) must notContainMatch("second failure")
+    } 
+    "display the failures of subexamples" in { 
+      specWithOneExample(that.hasTwoSubExamples) must containMatchOnlyOnce("sub1 failed") 
     } 
     "display '1 error' if one example throws an exception" in {
       specWithOneExample(that.throwsAnException) must containMatch("1 error") 
@@ -156,6 +159,7 @@ abstract class TestSpec extends LiterateSpecification with Console with MockOutp
   val failure2 = () => "ok" mustBe "second failure"
   val failMethod = () => fail("failure with the fail method")
   val exception= () => throw new Exception("new Error")
+  val subExamples = () => { "subexample1" in fail("sub1 failed"); "subexample2" in fail("sub2 failed") }
   def expectations(behaviours: List[that.Value]) = behaviours map { 
                                     case that.isOk => success
                                     case that.isSkipped => isSkipped
@@ -163,7 +167,9 @@ abstract class TestSpec extends LiterateSpecification with Console with MockOutp
                                     case that.isKo => failure1
                                     case that.isKoTwice => () => {failure1(); failure2()} 
                                     case that.isKoWithTheFailMethod => failMethod 
-                                    case that.throwsAnException => exception }
+                                    case that.throwsAnException => exception
+                                    case that.hasTwoSubExamples => subExamples 
+  }
 }
 
 class SpecWithOneExample(behaviours: List[(that.Value)]) extends TestSpec {
@@ -216,6 +222,8 @@ class SpecWithLiterateDescription(behaviours: List[(that.Value)]) extends TestSp
 }
 
 object that extends Enumeration {
-  val isKo, isOk, isKoTwice, isKoWithTheFailMethod, throwsAnException, isSkipped, isSkippedBecauseOfAFaultyMatcher = Value
+  val isKo, isOk, isKoTwice, isKoWithTheFailMethod, 
+      throwsAnException, isSkipped, isSkippedBecauseOfAFaultyMatcher,
+      hasTwoSubExamples = Value
 }
 class consoleReporterSpecTest extends JUnit4(consoleReporterSpec)
