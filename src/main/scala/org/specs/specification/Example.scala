@@ -46,7 +46,10 @@ case class ExampleWithContext[S](val context: SystemContext[S], var exampleDesc:
       case _ => t
     }
   }
-
+  /** clone method to create a new example from this one. */
+  override def clone: ExampleWithContext[S] = {
+    copyDefTo(ExampleWithContext(context, exampleDesc, cyc))
+  }
 } 
 case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLifeCycle) extends Tagged with HasResults {
   def this(desc: String, cycle: ExampleLifeCycle) = this(ExampleDescription(desc), cycle)
@@ -54,7 +57,7 @@ case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLif
   def description = exampleDescription.toString
 
   /** function containing the test to be run */
-  private[this] var toRun: () => Any = () => ()
+  private var toRun: () => Any = () => ()
 
   /** flag used to memorize if the example has already been executed once. In that case, it will not be re-executed */
   private[this] var executed = false
@@ -69,7 +72,7 @@ case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLif
   var thisErrors = new Queue[Throwable]
 
   /** number of <code>Assert</code> objects which refer to that Example */
-  private[this] var expectationsNumber = 0
+  private var expectationsNumber = 0
 
   /** @return the number of expectations, executing the example if necessary */
   def expectationsNb = { execute; expectationsNumber }
@@ -78,7 +81,7 @@ case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLif
   def addExpectation = { expectationsNumber += 1; this }
 
   /** sub-examples created inside the <code>in</code> method */
-  private[this] var subExs = new Queue[Example]
+  private var subExs = new Queue[Example]
 
   /** add a new sub-example to this example */
   def addExample(e: Example) = subExs += e
@@ -101,7 +104,7 @@ case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLif
    * Execution will be triggered when requesting status information on that example: failures, errors, expectations number, subexamples
    * @return a new <code>Example</code>
    */
-  def in[T](test: => T): Example = {
+  def in[T](test: => T): this.type = {
     val execution = () => {
       var failed = false
       // try the "before" methods. If there is an exception, add an error and return the current example
@@ -188,6 +191,17 @@ case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLif
     thisSkipped.clear
     subExs.foreach(_.resetForExecution)
     this
+  }
+  /** clone method to create a new example from this one. */
+  override def clone: Example = {
+    copyDefTo(Example(exampleDescription, cycle))
+  }
+  def copyDefTo[E <: Example](e: E): E = {
+    e.toRun = this.toRun
+    e.subExs = new Queue[Example]
+    this.subExs.foreach { subEx => e.subExs += subEx.clone }
+    e.expectationsNumber = this.expectationsNumber
+    e
   }
 }
 case class ExampleDescription(desc: String) {

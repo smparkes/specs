@@ -55,7 +55,7 @@ abstract class Specification extends Matchers with ExpectableFactory with Specif
   object behave {
     def like(other: Sus): Example = {
       val behaveLike = "behave like " + other.description.uncapitalize in {}
-      other.examples.foreach(behaveLike.addExample(_))
+      other.examples.foreach { example => behaveLike.addExample(example.clone) }
       behaveLike
     }
     def like(susName: String): Example = outer.systems.find(_.description == susName) match {
