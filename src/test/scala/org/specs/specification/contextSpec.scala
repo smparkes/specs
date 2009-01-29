@@ -55,11 +55,37 @@ use the system and its as parameters in { (s: System, c: Context) =>
 """ >@}{ parametersOk }
 </wiki>
 
+"System contexts with shared examples".definedAs(sharedExamples) ->> <wiki>
+
+<ex>When examples are shared between SUS, each example should be executed with the SUS context it is executed in</ex>: {
+""" 
+    "the first sut".definedAs(context1) should {
+      "use context 1 in its examples" in { (system: System, context: NamedContext) =>
+        context.name must_== expectedCurrentContextName
+      }
+      doAfter { expectedCurrentContextName = "context2"}
+    }
+    "this sut".definedAs(context2) should {
+      behave like "the first sut" // but with context2 instead of context1
+    }
+""" >@
+}{ sharedExamplesMustHaveProperContexts }
+
+</wiki>
+
+
+
   def parametersOk = exampleOk(2)
   def exampleOk(i: Int) = eg { (s: Specification) => 
-    s.examples.map(_.failures) // execute all examples
-    def exampleIsOk(e: Example) = e.isOk aka e.description.toString must beTrue
+    executeSpec(s)
     exampleIsOk(s.examples(i))
+  }
+  def exampleIsOk(e: Example) = e.isOk aka e.description.toString must beTrue
+  def executeSpec(s: Specification) = s.examples.map(_.failures) // execute all examples
+  def sharedExamplesMustHaveProperContexts = eg { (s: SpecificationWithSystemContextAndSharedExamples) => 
+    executeSpec(s)
+    executedContexts(0) must_== "context2"
+    executedContexts(1) must_== "context1"
   }
 }
 trait ContextDefinitions {
@@ -105,6 +131,30 @@ trait ContextDefinitions {
   def systemContexts = new SystemContext[SpecificationWithSystemContext] {
     def newSystem = SpecificationWithSystemContext()
   }
+  
+  var executedContexts: List [String] = Nil
+  case class SpecificationWithSystemContextAndSharedExamples() extends Specification {
+    case class System()
+    case class NamedContext(name: String) extends SystemContext[System] {
+      def newSystem = System()
+    }
+    def context1 = NamedContext("context1") 
+    def context2 = NamedContext("context2")
+    
+    "the first sut".definedAs(context1) should {
+      "use context 1 in its examples" in { (system: System, context: NamedContext) =>
+        println("the example is executed in context " + context.name)
+        executedContexts = context.name :: executedContexts
+      }
+    }
+    "the second sut".definedAs(context2) should {
+      behave like "the first sut"
+    }
+  }
+  def sharedExamples = new SystemContext[SpecificationWithSystemContextAndSharedExamples] {
+    def newSystem = SpecificationWithSystemContextAndSharedExamples()
+  }
 }
+
 import org.specs.runner._
 class contextSpecTest extends HtmlSuite(contextSpec, "target") with JUnit

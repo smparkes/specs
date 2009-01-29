@@ -41,14 +41,15 @@ case class ExampleWithContext[S](val context: SystemContext[S], var exampleDesc:
   override def execute(t: => Any) = {
     val test = t
     test match {
+      case function: Function0[Any] => function()
       case function: Function1[S, Any] => function(context.system)
       case function: Function2[S, Context, Any] => function(context.system, context)
-      case _ => t
+      case _ => test
     }
   }
   /** clone method to create a new example from this one. */
   override def clone: ExampleWithContext[S] = {
-    copyDefTo(ExampleWithContext(context, exampleDesc, cyc))
+    copyExecutionTo(ExampleWithContext(context, exampleDesc, cyc))
   }
 } 
 case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLifeCycle) extends Tagged with HasResults {
@@ -56,12 +57,6 @@ case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLif
 
   def description = exampleDescription.toString
 
-  /** function containing the test to be run */
-  private var toRun: () => Any = () => ()
-
-  /** flag used to memorize if the example has already been executed once. In that case, it will not be re-executed */
-  private[this] var executed = false
-  
   /** failures created by Assert objects inside the <code>in<code> method */
   var thisFailures = new Queue[FailureException]
 
@@ -81,7 +76,7 @@ case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLif
   def addExpectation = { expectationsNumber += 1; this }
 
   /** sub-examples created inside the <code>in</code> method */
-  private var subExs = new Queue[Example]
+  var subExs = new Queue[Example]
 
   /** add a new sub-example to this example */
   def addExample(e: Example) = subExs += e
@@ -95,70 +90,34 @@ case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLif
   def subExamples = {execute; subExs}
   
   /** alias for the <code>in</code> method */
-  def >>[T](test: => T) = in(test)
-  def doTest[T](test: => T) = cycle.executeTest(this, test)
+  def >>[T](expectations: => T) = in(expectations)
+  def doTest[T](expectations: => T) = cycle.executeTest(this, expectations)
+  
+  /** encapsulates the expectations to execute */
+  var execution = new ExampleExecution(this, () => ())
+
   /**
-   * creates a new Example object and store as a function the test to be executed. This <code>test</code>
-   * is a value which may contain expectations. Upon execution, errors and failures will be attached to the current example
+   * creates a new Example object and store as an ExampleExecution object the expectations to be executed. 
+   * This <code>expectations</code> parameter is a block of code which may contain expectations with matchers. 
+   * Upon execution, errors and failures will be attached to the current example
    * by calling the <code>addFailure</code> and <code>addError</code> methods
    * Execution will be triggered when requesting status information on that example: failures, errors, expectations number, subexamples
    * @return a new <code>Example</code>
    */
-  def in[T](test: => T): this.type = {
-    val execution = () => {
-      var failed = false
-      // try the "before" methods. If there is an exception, add an error and return the current example
-      try { cycle.beforeExample(this) } catch {
-        case t: Throwable => { 
-          addError(t) 
-          failed = true
-        }
-      }
-      // execute the <code>test</code> parameter. If it contains expectations they will be automatically executed
-      try {
-        if (!failed) {
-          cycle.beforeTest(this)
-          cycle.executeTest(this, test)
-          cycle.afterTest(this)
-        }
-      } catch { 
-        // failed expectations will launch a FailureException
-        // skipped expectations will launch a SkippedException
-        case f: FailureException => addFailure(f)
-        case s: SkippedException => addSkipped(s)
-        case t: Throwable => addError(t)
-      }
-      // try the "after" methods. If there is an exception, add an error and return the current example
-      try { 
-        if (!failed) 
-          cycle.afterExample(this) 
-      } catch { case t: Throwable => addError(t) }
-      this
-    }
-    toRun = () => {
-      if (isAccepted) {
-        execution()
-        while (!cycle.until) execution()
-      } else
-        addSkipped(new SkippedException("not tagged for execution"))
-    }
+  def in(expectations: =>Any): this.type = {
+    execution = new ExampleExecution(this, () => expectations)
     if (cycle.isSequential)
       execute
     this
   }
   
+  /** execute the example, checking the expectations. */
+  def execute: Unit =  execution.execute
+
   def before = {}
   def after = {}
   def execute(t: => Any) = t
 
-  /** execute the example, setting a flag to make sure that it is only executed once */
-  private[this] def execute = {
-    if (!executed){
-      toRun()
-      executed = true
-    }
-  }
-  
   /** creates and adds a new error from an exception t */
   def addError(t: Throwable) = thisErrors += t
 
@@ -185,7 +144,7 @@ case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLif
   
   /** reset in order to be able to run the example again */
   def resetForExecution: this.type = {
-    executed = false
+    execution.resetForExecution
     thisFailures.clear
     thisErrors.clear
     thisSkipped.clear
@@ -194,17 +153,73 @@ case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLif
   }
   /** clone method to create a new example from this one. */
   override def clone: Example = {
-    copyDefTo(Example(exampleDescription, cycle))
+    copyExecutionTo(Example(exampleDescription, cycle))
   }
-  def copyDefTo[E <: Example](e: E): E = {
-    e.toRun = this.toRun
-    e.subExs = new Queue[Example]
-    this.subExs.foreach { subEx => e.subExs += subEx.clone }
-    e.expectationsNumber = this.expectationsNumber
+  
+  def copyExecutionTo[E <: Example](e: E): E = {
+    e.execution = new ExampleExecution(e, execution.expectations)
     e
   }
 }
+/**
+ * Description of the example
+ */
 case class ExampleDescription(desc: String) {
   override def toString = desc
   def format: String = desc.toString
+}
+/**
+ * This class encapsulates the execution of an example 
+ */
+class ExampleExecution(example: Example, val expectations: () => Any) {
+  /** function containing the expectations to be run */
+  private var toRun: () => Any = () => {
+      if (example.isAccepted) {
+        execution()
+        while (!example.cycle.until) execution()
+      } else
+        example.addSkipped(new SkippedException("not tagged for execution"))
+  }
+
+  /** flag used to memorize if the example has already been executed once. In that case, it will not be re-executed */
+  private[this] var executed = false
+  
+  val execution = () => {
+    var failed = false
+    // try the "before" methods. If there is an exception, add an error and return the current example
+    try { example.cycle.beforeExample(example) } catch {
+      case t: Throwable => { 
+        example.addError(t) 
+        failed = true
+      }
+    }
+    // execute the <code>expectations</code> parameter. If it contains expectations with matchers they will be automatically executed
+    try {
+      if (!failed) {
+        example.cycle.beforeTest(example)
+        example.cycle.executeTest(example, expectations())
+        example.cycle.afterTest(example)
+      }
+    } catch { 
+      // failed expectations will launch a FailureException
+      // skipped expectations will launch a SkippedException
+      case f: FailureException => example.addFailure(f)
+      case s: SkippedException => example.addSkipped(s)
+      case t: Throwable => example.addError(t)
+      }
+      // try the "after" methods. If there is an exception, add an error and return the current example
+      try { 
+        if (!failed) 
+          example.cycle.afterExample(example) 
+      } catch { case t: Throwable => example.addError(t) }
+      example
+  }
+  /** execute the example, setting a flag to make sure that it is only executed once */
+  def execute = {
+    if (!executed){
+      toRun()
+      executed = true
+    }
+  }
+  def resetForExecution = executed = false
 }
