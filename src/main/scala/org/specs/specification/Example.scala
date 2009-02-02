@@ -127,14 +127,14 @@ case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLif
   /** creates and adds a skipped exception */
   def addSkipped(skip: SkippedException) = thisSkipped += skip
 
-  /** @return the failures of this example and its subexamples, executing the example if necessary */
-  def failures: Seq[FailureException] = { execute; thisFailures ++ subExamples.flatMap { _.failures } }
+  /** @return the failures of this example, executing the example if necessary */
+  def failures: Seq[FailureException] = { execute; thisFailures }
 
-  /** @return the skipped messages for this example and its subexamples, executing the example if necessary  */
-  def skipped: Seq[SkippedException] = { execute; thisSkipped ++ subExamples.flatMap { _.skipped } }
+  /** @return the skipped messages for this example, executing the example if necessary  */
+  def skipped: Seq[SkippedException] = { execute; thisSkipped }
 
-  /** @return the errors of this example and its subexamples, executing the example if necessary  */
-  def errors: Seq[Throwable] = { execute; thisErrors ++ subExamples.flatMap {_.errors} }
+  /** @return the errors of this example, executing the example if necessary  */
+  def errors: Seq[Throwable] = { execute; thisErrors }
 
   /** @return a user message with failures and messages, spaced with a specific tab string (used in ConsoleReport) */
   def pretty(tab: String) = tab + description + failures.foldLeft("") {_ + addSpace(tab) + _.message} + 

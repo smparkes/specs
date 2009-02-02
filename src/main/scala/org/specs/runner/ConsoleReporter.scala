@@ -145,7 +145,7 @@ trait OutputReporter extends Reporter with Output {
    */
   def reportExamples(examples: Iterable[Example], padding: String): Unit = {
     for (example <- examples) {
-      if (example.subExamples.isEmpty) reportExample(example, padding)
+      reportExample(example, padding)
       reportExamples(example.subExamples, padding + "  ")
     }
   }

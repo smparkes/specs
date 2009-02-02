@@ -139,7 +139,7 @@ trait AnyMatchers {
   /**
    * Matches if iterable.exists(_ == a)
    */   
-  def beIn[T <: AnyRef](iterable: =>Iterable[T]) = new Matcher[T](){
+  def beIn[T](iterable: =>Iterable[T]) = new Matcher[T](){
     def apply(v: => T) = {
       val (x, y) = (iterable, v) 
       (x.exists(_ == y), d(y) + " is in " + q(x), d(y) + " is not in " + q(x))
@@ -149,7 +149,7 @@ trait AnyMatchers {
   /**
    * Matches if not(iterable.exists(_ == a))
    */   
-  def notBeIn[T <: AnyRef](iterable: =>Iterable[T]) = beIn(iterable).not 
+  def notBeIn[T](iterable: =>Iterable[T]) = beIn(iterable).not 
 
   /**
    * Matches if any object with an <code>isEmpty</code> method returns true: (Any {def isEmpty: Boolean}).isEmpty
