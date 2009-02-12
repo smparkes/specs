@@ -173,9 +173,24 @@ trait DefaultResults extends HasResults {
   
 
 /**
+ * This trait can be used to access Matchers functionalities outside a Specification.
+ * For example like this:<code>
+ * 
+ *  trait Functions extends Expectations {
+ *    def bar(name: String) = name.length < 4 mustBe true
+ *  }
+ *  object Foo extends Specification with Functions {
+ *    bar("Foo")
+ *    bar("FooFoo")
+ *  }
+ * </code>
+ * 
+ */
+trait Expectations extends Matchers with ExpectableFactory
+/**
  * This trait can be reused in any test based framework to access Matchers functionalities
  */
-trait SpecsMatchers extends Matchers with ExpectableFactory with DefaultExampleExpectationsListener with DetailedFailures
+trait SpecsMatchers extends Expectations with DefaultExampleExpectationsListener with DetailedFailures
 
 
 /** utility object to indent a string with 2 spaces */
