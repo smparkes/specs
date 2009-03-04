@@ -1,7 +1,7 @@
 package org.specs.matcher
 import java.io.File
 
-object FileMatchersSpec extends MatchersSpecification with TestFileSystem  {
+object fileMatchersSpec extends MatchersSpecification with TestFileSystem  {
   
   "The PathMatchers trait" should { doBefore { setFileSystem } 
     "provide an beEqualToIgnoringSep matcher checking if two paths are the same regardless of their separators" in {
@@ -134,4 +134,4 @@ trait TestFileSystem extends MockFileSystem {
   }
 }
 import org.specs.runner._
-class FileMatchersTest extends JUnit4(FileMatchersSpec)
+class FileMatchersTest extends JUnit4(fileMatchersSpec)
