@@ -23,7 +23,7 @@ trait Html extends File {
   override def outputDir = normalize(htmlDir)
 
   /** default directory name. */
-  def htmlDir = "."
+  def htmlDir = "target"
 
   /** report the specification held by this runner. */
   override def report(specifications: Seq[Specification]) = {
@@ -75,6 +75,8 @@ trait Html extends File {
 	      @import url('./css/maven-theme.css');
 	      @import url('./css/site.css');
 	    </style>
+        <link href="./css/prettify.css" type="text/css" rel="stylesheet" />
+        <script type="text/javascript" src="./css/prettify.js"></script>
         <link rel="stylesheet" href="./css/print.css" type="text/css" media="print" />
         <link href="./css/tooltip.css" rel="stylesheet" type="text/css" />
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -140,7 +142,14 @@ trait Html extends File {
 
   /** create a table for one specification. */
   def specificationTable(spec: Specification) = {
-    <h2>{spec.description}</h2> ++ subspecsTables(spec.subSpecifications) ++ susTables(spec)
+    val subSpecsToDisplay = new scala.collection.mutable.ListBuffer[Specification]
+    spec.subSpecifications.foldLeft(subSpecsToDisplay) { (res, cur) =>
+      cur match {
+        case literate: LiterateSpecification if (literate.hasParentLink(spec)) => { literate.reportSpecs; res }  
+        case other => { res.append(other); res }
+      }
+    }
+    <h2>{spec.description}</h2> ++ subspecsTables(subSpecsToDisplay.toList) ++ susTables(spec)
   }
 
   /** create tables for systems. */
@@ -261,13 +270,16 @@ trait Html extends File {
 
   /** reduce a list with a function returning a NodeSeq. */
   def onLoadFunction(specification: Specification) = {
-    if (nonTrivialSpec(specification)) "" else "noNavBar()"
+    "prettyPrint()" + (if (nonTrivialSpec(specification)) "" else ";noNavBar()")
   }
   def nonTrivialSpec(specification: Specification) = {
     (specification.systems ++ specification.subSpecifications).size > 1
   }
   def javaScript = <script language="javascript"> {"""
-
+    function init() {
+	   prettyPrint()
+     noNavBar()
+    }
     // found on : http://www.tek-tips.com/faqs.cfm?fid=6620
     String.prototype.endsWith = function(str) { return (this.match(str+'$') == str) }
 

@@ -11,3 +11,6 @@ text.rb
 .gitignore
 target*
 .settings
+*.iml
+*.ipr
+*.iws

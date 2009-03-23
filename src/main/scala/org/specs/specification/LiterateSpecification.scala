@@ -15,8 +15,9 @@ import org.specs.runner._
  * <li>xmlRunnerSpec
  * </ul>
  */
-class LiterateSpecification extends Specification with ExpectableFactory with DataTables with Properties {
+class LiterateSpecification extends Specification with ExpectableFactory with DataTables with Properties with Links {
   setSequential()
+
   def this(n: String) = { this(); name = n; description = n; this }
 
   /**
@@ -26,6 +27,8 @@ class LiterateSpecification extends Specification with ExpectableFactory with Da
    */
   implicit def anyToShh(a: Any) = new Silenced
 
+  /** allow empty sus to be reported. */
+  override def filterEmptySus = false
   class Silenced {
     def shh = ()
 
@@ -101,19 +104,9 @@ class LiterateSpecification extends Specification with ExpectableFactory with Da
    * giving it a number depending on the existing created examples/
    */
   def eg[S](function: S => Any): Unit = (forExample in function).shh
-  /**
-   * embeddeds a test into a new example and silence the result
-   * @deprecated
-   */
-  def check[S](function: S => Any): Unit = eg(function)
 
   /** embeddeds a test into a new example and silence the result */
   def eg(test: =>Any): Unit = (forExample in test).shh
-  /**
-   * embeddeds a test into a new example and silence the result
-   * @deprecated
-   */
-  def check(test: =>Any): Unit = eg(test)
 
   /** return a String containing the output messages from the console with a given padding such as a newline for instance */
   def consoleOutput(pad: String, messages: Seq[String]): String = { pad + consoleOutput(messages) }
@@ -122,11 +115,20 @@ class LiterateSpecification extends Specification with ExpectableFactory with Da
   def consoleOutput(messages: Seq[String]): String = messages.map("> " + _.toString).mkString("\n")
 
   def includeSus(susName: String) = "include " + susName + " not implemented yet"
+
+  private var parentLinks = List[Specification]()
+  def addParentLink(s: Specification): this.type = { parentLinks = s :: parentLinks; this }
+  def hasParentLink(s: Specification) = parentLinks.contains(s)
+
+  def linkTo(subSpec: LiterateSpecification with Html) = {
+    subSpec.addParentLink(this)
+    pathLink(subSpec.description, new java.io.File(subSpec.filePath(subSpec)).getAbsolutePath)
+  }
 }
 /**
  * This trait provides functions which can be used to ease the use of wiki markup
  */
-trait Wiki extends Properties {
+trait Wiki extends Properties with Links {
   implicit def toWikiString(a: Any) = new WikiString(a.toString)
   class WikiString(s: String) {
     def code = wikiCode(s)
@@ -138,12 +140,22 @@ trait Wiki extends Properties {
    * Using this function avoid issues like quotes insides brackets ['something']
    * being displayed as question marks.
    */
-  def wikiCode(stringToFormat: String) = "<code>"+stringToFormat+"</code>"
-  def wikiPre(stringToFormat: String) = "<pre>"+stringToFormat+"</pre>"
+  def wikiPre(stringToFormat: String) = <pre>stringToFormat</pre>
+  def wikiCode(stringToFormat: String) = stringToFormat.replace("\r\n", "\n").
+                                                        replace("\n\r", "\n").
+          split("\n").map(htmlize(_)).mkString("==<code class=\"prettyprint\">", "</code>==\n==<code class=\"prettyprint\">", "</code>==")
+
+  private def htmlize(s: String) = s.replace("<", "&lt;").replace(">", "&gt;")
   /**
    * Alias for wikiCode
    */
   def >@(stringToFormat: String) = wikiCode(stringToFormat)
 
   def linkTo(susName: String) = "link to " + susName + " not implemented yet"
+  override def pathLink(desc: String, path: String) = {
+    "\"" + desc + "\":file:///" + path
+  }
+}
+trait Links {
+  def pathLink(desc: String, path: String) = desc + " (See: " + path + ")"
 }

@@ -62,7 +62,8 @@ abstract class Specification extends Matchers with ExpectableFactory with Specif
     }
     def like(susName: String): Example = outer.systems.find(_.description == susName) match {
       case Some(sus) => this.like(sus)
-      case None => throw new Exception(q(susName) + " is not specified in " + outer.name)
+      case None => throw new Exception(q(susName) + " is not specified in " + outer.name + 
+                                         outer.systems.map(_.description).mkString(" (available sus are: ", ", ", ")"))
     }
   }
 
@@ -191,11 +192,11 @@ trait DefaultResults extends HasResults {
  * </code>
  *
  */
-trait Expectations extends Matchers with ExpectableFactory
+trait Expectations extends Matchers with ExpectableFactory with DetailedFailures
 /**
  * This trait can be reused in any test based framework to access Matchers functionalities
  */
-trait SpecsMatchers extends Expectations with DefaultExampleExpectationsListener with DetailedFailures
+trait SpecsMatchers extends Expectations with DefaultExampleExpectationsListener
 
 
 /** utility object to indent a string with 2 spaces */
