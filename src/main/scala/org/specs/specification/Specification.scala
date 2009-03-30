@@ -9,8 +9,7 @@ import org.specs.matcher.MatcherUtils._
 import org.specs.SpecUtils._
 import org.specs.specification._
 import org.specs.ExtendedThrowable._
-import _root_.org.junit.runner._
-
+import org.junit.runner.RunWith
 /**
  * This class is the main class for declaring a new specification<br>
  * In the context of a specification, you can:<ul>
