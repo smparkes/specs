@@ -6,7 +6,8 @@ import org.specs.util._
 import org.specs._
 import org.specs.specification._
 import org.specs.ExtendedThrowable._
-
+import org.specs.execute._
+import org.specs.util.Plural._
 /**
  * This trait reports the result of a specification on a simple <code>Output</code>
  * which must support <code>print</code>-like methods
@@ -142,7 +143,7 @@ trait OutputReporter extends Reporter with Output {
    * prints the statistics for a sus
    */
   def printStats(sus: Sus, padding: String): Unit = {
-    println(padding + "Total for SUT \"" + sus.description + "\":")
+    println(padding + "Total for SUS \"" + sus.description + "\":")
     printStats(stats(sus), padding)
   }
 
@@ -151,17 +152,16 @@ trait OutputReporter extends Reporter with Output {
    */
   def printStats(stat: (Int, Int, Int, Int, Int), padding: String) = {
     val (examplesNb, expectationsNb,  failuresNb, errorsNb, skippedNb) = stat
-    def plural[T](nb: Int) = if (nb > 1) "s" else ""
     def failureColoredIf(text: String, cond: Boolean) =
       if (cond) failureColored(text)
       else text
     println(padding + "Finished in " + timer.time)
     println(padding +
-            examplesNb + " example" + plural(examplesNb) +
+            examplesNb + " example".plural(examplesNb) +
             (if (skippedNb > 0) " (" + skippedNb + " skipped)" else "") + ", " +
-            expectationsNb + " expectation" + plural(expectationsNb) + ", " +
-            failureColoredIf(failuresNb + " failure" + plural(failuresNb), failuresNb > 0) + ", " +
-            failureColoredIf(errorsNb + " error" + plural(errorsNb), errorsNb > 0)
+            expectationsNb + " expectation".plural(expectationsNb) + ", " +
+            failureColoredIf(failuresNb + " failure".plural(failuresNb), failuresNb > 0) + ", " +
+            failureColoredIf(errorsNb + " error".plural(errorsNb), errorsNb > 0)
             )
     println("")
   }
@@ -214,7 +214,7 @@ trait OutputReporter extends Reporter with Output {
   /** @return true if the results should be printed
    */
   private def canReport(hasResults: HasResults) = {
-    !failedAndErrorsOnly || failedAndErrorsOnly && hasResults.hasFailureAndErrors
+    !failedAndErrorsOnly || failedAndErrorsOnly && hasResults.hasFailureOrErrors
   }
 }
 

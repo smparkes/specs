@@ -5,6 +5,7 @@ import org.specs.io._
 import org.specs.util._
 import org.specs.ExtendedThrowable._
 import org.specs.xml.NodeFunctions._
+import org.specs.execute._
 
 /**
  * The Html trait outputs the results of a specification execution as an html
@@ -53,7 +54,7 @@ trait Html extends File {
    */
   def asHtml(spec: Specification): Elem = <html>
     {head(spec)}
-    <body onLoad={onLoadFunction(spec)}>
+    <body>
       <div id="toolTip"/>
       {anchorName("top")}
       {summaryTable(spec)}
@@ -78,10 +79,13 @@ trait Html extends File {
         <link href="./css/prettify.css" type="text/css" rel="stylesheet" />
         <script type="text/javascript" src="./css/prettify.js"></script>
         <link rel="stylesheet" href="./css/print.css" type="text/css" media="print" />
+        <script type="text/javascript" src="./css/tabber.js"></script> 
+        <link rel="stylesheet" href="./css/tabber.css" type="text/css" media="screen"/> 
         <link href="./css/tooltip.css" rel="stylesheet" type="text/css" />
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <script type="text/javascript" src="./css/tooltip.js"/>
         {javaScript}
+        <script language="javascript">window.onLoad={onLoadFunction(specification)}</script>
     </head>
 
   /** return a formatted string depending on the type of literate description: text, wiki or html. */
@@ -278,7 +282,7 @@ trait Html extends File {
   def javaScript = <script language="javascript"> {"""
     function init() {
 	   prettyPrint()
-     noNavBar()
+       noNavBar()
     }
     // found on : http://www.tek-tips.com/faqs.cfm?fid=6620
     String.prototype.endsWith = function(str) { return (this.match(str+'$') == str) }

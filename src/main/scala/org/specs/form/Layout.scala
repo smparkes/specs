@@ -4,63 +4,73 @@ import scala.xml._
 import scala.collection.mutable._
 import scala.collection.mutable.ListBuffer
 import org.specs.xml.NodeFunctions._
+import org.specs.util.IncludeExclude
+import org.specs.xml.Xhtml._
 
-trait Linkable[T] {
-  val next: ListBuffer[Linkable[_]] = new ListBuffer()
-  var previous: Option[Linkable[_]] = None
+/**
+ * This trait allows to display ToXhtml elements in rows or tabs.
+ * 
+ * It is itself a ToXhtml element which will return itself as a set of rows
+ * 
+ * The main method is tr which declares values which must be displayed on the same row.
+ * 
+ * tr(a1, a2) // tr for "table row"
+ * tr(a3)
+ * 
+ * Several display functions are also available:
+ * 
+ * tr(empty)                // displays a small empty line
+ * p(values)                // "paragraph": displays an empty line and the values on the next row
+ * th1("header")            // display the title in a small box on a new row
+ * th2("header")            // display the title in a <th> on a new row
+ * th3("header")            // display the title in a <th> on a new row, aligned left
+ * th3("header", "success") // display the title in a <th> on a new row, aligned left, with a special class attribute
+ * 
+ * Tabs can also be created with the tabs() and tab() case classes:
+ * 
+ * new tabs() {
+ *   new tab() {
+ *     tr(v1, v2)
+ *   }
+ * }
+ */
+trait Layoutable extends Layout with ToXhtml with LayoutFormats with Tabs
 
-  def -->[X](others: Linkable[X]*): this.type = {
-    next.appendAll(others)
-    others.foreach { _.previous = Some(this) }
+/**
+ * The Layout trait allows to put ToXhtml values on rows
+ */
+trait Layout extends IncludeExclude[LabeledXhtml] {
+  /** store row values */
+  protected var rowValues: ListBuffer[Seq[LabeledXhtml]] = new ListBuffer
+
+  /**
+   * adding values on a row
+   */
+  def tr(values: LabeledXhtml*): this.type = {
+    appendValues(values:_*)
     this
   }
-}
-trait Layoutable extends ToHtml {
-  private var rows: ListBuffer[() => NodeSeq] = new ListBuffer
-
-  def xml = reduce(rows, {(f: () => NodeSeq) => f.apply()})
-
-  var columnsNumber = 1
-
-  def toRow(values: ToHtml*) = <tr> {reduce(values, {(x: ToHtml) => x.toEmbeddedHtml})} </tr>
-
-  def inRow(value: ToHtml) = <tr> {value.toEmbeddedHtml} </tr>
-
-  private def max(a: Int, b: Int) = if (a < b) b else a
-
-  private def max(values: Int*) = {
-    var m = 0
-    values.foreach{(x: Int) => if (x > m) m = x}
-    m
+  protected def appendValues(values: LabeledXhtml*) = {
+    rowValues.append(values)
   }
-
-  def tr(values: ToHtml*) = {
-    columnsNumber = max(columnsNumber, values.size)
-    rows.append(() => toRow(values: _*))
+  /**
+   * adding several rows coming from another form
+   */
+  def trs(rows: List[Seq[LabeledXhtml]]): this.type = {
+    appendRows(rows)
+    this
   }
-
-  def span = columnsNumber * 3
-
-  def updateLastTd(nodes: NodeSeq): NodeSeq = updateLastTd(nodes, span)
-
-  def updateLastTd(nodes: NodeSeq, spanSize: Int): NodeSeq = {
-    nodes.toList match {
-      case List(<th>{ b }</th>) => <th colspan={spanSize.toString}>{b}</th> % nodes.toList.first.attributes
-      case List(<td>{ b }</td>) => <td colspan={spanSize.toString}>{b}</td> % nodes.toList.first.attributes
-      case List(<td>{ b }</td>, Text(x)) => <td colspan={spanSize.toString}>{b}</td> % nodes.toList.first.attributes  ++ Text(x)
-      case <th>{ b }</th> :: otherThs => nodes.toList.first ++ updateLastTd(otherThs, spanSize)
-      case <td>{ b }</td> :: otherTds => nodes.toList.first ++ updateLastTd(otherTds, spanSize)
-      case List(<table>{ x @ _*}</table>) => <table class="dataTable">{updateLastTd(x, spanSize)}</table>
-      case <tr>{ y @ _*}</tr> :: otherRows => <tr>{updateLastTd(y, spanSize)}</tr> ++ updateLastTd(otherRows, spanSize)
-      case Text(x) :: other => Text(x) ++ updateLastTd(other, spanSize)
-      case other => other
-    }
-  }
+  protected def appendRows(rows: List[Seq[LabeledXhtml]]) = rows.foreach { v => appendValues(v:_*) } 
+  /** @return all rows as a List */
+  def rows = rowValues.toList
+  /** @return the number of rows */
+  def rowsNb = rowValues.size
+  /** concatenate all rows as Xhtml */
+  def xhtml = reduce(rowValues, { (x:Seq[LabeledXhtml]) => toRow(x:_*) })
+  /** 
+   * create a row with the "embedded" Xhtml values, filtered according to the IncludeExclude trait.
+   */
+  protected def toRow(values: LabeledXhtml*) = <tr>{ reduce(filter(values), { (x: LabeledXhtml) => x.toEmbeddedXhtml }) }</tr>
 }
-
-trait ToHtml {
-  def toEmbeddedHtml: NodeSeq = <td> {toHtml} </td>
-  def toEmbeddedHtmlWithSpan(s: Int): NodeSeq = <td colspan= {s.toString}> {toHtml} </td>
-  def toHtml: NodeSeq = NodeSeq.Empty
-  def toHtmlWithSpan(s: Int): NodeSeq = NodeSeq.Empty
-}
+/** alias type */
+trait LabeledXhtml extends HasLabel with ToXhtml

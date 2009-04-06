@@ -10,6 +10,8 @@ import org.specs.SpecUtils._
 import org.specs.specification._
 import org.specs.ExtendedThrowable._
 import org.junit.runner.RunWith
+import org.specs.execute._
+
 /**
  * This class is the main class for declaring a new specification<br>
  * In the context of a specification, you can:<ul>
@@ -131,54 +133,6 @@ abstract class Specification extends Matchers with ExpectableFactory with Specif
    def skip(m: String) = SkippedException(m).hideCallerAndThrow("org.specs.Specification")
 
  }
-/**
- * This trait is useful to get a common interface for Specifications, Sus and Examples.
- */
-trait HasResults {
-  def failures: Seq[FailureException]
-  def skipped: Seq[SkippedException]
-  def errors: Seq[Throwable]
-  def status = {
-    if (!errors.isEmpty)
-      "error"
-    else if (!failures.isEmpty)
-      "failure"
-    else if (!skipped.isEmpty)
-      "skipped"
-    else
-      "success"
-  }
-  def statusAsText = {
-    if (!failureAndErrors.isEmpty)
-      "x"
-    else if (!skipped.isEmpty)
-      "o"
-    else
-      "+"
-  }
-  def hasFailureAndErrors = !failureAndErrors.isEmpty
-  def failureAndErrors = (failures ++ errors).toList
-  def issues = (failures ++ errors ++ skipped).toList
-  def issueMessages = issues.map(_.getMessage).mkString(", ")
-  def hasIssues = !issues.isEmpty
-  def isOk = issues.isEmpty
-}
-/**
- * Default implementation for the HasResults trait using lists.
- */
-trait DefaultResults extends HasResults {
-  private val thisFailures: ListBuffer[FailureException] = new ListBuffer()
-  private val thisErrors: ListBuffer[Throwable] = new ListBuffer()
-  private val thisSkipped: ListBuffer[SkippedException] = new ListBuffer()
-  def reset() = { thisFailures.clear; thisErrors.clear; thisSkipped.clear }
-  def addFailure(f: FailureException) = thisFailures.append(f)
-  def addError(t: Throwable) = thisErrors.append(t)
-  def addSkipped(s: SkippedException) = thisSkipped.append(s)
-  def failures: Seq[FailureException] = thisFailures.toList
-  def errors: Seq[Throwable] = thisErrors.toList
-  def skipped: Seq[SkippedException] = thisSkipped.toList
-}
-
 
 /**
  * This trait can be used to access Matchers functionalities outside a Specification.

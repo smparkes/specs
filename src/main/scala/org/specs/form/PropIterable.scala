@@ -7,30 +7,33 @@ import scala.xml.NodeSeq
  */
 class MatcherPropIterable[T](override val label: String,
                              expectedIt: Option[Iterable[T]],
-                 override val actual: Option[Iterable[T]], override val constraint: Option[MatcherConstraint[Iterable[T]]]) extends
-  MatcherProp[Iterable[T]](label, expectedIt, actual, constraint) {
+                             actual: =>Option[Iterable[T]], constraint: Option[MatcherConstraint[Iterable[T]]]) extends
+  MatcherProp[Iterable[T]](label, expectedIt, actual, constraint) with ValuesFormatter[T] {
+
   /** apply method with multiple args for better readability */
   def apply(v: T*): this.type = {
     super.apply(Some(v))
     this
   }
-
   /**
-   * This toHtml method currently displays values on one line.
+   * Display the property:
+   * 
+   * label: "this" (expected: "that")
    */
-  override def toHtml = {
-    <td>{label}</td> ++ (
-      if (executed)
-        <td class={statusClass}>{expected.getOrElse(Nil: Iterable[T]).mkString(", ")}</td> ++ (if (!isOk) <td class={statusClass}>{issueMessages}</td> else NodeSeq.Empty)
-      else
-        <td class="value">{expected.getOrElse(Nil: Iterable[T]).mkString(", ")}</td>
-    )
+  override def toString = {
+    label + ": " + formatStringValue(this.actual) + " (expected: " + formatStringValue(expected) + ")"
   }
-
+  
+  private def formatStringValue(v: Option[Iterable[T]]) = {
+    v.map(formatIterable(_)).getOrElse("_")
+  }
+  
+  override private[form] def formattedValue = formatIterable(expected.getOrElse(actual.getOrElse(Nil: Iterable[T])))
 }
 /**
  * Companion object containing default factory methods
  */
 case object PropIterable {
-  def apply[T](label: String, value: Iterable[T], c: MatcherConstraint[Iterable[T]]): MatcherPropIterable[T] = new MatcherPropIterable(label, None, Some(value), Some(c))
+  def apply[T](label: String, value: =>Iterable[T]): MatcherPropIterable[T] = new MatcherPropIterable(label, None, Some(value), None)
+  def apply[T](label: String, value: =>Iterable[T], c: MatcherConstraint[Iterable[T]]): MatcherPropIterable[T] = new MatcherPropIterable(label, None, Some(value), Some(c))
 }

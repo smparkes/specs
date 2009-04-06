@@ -3,6 +3,7 @@ import org.specs._
 import org.specs.mock._
 import org.specs.Sugar._
 import org.specs.specification._
+import org.specs.execute._
 
 class anyMatchersUnit extends MatchersSpecification {
   "A 'be' matcher" should {
@@ -35,6 +36,9 @@ class anyMatchersUnit extends MatchersSpecification {
       case class MyObject(value: Int)
       val (o1, o2) = (MyObject(1), MyObject(1))
       o1 must be_==(o2)
+    }
+    "be ok when using the short form ==" in {
+      1 must ==(1)
     }
     "be ok when comparing a list of ints" in {
       List(1) must be_==(List(1))

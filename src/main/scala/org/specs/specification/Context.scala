@@ -10,6 +10,8 @@ import org.specs.SpecUtils._
 import org.specs.specification._
 import org.specs.ExtendedThrowable._
 import scala.reflect.Manifest
+import org.specs.execute._
+
 /**
  * This traits adds before / after capabilities to specifications, so that a context can be defined for
  * each system under test being specified.
@@ -121,10 +123,10 @@ trait Contexts extends BeforeAfter {
   case class ToContext(desc: String) {
     def ->-[S](context: Context): Sus = {
       if (context == null) throw new NullPointerException("the context is null")
-      specifySut(context, desc)
+      specifySus(context, desc)
     } 
   }
-  private def specifySut(context: Context, desc: String): Sus = {
+  private def specifySus(context: Context, desc: String): Sus = {
     if (context == null) throw new NullPointerException("the context is null")
     val sus = specify(desc)
     doFirst(context.firstActions())
@@ -170,17 +172,17 @@ trait SystemContexts extends Contexts {
   implicit def whenInSystemContext(s: String) = ToSystemContext(s) 
 
   case class ToSystemContext(desc: String) {
-    def definedAs[S](context: SystemContext[S]): Sus = specifySutWithContext(context, desc)
-    def isAn[S](context: SystemContext[S]): Sus = specifySutWithContext(context, desc)
-    def isA[S](context: SystemContext[S]): Sus = specifySutWithContext(context, desc)
-    def whenIn[S](context: SystemContext[S]): Sus = specifySutWithContext(context, desc)
-    def whenIs[S](context: SystemContext[S]): Sus = specifySutWithContext(context, desc)
-    def whenHas[S](context: SystemContext[S]): Sus = specifySutWithContext(context, desc)
-    def whenHaving[S](context: SystemContext[S]): Sus = specifySutWithContext(context, desc)
-    def when[S](context: SystemContext[S]): Sus = specifySutWithContext(context, desc)
+    def definedAs[S](context: SystemContext[S]): Sus = specifySusWithContext(context, desc)
+    def isAn[S](context: SystemContext[S]): Sus = specifySusWithContext(context, desc)
+    def isA[S](context: SystemContext[S]): Sus = specifySusWithContext(context, desc)
+    def whenIn[S](context: SystemContext[S]): Sus = specifySusWithContext(context, desc)
+    def whenIs[S](context: SystemContext[S]): Sus = specifySusWithContext(context, desc)
+    def whenHas[S](context: SystemContext[S]): Sus = specifySusWithContext(context, desc)
+    def whenHaving[S](context: SystemContext[S]): Sus = specifySusWithContext(context, desc)
+    def when[S](context: SystemContext[S]): Sus = specifySusWithContext(context, desc)
   }
   
-  private def specifySutWithContext[S](context: SystemContext[S], desc: String): Sus = {
+  private def specifySusWithContext[S](context: SystemContext[S], desc: String): Sus = {
     if (context == null) throw new NullPointerException("the context is null")
     val sus = specify(context, desc)
     doFirst(context.firstActions())

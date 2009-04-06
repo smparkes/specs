@@ -1,3 +1,4 @@
+
 package org.specs.util
 
 /**
@@ -17,10 +18,37 @@ object Classes {
     try {
      return Some(getClass.getClassLoader.loadClass(className).newInstance.asInstanceOf[T])
     } catch {
-      case e => if (printStackTrace) e.printStackTrace()
+      case e => if (printStackTrace || System.getProperty("debugCreateObject") != null) e.printStackTrace()
     }
     return None
   }
+  /**
+   * @return the class name without the package name
+   */
+  def className(fullName: String): String = {
+    val remainingDollarNames = fullName.split("\\.").last.split("\\$")
+    if (remainingDollarNames.size > 1) {
+      if (remainingDollarNames(remainingDollarNames.size - 1).matches("\\d"))
+        remainingDollarNames(remainingDollarNames.size - 2)
+      else
+        remainingDollarNames(remainingDollarNames.size - 1)
+    }
+    else remainingDollarNames(0)
+  }
+  /**
+   * @return the class name without the package name
+   */
+  def className(klass: Class[_]): String = {
+    val result = className(klass.getName)
+    if (result.contains("anon") && klass.getSuperclass != null)
+      className(klass.getSuperclass)
+    else
+      result
+  }
+  /**
+   refdata.bondDefinition$$anonfun$1$$anon$1
+refdata.BondDescriptionForm$FixedCoupon
+   */
 }
 
 /**
