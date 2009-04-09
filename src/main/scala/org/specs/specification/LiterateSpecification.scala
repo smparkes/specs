@@ -6,6 +6,7 @@ import org.specs.util._
 import org.specs.Sugar._
 import org.specs.matcher._
 import org.specs.runner._
+import org.specs.form._
 import org.specs.execute._
 
 /**
@@ -48,7 +49,9 @@ class LiterateSpecification extends Specification with ExpectableFactory with Da
     def inTable(table: =>ExecutableDataTable) = {
       lazy val tableToExecute = table
       forExample(desc) in {
-        tableToExecute.execute
+        isExpectation(tableToExecute.execute)
+        if (!tableToExecute.isOk)
+          throw new DataTableFailureException(tableToExecute)
       }
       desc + "\n" + tableToExecute.toHtml.toString
     }
@@ -56,7 +59,7 @@ class LiterateSpecification extends Specification with ExpectableFactory with Da
       lazy val formToExecute = form
       val description = if (desc.isEmpty) form.title else desc
       forExample(description) in {
-          formToExecute.execute
+          isExpectation(formToExecute.execute)
           if (!formToExecute.isOk) throw new FailureException("The form '" +  formToExecute.title + "' failed")
       }
       description + "\n" + formToExecute.toHtml.toString
@@ -130,9 +133,17 @@ class LiterateSpecification extends Specification with ExpectableFactory with Da
 
   def linkTo(subSpec: LiterateSpecification with Html): String = linkTo(subSpec.description, subSpec)
   def linkTo(desc: String, subSpec: LiterateSpecification with Html): String = {
-    if (!this.subSpecifications.contains(subSpec)) include(subSpec)
+    if (!contains(subSpec)) include(subSpec)
+    // execute the subSpec
+    subSpec.failures
     subSpec.addParentLink(this)
     pathLink(desc, new java.io.File(subSpec.filePath(subSpec)).getAbsolutePath)
+  }
+  def prop[T](label: String, actual: =>T): MatcherProp[T] = {
+    Prop(label, actual, MatcherConstraint((m:Matcher[T]) => actual must m))
+  }
+  def displayProp[T](label: String, actual: =>T)(expected: T) = {
+    prop(label, actual)(expected).display_!
   }
 }
 /**
@@ -155,7 +166,7 @@ trait Wiki extends Properties with Links {
                                                         replace("\n\r", "\n").
           split("\n").map(htmlize(_)).mkString("==<code class=\"prettyprint\">", "</code>==\n==<code class=\"prettyprint\">", "</code>==")
 
-  private def htmlize(s: String) = s.replace("<", "&lt;").replace(">", "&gt;")
+  protected def htmlize(s: String) = s.replace("<", "&lt;").replace(">", "&gt;")
   /**
    * Alias for wikiCode
    */
@@ -164,6 +175,18 @@ trait Wiki extends Properties with Links {
   def linkTo(susName: String) = "link to " + susName + " not implemented yet"
   override def pathLink(desc: String, path: String) = {
     "\"" + desc + "\":file:///" + path
+  }
+}
+trait Textile extends Wiki
+trait Markdown extends Wiki {
+  override def wikiCode(stringToFormat: String) = stringToFormat.replace("\r\n", "\n").
+                                                        replace("\n\r", "\n").
+          split("\n").map(htmlize(_)).mkString("<code class=\"prettyprint\">", "</code\n<code class=\"prettyprint\">", "</code>")
+  override def pathLink(desc: String, path: String) = {
+    "[" + desc + "](file:///" + path + ")"
+  }
+  def pathLink(desc: String, path: String, title: String) = {
+    "[" + desc + "](file:///" + path + " " + title + ")"
   }
 }
 trait Links {
