@@ -3,7 +3,7 @@ import org.specs._
 import org.specs.specification.fullDetails
 
 class iterableMatchersSpec extends MatchersSpecification {
-  "Iterable matchers" should { doBefore { clearExample }
+  "Iterable matchers" should { clearExample.before
     "provide a 'must beEmpty' matcher on iterables: List() must beEmpty" in {
       List() must beEmpty
       expectation(List("1") must beEmpty) must failWith("List(1) is not empty")
@@ -85,6 +85,41 @@ class iterableMatchersSpec extends MatchersSpecification {
       expectation(List("one", "two") must haveSize(3)) must failWith("'List(one, two)' doesn't have size 3")
       expectation(List("one", "two") aka "the list" must haveSize(3)) must failWith("the list 'List(one, two)' doesn't have size 3")
     }
-
+    "provide a 'must be empty' matcher on iterables" in {
+      List() must be empty
+    }
+    "provide a 'must not be empty' matcher on iterables" in {
+      List("1") must not be empty
+    }
+    "provide a 'must not contain' matcher on iterables" in {
+      List("one", "two") must not contain("three")
+    }
+    "provide a 'must not containMatch' matcher on iterables" in {
+      List("one", "two") must not containMatch("z.*")
+    }
+    "provide a 'must not have' matcher on iterables" in {
+      List("one", "two") must not have((_:String).contains("z"))
+    }
+    "provide a 'have size' matcher checking the size of a collection" in {
+      List("one", "two") must have size(2)
+    }
+    "provide a 'must be empty' matcher on any type of iterable" in {
+      (Nil:Iterable[Int]) must be empty
+      val list: List[Int] = Nil
+      list must be empty
+      val collection: Collection[Int] = Nil
+      collection must be empty
+      val seq: Seq[Int] = Nil
+      seq must be empty
+      val map: Map[Int, Int] = Map()
+      map must be empty
+      val set: Set[String] = Set("one")
+      set must not contain("two")
+      val array: Array[String] = List("one").toArray
+      array must not contain("two")
+    }
+    "provide a 'be the sameSetAs' matcher" in {
+      Set("1") must be the sameSetAs(Set("1"))
+    }
   }
 }

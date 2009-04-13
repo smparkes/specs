@@ -6,7 +6,7 @@ import org.specs.collection.ExtendedIterable._
 import org.specs.ExtendedThrowable._
 import org.specs.matcher.MatcherUtils._
 import org.specs.execute._
-
+import scala.xml.Node
 /**
  * <p>The <code>Matchers</code> object allows to import the functions from the <code>Matchers</code> trait. 
  */
@@ -14,6 +14,7 @@ object Matchers extends Matchers
 /**
  * <p>The <code>Matchers</code> trait provides all existing Matchers to the 
  * <code>Specification</code> trait</p> 
+ * They can be used with be/have + matcher syntax
  */
 trait Matchers extends AnyMatchers with 
                        LogicalMatchers with
@@ -25,6 +26,21 @@ trait Matchers extends AnyMatchers with
                        XmlMatchers with 
                        FileMatchers with 
                        MatcherResult
+/**
+ * <p>The <code>BaseMatchers</code> trait provides all existing Matchers to the 
+ * <code>Specification</code> trait</p> 
+ * They can't be used with be/have + matcher syntax
+ */
+trait BaseMatchers extends AnyBaseMatchers with 
+                           LogicalMatchers with
+                           StringBaseMatchers with
+                           IterableBaseMatchers with
+                           MapBaseMatchers with
+                           NumericBaseMatchers with
+                           PatternBaseMatchers with 
+                           XmlBaseMatchers with 
+                           FileBaseMatchers with 
+                           MatcherResult
                        
 /**
  * <p>The <code>AbstractMatcher</code> class is the base class for Matchers.
@@ -230,3 +246,26 @@ trait MatcherResult {
   implicit def toTuple(m: MatcherResult): (Boolean, String, String) = (m.success, m.okMessage, m.koMessage)
 
 }
+abstract class OkWordMatcher[T] extends Matcher[T]
+class NotMatcher[T] extends Matcher[T] { 
+  def apply(v: =>T) = (false, "", "")
+}
+class BeVerbMatcher[T] extends OkWordMatcher[T] { 
+  def apply(v: =>T) = (true, "", "")
+  def ==/(node: Iterable[Node]) = new EqualIgnoringSpaceMatcher(node)
+  def ==/(s: String) = new BeEqualToIgnoringCase(s)
+  def !=/(s: String) = new BeEqualToIgnoringCase(s).not
+  def <[T <% Double](n: T) = new BeLessThan(n) 
+  def <=[T <% Double](n: T) = new BeLessThanOrEqualTo(n) 
+  def >[T <% Double](n: T) = new BeLessThanOrEqualTo(n).not
+  def >=[T <% Double](n: T) = new BeLessThan(n).not 
+  def ~[T <% Double](n: T, delta: T) = new BeCloseTo(n, delta)
+}
+class HaveVerbMatcher[T] extends OkWordMatcher[T] { 
+  def apply(v: =>T) = (true, "", "")
+}
+class ArticleMatcher[T] extends OkWordMatcher[T] { 
+  def apply(v: =>T) = (true, "", "")
+}
+
+

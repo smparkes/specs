@@ -4,13 +4,16 @@ import org.specs.util._
 import matcher.Matcher
 import org.specs._
 import org.specs.runner.{JUnitSuiteRunner, JUnit}
-import samples.Persons
+import samples.PersonForms
 import scala.xml._
 import org.specs.Sugar._
 import org.specs.specification.LiterateSpecification
 import org.junit.runner.RunWith
 
-class formSpec extends LiterateSpecification with Persons with JUnit { persons =>
+class formSpec extends LiterateSpecification with PersonForms with JUnit { persons =>
+  val address = Address(37, "Nando-cho")
+  val person = Person("Eric", "Torreborre", address, List("Jerome", "Olivier"))
+
   "A form" should {
     "have a title" in {
       val form = PersonForm("person", person)
@@ -33,7 +36,7 @@ class formSpec extends LiterateSpecification with Persons with JUnit { persons =
         firstName("Eric"); lastName("Torreborre")
         initials("TE")
       }
-      (form.execute.toXhtml \\("td"))(5) must ==/(<td class="failure" valign="top"><b>TE</b>'ET' is not equal ignoring case to 'TE'</td>)
+      (form.execute.toXhtml \\("td"))(10) must ==/(<td class="failure" valign="top"><b>TE</b>'ET' is not equal ignoring case to 'TE'</td>)
     }
   }
   "A form" can {
@@ -88,11 +91,11 @@ class formSpec extends LiterateSpecification with Persons with JUnit { persons =
     }
     "have its title spanning all columns" in {
       val form = new PersonForm("Customer", person) { firstName("Eric") }
-      form.toXhtml must \\(<th>Customer</th>, Map("colspan"->"2"))
+      form.toXhtml must \\(<th>Customer</th>, Map("colspan"->"4"))
     }
     "have its title spanning all columns - one column, 2 properties" in {
       val form = new PersonForm("Customer", person) { firstName("Eric"); lastName("T") }
-      form.toXhtml must \\(<th>Customer</th>, Map("colspan"->"2"))
+      form.toXhtml must \\(<th>Customer</th>, Map("colspan"->"4"))
     }
     "have its title spanning all columns - 2 columns, 2 properties" in {
       val form = new PersonForm("Customer", person) { tr(firstName("Eric"), lastName("T")) }
