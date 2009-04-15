@@ -6,32 +6,32 @@ import org.specs.util.Property
  * 
  * val f = Field(label, 1)
  * 
- * Note that the value is not evaluated until explicitely queried
+ * Note that the value is not evaluated until explicitly queried
  */
-class Field[T](val label: String, value: =>T) extends Property(() => value) with LabeledXhtml with ValueFormatter[T] {
+class Field[T](val label: String, value: =>T) extends Property(Some(value)) with LabeledXhtml with ValueFormatter[T] {
   
   /**
    * set a new value on the field. 
    */
-  def apply[S <% T](value: =>S): Field[T] = {
-    super.apply(() => value)
+  override def apply[S <% T](value: =>S): this.type = {
+    super.apply(value)
     this
   }
 
   /** shortcut method for this().apply() returning the contained value. */
-  def get: T = this()()
+  def get: T = this()
 
   /** @return label: value */
   override def toString = label + ": " + this.get
   
   /** return the value <td> cell */
-  protected def valueCell = <td class="value">{ format(this.get) }</td>
+  protected def valueCell = <td class="value">{ valuesDecorator(format(this.get)) }</td>
   /** return the value <td> cell */
   override def toXhtml = {
     if (label.isEmpty) 
       valueCell
     else
-      <td>{label}</td> ++ valueCell
+      <td>{labelsDecorator(label)}</td> ++ valueCell
   }
   /** don't add a supplementary <td> when embbedding the xhtml */
   override def toEmbeddedXhtml = toXhtml

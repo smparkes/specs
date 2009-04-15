@@ -1,11 +1,14 @@
 package org.specs.form
 import org.specs.util._
 import org.specs.xml.NodeFunctions._
+import scala.collection.mutable.ListBuffer
 
-class DataTableForm extends TableForm with DataTables {
+class DataTableForm(title: Option[String]) extends TableForm(title) with DataTables {
+  def this() = this(None)
+  def this(t: String) = this(Some(t))
 
   /** header retrieved from the DataTable header */
-  private var tableHeader: Option[TableHeader] = None
+  protected var tableHeader: Option[TableHeader] = None
   /** store a reference to the DataTable header */
   implicit override def toTableHeader(s: String) = {
     val th = super.toTableHeader(s)
@@ -14,7 +17,7 @@ class DataTableForm extends TableForm with DataTables {
   }
   /** add a header row if it hasn't been done */
   override def tr[F <: Form](line: F): F = {
-    if (unsetHeader) {
+    if (unsetHeader && tableHeader.isDefined) {
       tableHeader.map((header: TableHeader) => inNewRow(reduce(header.titles, { (s: String) => <th>{s}</th> })))
       unsetHeader = false
     }
@@ -22,4 +25,12 @@ class DataTableForm extends TableForm with DataTables {
     line
   }
 
+  override def report(s: Specification) = {
+    executeTable
+    superReport(s)
+  }
+  protected def superReport(s: Specification) = super.report(s) 
+  protected def executeTable = {
+    tableHeader.map(_.executeWithNoFailureFunction)
+  }
 }
