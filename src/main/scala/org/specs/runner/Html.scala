@@ -37,7 +37,7 @@ trait Html extends File {
     debug("Html - reporting to " + outputDir + ": " + specs.map(_.description).mkString(", "))
     this
   }
-
+  
   /** define the html content for this specification execution. */
   def specOutput(spec: Specification): String = {
     // it is necessary to replace the br blocks because:
@@ -71,21 +71,23 @@ trait Html extends File {
    */
   def head(specification: Specification) = <head>
       <title>{specification.name}</title>
-	    <style type="text/css" media="all">
-	      @import url('./css/maven-base.css');
-	      @import url('./css/maven-theme.css');
-	      @import url('./css/site.css');
-	    </style>
+        <style type="text/css" media="all">
+          @import url('./css/maven-base.css');
+          @import url('./css/maven-theme.css');
+          @import url('./css/site.css');
+        </style>
         <link href="./css/prettify.css" type="text/css" rel="stylesheet" />
         <script type="text/javascript" src="./css/prettify.js"></script>
         <link rel="stylesheet" href="./css/print.css" type="text/css" media="print" />
-        <script type="text/javascript" src="./css/tabber.js"></script> 
-        <link rel="stylesheet" href="./css/tabber.css" type="text/css" media="screen"/> 
         <link href="./css/tooltip.css" rel="stylesheet" type="text/css" />
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <script type="text/javascript" src="./css/tooltip.js"/>
-        {javaScript}
-        <script language="javascript">window.onLoad={onLoadFunction(specification)}</script>
+        {javaScript(specification)}
+        <script language="javascript">window.onload={"init;"}</script>
+        <!-- the tabber.js file must be loaded after the onload function has been set, in order to run the
+             tabber code, then the init code -->
+        <script type="text/javascript" src="./css/tabber.js"></script> 
+        <link rel="stylesheet" href="./css/tabber.css" type="text/css" media="screen"/> 
     </head>
 
   /** return a formatted string depending on the type of literate description: text, wiki or html. */
@@ -120,7 +122,7 @@ trait Html extends File {
 
  /** creates a summary row for a sus. */
   def summarySus(sus: Sus, spec: Specification): NodeSeq = <tr>
-	<td>{statusIcon(sus)}</td>
+    <td>{statusIcon(sus)}</td>
     <td>{anchorRef(susName(sus, spec))}</td>
   </tr>
 
@@ -146,16 +148,9 @@ trait Html extends File {
 
   /** create a table for one specification. */
   def specificationTable(spec: Specification) = {
-    val subSpecsToDisplay = new scala.collection.mutable.ListBuffer[Specification]
-    spec.subSpecifications.foldLeft(subSpecsToDisplay) { (res, cur) =>
-      cur match {
-        case literate: LiterateSpecification if (literate.hasParentLink(spec)) => { literate.reportSpecs; res }  
-        case other => { res.append(other); res }
-      }
-    }
-    <h2>{spec.description}</h2> ++ subspecsTables(subSpecsToDisplay.toList) ++ susTables(spec)
+    spec.linkedSpecifications.foreach(_.reportSpecs)
+    <h2>{spec.description}</h2> ++ subspecsTables(spec.unlinkedSpecifications.toList) ++ susTables(spec)
   }
-
   /** create tables for systems. */
   def susTables(spec: Specification): NodeSeq = reduce[Sus](spec.systems, susTable(_, spec))
 
@@ -186,7 +181,7 @@ trait Html extends File {
          </table>}
       case Some(_) if !sus.examples.isEmpty => {
         <h3><img src="images/collapsed.gif" onclick={"toggleImage(this); showHideTable('sus:" + System.identityHashCode(sus) + "')"}/>Examples summary</h3>
-	    <div id={"sus:" + System.identityHashCode(sus)} style="display:none">
+        <div id={"sus:" + System.identityHashCode(sus)} style="display:none">
           <table class="bodyTable">
              {exampleRows(sus.examples, sus.isFullSuccess)}
           </table>
@@ -244,14 +239,14 @@ trait Html extends File {
   /** Message for an example. */
   def message(example: Example, fullSuccess: Boolean) = {
     def msg = {
-	  if (!example.failures.isEmpty)
-	      reduce[FailureException](example.failures, failure(_))
-	    else if (!example.errors.isEmpty)
-	      reduce[Throwable](example.errors, e => exceptionText(e))
-	    else if (!example.skipped.isEmpty)
-	      reduce[SkippedException](example.skipped, s => exceptionText(s))
-	    else
-	      ""
+      if (!example.failures.isEmpty)
+          reduce[FailureException](example.failures, failure(_))
+        else if (!example.errors.isEmpty)
+          reduce[Throwable](example.errors, e => exceptionText(e))
+        else if (!example.skipped.isEmpty)
+          reduce[SkippedException](example.skipped, s => exceptionText(s))
+        else
+          ""
     }
     if (fullSuccess)
       NodeSeq.Empty
@@ -272,18 +267,18 @@ trait Html extends File {
   def stackTrace(e: Throwable) = if (!e.isInstanceOf[FailureException]) e.stackToString("\r", "\r", "") else ""
   def exceptionText(e: Throwable) = <a title={e.fullLocation + stackTrace(e)}>{if (e.getMessage != null) new Text(e.getMessage) else new Text("null")}</a>
 
-  /** reduce a list with a function returning a NodeSeq. */
-  def onLoadFunction(specification: Specification) = {
-    "prettyPrint()" + (if (nonTrivialSpec(specification)) "" else ";noNavBar()")
+  def initFunction(specification: Specification) = {
+    """function init() { """ +
+     "prettyPrint()" + 
+      (if (nonTrivialSpec(specification)) "" else ";noNavBar()") +
+    "}"
   }
   def nonTrivialSpec(specification: Specification) = {
-    (specification.systems ++ specification.subSpecifications).size > 1
+    (specification.systems ++ specification.unlinkedSpecifications).size > 1
   }
-  def javaScript = <script language="javascript"> {"""
-    function init() {
-	   prettyPrint()
-       noNavBar()
-    }
+  def javaScript(specification: Specification) = <script language="javascript"> { 
+    initFunction(specification) +
+    """
     // found on : http://www.tek-tips.com/faqs.cfm?fid=6620
     String.prototype.endsWith = function(str) { return (this.match(str+'$') == str) }
 
@@ -295,40 +290,42 @@ trait Html extends File {
     }
     function noNavBar() {
       changeWidth('leftColumn','0px');
-      changeMarginLeft('bodyColumn', '10px')
+      document.getElementById('leftColumn').style.visibility = 'hidden'; 
+      document.getElementById('leftColumn').style.display = 'none'; 
+      changeMarginLeft('bodyColumn', '35px')
    }
    function toggleNavBar(image) {
       toggleImage(image)
       if (image.src.endsWith('images/expanded.gif')) {
-		changeWidth('leftColumn','20px');
-      	changeMarginLeft('bodyColumn', '35px')
-	  }
+        changeWidth('leftColumn','20px');
+        changeMarginLeft('bodyColumn', '35px')
+      }
     else {
-		changeWidth('leftColumn','250px');
-      	changeMarginLeft('bodyColumn', '277px')
-	  }
+        changeWidth('leftColumn','250px');
+        changeMarginLeft('bodyColumn', '277px')
+      }
    }
    function toggleImage(image) {
-	  if (image.src.endsWith('images/expanded.gif')) {
-	    image.src = 'images/collapsed.gif';
-	  }
+      if (image.src.endsWith('images/expanded.gif')) {
+        image.src = 'images/collapsed.gif';
+      }
     else {
         image.src = 'images/expanded.gif';
-	  }
+      }
    }
-	function showHideTable(tableId) {
-	  table = document.getElementById(tableId)
-	  table.style.display = (table.style.display == 'none')? 'block' : 'none';
-	}
-	function showExampleMessage(status, exId, event) {
+    function showHideTable(tableId) {
+      table = document.getElementById(tableId)
+      table.style.display = (table.style.display == 'none')? 'block' : 'none';
+    }
+    function showExampleMessage(status, exId, event) {
     exampleMessage = document.getElementById('rowmess:' + exId)
     exampleIcon = document.getElementById('rowicon:' + exId)
     showToolTipWithIcon(status, exampleIcon.src, exampleMessage.innerHTML, event)
   }
-	function showExampleDesc(exId, event) {
-		exampleDesc = document.getElementById('rowdesc:' + exId)
+    function showExampleDesc(exId, event) {
+        exampleDesc = document.getElementById('rowdesc:' + exId)
         showToolTip('Description', exampleDesc.innerHTML, event)
-	}
+    }
 
 """}
     </script>
