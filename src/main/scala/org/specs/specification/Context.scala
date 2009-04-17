@@ -16,7 +16,7 @@ import org.specs.execute._
  * This traits adds before / after capabilities to specifications, so that a context can be defined for
  * each system under test being specified.
  */
-trait BeforeAfter extends SpecificationStructure { outer =>
+trait BeforeAfter extends BaseSpecification { outer =>
   /** 
    * @deprecated
    * adds a "before" function to the last sus being defined 
@@ -159,6 +159,7 @@ abstract class SystemContext[S] extends Context with java.lang.Cloneable {
 }
 trait SystemContexts extends Contexts {
   class SystemContextCaller(s: String) {
+    def withSome[T](context: SystemContext[T])(f: T => Any): Example = into(f)(context)
     def withAn[T](context: SystemContext[T])(f: T => Any): Example = into(f)(context)
     def withA[T](context: SystemContext[T])(f: T => Any): Example = into(f)(context)
     def into[T](f: T => Any)(implicit context: SystemContext[T]): Example = {

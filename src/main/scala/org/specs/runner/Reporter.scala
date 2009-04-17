@@ -3,6 +3,9 @@ package org.specs.runner
 import scala.collection.mutable.Queue
 import org.specs.log.ConsoleLog
 import org.specs.specification._
+import org.specs.util.Configuration._
+import org.specs.util.Configuration
+import org.specs.util.Property
 
 /**
  * The SpecsHolder trait is used by any class providing access to a sequence of specifications
@@ -36,35 +39,46 @@ trait SpecsHolder {
  * object runner extends Runner(spec) with Html with Xml for example
  */
 trait Reporter extends SpecsFilter with ConsoleLog {
+  val configuration: Property[Configuration] = Property(config)
   /** this variable controls if stacktraces should be printed. */
-  protected var stacktrace = true
+  protected val stacktrace = Property(configuration().stacktrace)
   /** this variable controls if ok examples should be printed. */
-  protected var failedAndErrorsOnly = false
+  protected val failedAndErrorsOnly = Property(configuration().failedAndErrorsOnly)
   /** this variable controls if the statistics should be printed. */
-  protected var statistics = true
+  protected val statistics = Property(configuration().statistics)
   /** this variable controls if the final statistics should be printed. */
-  protected var finalStatisticsOnly = false
+  protected val finalStatisticsOnly = Property(configuration().finalStatisticsOnly)
   /** this variable controls if the ANSI color sequences should be used to colorize output */
-  protected var colorize = false
+  protected val colorize = Property(configuration().colorize)
 
+  /** set a new configuration object. */
+  def setConfiguration(className: Option[String]): this.type = { 
+    className.map((name: String) => Configuration.config = Configuration.getConfiguration(name))
+    setOptionsFromConfig()
+    this
+  }
   /** allow subclasses to remove the stacktrace display. */
-  def setNoStacktrace(): this.type = { stacktrace = false; this }
+  def setNoStacktrace(): this.type = { stacktrace(false); this }
   /** allow subclasses to remove the ok and skipped examples. */
-  def setFailedAndErrorsOnly(): this.type = { failedAndErrorsOnly = true; this }
+  def setFailedAndErrorsOnly(): this.type = { failedAndErrorsOnly(true); this }
   /** allow subclasses to remove the statistics. */
-  def setNoStatistics(): this.type = { statistics = false; this }
+  def setNoStatistics(): this.type = { statistics(false); this }
   /** allow subclasses to print the final statistics.only */
-  def setFinalStatisticsOnly(): this.type = { finalStatisticsOnly = true; this }
+  def setFinalStatisticsOnly(): this.type = { finalStatisticsOnly(true); this }
   /** allow subclasses to add colorization to the output. */
-  def setColorize(): this.type = { colorize = true; this }
+  def setColorize(): this.type = { colorize(true); this }
   /** reset all options. */
   def resetOptions(): this.type = {
     args = Array()
-    stacktrace = true
-    failedAndErrorsOnly = false
-    colorize = false
-    statistics = false
-    finalStatisticsOnly = false
+    setOptionsFromConfig()
+  }
+  def setOptionsFromConfig(): this.type = {
+    configuration(config)
+    stacktrace(configuration().stacktrace)
+    failedAndErrorsOnly(configuration().failedAndErrorsOnly)
+    colorize(configuration().colorize)
+    statistics(configuration().statistics)
+    finalStatisticsOnly(configuration().finalStatisticsOnly)
     this
   }
 
@@ -104,6 +118,7 @@ trait Reporter extends SpecsFilter with ConsoleLog {
   protected def displayOptions = {
     println("""
     [-h|--help]
+    [-config|--configuration]
     [-ns|--nostacktrace]
     [-nostats|--nostatistics]
     [-finalstats|--finalstatistics]
@@ -117,6 +132,7 @@ trait Reporter extends SpecsFilter with ConsoleLog {
   protected def displayOptionsDescription = {
     println("""
 -h, --help                      print this message and doesn't execute the specification
+-config, --configuration        class name of an object extending the org.specs.util.Configuration trait
 -ns, --nostacktrace             remove the stacktraces from the reporting
 -nostats, --nostatistics        remove the statistics from the reporting
 -finalstats, --finalstatistics  print the final statistics only
@@ -149,7 +165,8 @@ trait Reporter extends SpecsFilter with ConsoleLog {
    * to allow the chaining of several reporters as traits.
    */
   def report(specs: Seq[Specification]): this.type = {
-     if (argsContain("-ns", "--nostacktrace")) setNoStacktrace()
+    if (argsContain("-config", "--configuration")) setConfiguration(argValue(args, List("-config", "--configuration")))
+    if (argsContain("-ns", "--nostacktrace")) setNoStacktrace()
     if (argsContain("-nostats", "--nostatistics")) setNoStatistics()
     if (argsContain("-finalstats", "-finalstatistics")) setFinalStatisticsOnly()
     if (argsContain("-xonly", "--failedonly")) setFailedAndErrorsOnly()

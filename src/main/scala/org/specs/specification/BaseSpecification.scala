@@ -32,12 +32,12 @@ import org.specs.execute._
  * } </pre>
  * Sub-examples are usually used to share examples across specifications (see the Stack example in test/scala/scala/specs/sample)
  * <p>
- * A <code>SpecificationStructure</code> also implements an <code>ExampleLifeCycle</code> trait
+ * A <code>BaseSpecification</code> also implements an <code>ExampleLifeCycle</code> trait
  * allowing subclasses to refine the behaviour of the specification before/after an example and before/after
  * a test inside an example. This is used to plug setup/teardown behaviour at the sus level and to plug
  * mock expectations checking when a specification is using the Mocker trait: <code>mySpec extends Specification with Mocker</code>
  */
-trait SpecificationStructure extends ExampleLifeCycle with ExampleExpectationsListener with Tagged 
+trait BaseSpecification extends ExampleLifeCycle with ExampleExpectationsListener with Tagged 
   with HasResults with LinkedSpecification { outer =>
 
   /** description of the specification */
@@ -64,6 +64,15 @@ trait SpecificationStructure extends ExampleLifeCycle with ExampleExpectationsLi
   /** specifications contained by the current specification. An empty list by default */
   var subSpecifications: List[Specification] = List()
 
+  /** specification including this one */
+  var parentSpecification: Option[BaseSpecification] = None
+
+  /** set the parent specification of this one */
+  def setParent(s: BaseSpecification): this.type = { parentSpecification = Some(s); this }
+  /** @return all the parent specifications of this specification, starting with the immediate parent */
+  def parentSpecifications: List[BaseSpecification] = {
+    parentSpecification.map(List(_)).getOrElse(Nil) ::: parentSpecification.map(_.parentSpecifications).getOrElse(Nil)   
+  } 
   /** this declares that a specification is composed of other specifications */
   def isSpecifiedBy(specifications: Specification*) = {
     this.description = this.name + " is specified by"
@@ -71,7 +80,9 @@ trait SpecificationStructure extends ExampleLifeCycle with ExampleExpectationsLi
   }
 
   def include(specifications: Specification*) = {
-    subSpecifications = subSpecifications ::: specifications.toList.filter((s: Specification) => !(s eq this))
+    val toInclude = specifications.toList.filter((s: Specification) => !(s eq this) && !s.contains(this))
+    toInclude.foreach(_.setParent(this))
+    subSpecifications = subSpecifications ::: toInclude 
   }
 
   /** alias for isSpecifiedBy */
@@ -84,7 +95,7 @@ trait SpecificationStructure extends ExampleLifeCycle with ExampleExpectationsLi
    * implicit definition allowing to declare a composition inside the current specification:
    * <code>"A complex specification".isSpecifiedBy(spec1, spec2)</code>
    */
-  implicit def declare(d: String): SpecificationStructure = { name = d; this }
+  implicit def declare(d: String): BaseSpecification = { name = d; this }
 
   /** list of systems under test */
   var systems : List[Sus] = Nil
@@ -261,12 +272,14 @@ trait SpecificationStructure extends ExampleLifeCycle with ExampleExpectationsLi
   }
   /** Declare the subspecifications and systems as components to be tagged when the specification is tagged */
   override def taggedComponents = this.subSpecifications ++ this.systems
+  
+  override def toString = name
 }
 /**
  * This trait adds the possibility to declare an included specification as "linked" in order to 
  * control its reporting in a separate file for example.
  */
-trait LinkedSpecification { this: SpecificationStructure => 
+trait LinkedSpecification { this: BaseSpecification => 
   /** storing the parent links of this specification */
   private var parentLinks = List[LinkedSpecification]()
   def addParent(s: LinkedSpecification): this.type = { parentLinks = s :: parentLinks; this }

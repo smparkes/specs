@@ -37,7 +37,7 @@ import org.specs.execute._
  * </code>
  * 
  */
-class LiterateSpecification extends Specification with LiterateSpecificationStructure with LiterateSpecificationLinks 
+class LiterateSpecification extends Specification with LiterateBaseSpecification with LiterateSpecificationLinks 
       with LiterateDataTables with LiterateForms with LiterateProperties with LiterateShortcuts {
   setSequential()
 
@@ -47,9 +47,15 @@ class LiterateSpecification extends Specification with LiterateSpecificationStru
   override def filterEmptySus = false
 }
 /**
+ * LiterateSpecification with Html reporting
+ */      
+class HtmlSpecification extends LiterateSpecification with Html {
+  def this(n: String) = { this(); name = n; description = n; this }
+}
+/**
  * This trait helps declaring datatables inside the Literate Specification
  */
-trait LiterateDataTables extends DataTables with ExpectableFactory with SpecificationStructure {
+trait LiterateDataTables extends DataTables with ExpectableFactory with BaseSpecification {
   /**
    * This method allows to embbed a DataTable in a literate specification and display the results of its execution
    */
@@ -86,7 +92,7 @@ trait LiterateProperties extends Properties with ExpectableFactory {
 /**
  * This trait adds shortcut to declare forms in the specification text
  */
-trait LiterateForms extends ExpectableFactory with SpecificationStructure { 
+trait LiterateForms extends ExpectableFactory with BaseSpecification { 
   /**
    * This method allows to embbed a Form in a literate specification and display the results of its execution
    */
@@ -106,7 +112,7 @@ trait LiterateForms extends ExpectableFactory with SpecificationStructure {
 /**
  * This trait adds shortcut methods to define expectations, to silence expressions
  */
-trait LiterateShortcuts extends ExpectableFactory with SpecificationStructure { 
+trait LiterateShortcuts extends ExpectableFactory with BaseSpecification with FailOrSkip { 
   /**
    * This method is used to silence the result of a call in an action. For example: <pre>
    * The timer should be stopped {timer.stop.shh}
@@ -130,13 +136,13 @@ trait LiterateShortcuts extends ExpectableFactory with SpecificationStructure {
   /** embeddeds a test into a new example and silence the result */
   def eg(test: =>Any): Unit = (forExample in test).shh
   /** create an anonymous example which will be skipped until it is implemented */
-  def notImplemented = forExample in { }
+  def notImplemented = forExample in { skip("PENDING: not yet implemented") }
   /** return a String containing the output messages from the console with a given padding such as a newline for instance */
   def consoleOutput(pad: String, messages: Seq[String]): String = { pad + consoleOutput(messages) }
   /** return a String containing the output messages from the console */
   def consoleOutput(messages: Seq[String]): String = messages.map("> " + _.toString).mkString("\n")
 }
-trait LiterateSpecificationStructure extends ExpectableFactory with SpecificationStructure {
+trait LiterateBaseSpecification extends ExpectableFactory with BaseSpecification {
   implicit def toSus(e: => Elem): ToLiterateSus = new ToLiterateSus(e) 
   class ToLiterateSus(e: => Elem) {
     def isSus = toLiterateSus("") ->> e
