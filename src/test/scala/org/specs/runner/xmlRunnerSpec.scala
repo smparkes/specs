@@ -1,3 +1,21 @@
+/**
+ * Copyright (c) 2007-2009 Eric Torreborre <etorreborre@yahoo.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+ * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software. Neither the name of specs nor the names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written permission.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+ * TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS INTHE SOFTWARE.
+ */
 package org.specs.runner
 import org.specs.specification._
 import org.specs.util._
@@ -37,12 +55,12 @@ class xmlRunnerSpec extends RunnerFixture with JUnit { "The specification for th
 
 <li> {"containing an element for the ko example test containing the failure:\n" +
   <example expectations="1" failures="1" description="have one ko example" errors="0">
-          <failure location="xmlRunnerFixture.scala:47">'1' is not the same as '2'</failure>
+          <failure location="xmlRunnerFixture.scala:65">'1' is not the same as '2'</failure>
     </example>.as(xml) in checkXml }</li>
 
 <li> {"containing an element for the ko example test containing the exception:\n" +
   <example description="have an example with an error" expectations="1" failures="0" errors="1">
-      <error location="xmlRunnerFixture.scala:48">error message</error>
+      <error location="xmlRunnerFixture.scala:66">error message</error>
     </example>.as(xml) in checkXml }</li>
 
 <li> {"containing an element for the example containing a sub-example:\n" +

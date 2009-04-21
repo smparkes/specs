@@ -1,3 +1,21 @@
+/**
+ * Copyright (c) 2007-2009 Eric Torreborre <etorreborre@yahoo.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+ * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software. Neither the name of specs nor the names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written permission.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+ * TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS INTHE SOFTWARE.
+ */
 package org.specs.form
 import org.specs._
 import org.specs.execute._
@@ -43,10 +61,10 @@ class propSpec extends Specification with JUnit with Mockito with SystemContexts
   }
   "A property toXhtml method" should {
     "display the actual value and not display the label if it is empty" in {
-      Prop("", 1).toXhtml must ==/(<td class="value">1</td>)
+      Prop("", 1).toXhtml must ==/(<td class="info">1</td>)
     }
     "display the label and the actual value if the label is not empty" in {
-      Prop("label", 1).toXhtml must ==/(<td>label</td><td class="value">1</td>)
+      Prop("label", 1).toXhtml must ==/(<td>label</td><td class="info">1</td>)
     }
     "set the class attribute of the value as failure if the Prop has failed" in {
       (Prop("Result", 1, {fail(""); 1}).toXhtml_! \\("@class")).toString must_== "failure"
@@ -57,14 +75,14 @@ class propSpec extends Specification with JUnit with Mockito with SystemContexts
     "set the class attribute of the value as success if the Prop succeeded" in {
       (Prop("Result", 1, true).toXhtml_! \\("@class")).toString must_== "success"
     }
-    "set the class attribute of the value as 'value' if the Prop hasn't been executed" in {
-      (Prop("Result", 1, {error("bad"); 1}).toXhtml \\("@class")).toString must_== "value"
+    "set the class attribute of the value as 'info' if the Prop hasn't been executed" in {
+      (Prop("Result", 1, {error("bad"); 1}).toXhtml \\("@class")).toString must_== "info"
     }
     "display the expected value if both actual and expected values are set" in {
-      Prop("Result", 1)(2).toXhtml(1) must ==/(<td class="value">2</td>)
+      Prop("Result", 1)(2).toXhtml(1) must ==/(<td class="info">2</td>)
     }
     "display the actual value if the expected value is not set" in {
-      Prop("Result", 1).toXhtml(1) must ==/(<td class="value">1</td>)
+      Prop("Result", 1).toXhtml(1) must ==/(<td class="info">1</td>)
     }
     "display the issue message if there is an issue" in {
       Prop("Result", 1, {fail("failed!"); 1}).toXhtml_!(1).toString must include("failed!")
@@ -73,15 +91,15 @@ class propSpec extends Specification with JUnit with Mockito with SystemContexts
       Prop("Result", 1, {fail("failed!"); 1}).toXhtml_!(1) \\("b") must ==/(<b>1</b>)
     }
     "format a Double expected value with all decimals, up to 15 decimals" in {
-      Prop("Result", 1.123456789012345).toXhtml(1) must ==/(<td class="value">1.123456789012345</td>)
+      Prop("Result", 1.123456789012345).toXhtml(1) must ==/(<td class="info">1.123456789012345</td>)
     }
     "allow a label decorator to be used to surround the label" in {
-      val p = Prop("Result", 1.123456789012345).decorateLabelWith((s: String) => <b>{s}</b>).toXhtml(0)
-      p aka "the prop with a decorated label" must ==/(<td><b>Result</b></td>)
+      val p = Prop("Result", 1.123456789012345).decorateLabelWith((s: Node) => <b>{s}</b>).toXhtml(0)
+      p aka "a prop with a bold decorated label" must ==/(<td><b>Result</b></td>)
     }
     "allow a values decorator to be used to surround the value" in {
-      val p = Prop("Result", 1.123456789012345).decorateValueWith((s: String) => <b>{s}</b>).toXhtml(1)
-      p aka "the prop with a decorated value" must ==/(<td class="value"><b>1.123456789012345</b></td>)
+      val p = Prop("Result", 1.123456789012345).decorateValueWith((s: Node) => <b>{s}</b>).toXhtml(1)
+      p aka "a prop with a bold decorated value" must ==/(<td class="info"><b>1.123456789012345</b></td>)
     }
     "allow an italic/bold/strike value/label decorator to be used to surround the value" in {
       
@@ -107,13 +125,21 @@ class propSpec extends Specification with JUnit with Mockito with SystemContexts
          style(formWithProp).toXhtml aka "the decorated form with a Prop" must have \\(expected)
       }
     }
+    "allow a values decorator to be stacked" in {
+      val p = Prop("Result", 1.12).boldValue.italicValue.toXhtml(1)
+      p aka "a prop with a bold and italic decorated value" must ==/(<td class="info"><i><b>1.12</b></i></td>)
+    }
+    "allow a to set a success style attribute to decorate the value" in {
+      val p = Prop("Result", 1.12).successValue.toXhtml(1)
+      p aka "a prop with a success decorated value" must ==/(<td class="success">1.12</td>)
+    }
   }
   "A Prop" can {
     "use a different value formatter formatting both missing values and values" in {
-      Prop("Result", 1).formatWith((i:Option[Int]) => "["+i.get.toString+"]").toXhtml(1) must ==/(<td class="value">[1]</td>)
+      Prop("Result", 1).formatWith((i:Option[Int]) => "["+i.get.toString+"]").toXhtml(1) must ==/(<td class="info">[1]</td>)
     }
     "use a different value formatter formatting existing values" in {
-      Prop("Result", 1).formatterIs((i: Int) => "["+i.toString+"]").toXhtml(1) must ==/(<td class="value">[1]</td>)
+      Prop("Result", 1).formatterIs((i: Int) => "["+i.toString+"]").toXhtml(1) must ==/(<td class="info">[1]</td>)
     }
   }
 

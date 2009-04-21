@@ -1,3 +1,21 @@
+/**
+ * Copyright (c) 2007-2009 Eric Torreborre <etorreborre@yahoo.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+ * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software. Neither the name of specs nor the names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written permission.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+ * TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS INTHE SOFTWARE.
+ */
 package org.specs.runner
 
 import scala.collection.mutable.Queue
@@ -39,17 +57,17 @@ trait SpecsHolder {
  * object runner extends Runner(spec) with Html with Xml for example
  */
 trait Reporter extends SpecsFilter with ConsoleLog {
-  val configuration: Property[Configuration] = Property(config)
+  val specsConfiguration: Property[Configuration] = Property(config)
   /** this variable controls if stacktraces should be printed. */
-  protected val stacktrace = Property(configuration().stacktrace)
+  protected val stacktrace = Property(specsConfiguration().stacktrace)
   /** this variable controls if ok examples should be printed. */
-  protected val failedAndErrorsOnly = Property(configuration().failedAndErrorsOnly)
+  protected val failedAndErrorsOnly = Property(specsConfiguration().failedAndErrorsOnly)
   /** this variable controls if the statistics should be printed. */
-  protected val statistics = Property(configuration().statistics)
+  protected val statistics = Property(specsConfiguration().statistics)
   /** this variable controls if the final statistics should be printed. */
-  protected val finalStatisticsOnly = Property(configuration().finalStatisticsOnly)
+  protected val finalStatisticsOnly = Property(specsConfiguration().finalStatisticsOnly)
   /** this variable controls if the ANSI color sequences should be used to colorize output */
-  protected val colorize = Property(configuration().colorize)
+  protected val colorize = Property(specsConfiguration().colorize)
 
   /** set a new configuration object. */
   def setConfiguration(className: Option[String]): this.type = { 
@@ -73,12 +91,12 @@ trait Reporter extends SpecsFilter with ConsoleLog {
     setOptionsFromConfig()
   }
   def setOptionsFromConfig(): this.type = {
-    configuration(config)
-    stacktrace(configuration().stacktrace)
-    failedAndErrorsOnly(configuration().failedAndErrorsOnly)
-    colorize(configuration().colorize)
-    statistics(configuration().statistics)
-    finalStatisticsOnly(configuration().finalStatisticsOnly)
+    specsConfiguration(config)
+    stacktrace(specsConfiguration().stacktrace)
+    failedAndErrorsOnly(specsConfiguration().failedAndErrorsOnly)
+    colorize(specsConfiguration().colorize)
+    statistics(specsConfiguration().statistics)
+    finalStatisticsOnly(specsConfiguration().finalStatisticsOnly)
     this
   }
 

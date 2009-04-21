@@ -1,7 +1,25 @@
+/**
+ * Copyright (c) 2007-2009 Eric Torreborre <etorreborre@yahoo.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+ * and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of
+ * the Software. Neither the name of specs nor the names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written permission.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+ * TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS INTHE SOFTWARE.
+ */
 package org.specs.runner
 
 class teamCityRunnerSpec extends teamCityRunnerRules { "TeamCity Runner Specification" ->> <wiki>
-
+ 
 h3. Introduction
 
 The TeamCity runner is a Specification runner designed to create TeamCity formatted messages to the standard output when running specifications.
@@ -41,14 +59,14 @@ When executed, <ex>the TeamCity runner should notify the start of a specificatio
 (the _details_ attribute is omitted)
 
 {List("##teamcity[testStarted name='specification name.failed example']",
-      "##teamcity[testFailed name='specification name.failed example' message='the value is true (teamCityRunnerRules.scala:20)' details='exception stacktrace']",
+      "##teamcity[testFailed name='specification name.failed example' message='the value is true (teamCityRunnerRules.scala:38)' details='exception stacktrace']",
       "##teamcity[testFinished name='specification name.failed example']").as(messages).mkString("\n") >@}{messagesMustBeCreated}
 
 <ex>An example with an exception must be reported with its error message</ex>:
 (the _details_ attribute is omitted)
 
 {List("##teamcity[testStarted name='specification name.exception example']",
-      "##teamcity[testFailed name='specification name.exception example' message='error (teamCityRunnerRules.scala:21)' details='exception stacktrace']",
+      "##teamcity[testFailed name='specification name.exception example' message='error (teamCityRunnerRules.scala:39)' details='exception stacktrace']",
       "##teamcity[testFinished name='specification name.exception example']").as(messages).mkString("\n") >@}{messagesMustBeCreated}
 
 <ex>An example with sub examples must be reported as one example with aggregated messages</ex>. For example, for the following subexamples:
@@ -62,7 +80,7 @@ When executed, <ex>the TeamCity runner should notify the start of a specificatio
 The messages should be (the _details_ attribute is omitted):
 
 {List("##teamcity[testStarted name='specification name.sub examples']",
-      "##teamcity[testFailed name='specification name.sub examples' message='bad sub1: the value is true (teamCityRunnerRules.scala:24); bad sub2: the value is false (teamCityRunnerRules.scala:25)' details='exception stacktrace']",
+      "##teamcity[testFailed name='specification name.sub examples' message='bad sub1: the value is true (teamCityRunnerRules.scala:42); bad sub2: the value is false (teamCityRunnerRules.scala:43)' details='exception stacktrace']",
       "##teamcity[testFinished name='specification name.sub examples']").as(messages).mkString("\n")}{messagesMustBeCreated}
 
 </wiki>
