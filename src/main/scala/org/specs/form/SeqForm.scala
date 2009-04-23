@@ -20,57 +20,75 @@ package org.specs.form
 import scala.collection.mutable._
 import scala.xml._
 import org.specs.util.Plural._
+import org.specs.execute.Status
 /**
- * A SeqForm is a Form containing a sequence of LineForms
+ * A SeqForm is a TableForm containing a sequence of LineForms
  * and using a sequence of values as the actual values
  * 
  * It is used in conjonction with a custom LineForm representing the values on a line: <code>
  * 
  * // @see EntityLineForm for LineForms representing a specific entity, possibly unset
- * class CustomerLine extends EntityLineForm[Customer] {
- *   val name = prop("Name", (c: Customer) => c.getName)
- *   val age = prop("b", (c: Customer) => c.getAge)
+ * case class CustomerLine(name: String, age: Int) extends EntityLineForm[Customer] {
+ * // the prop method accepts a function here, taking the proper attribute on the "Entity"
+ *   prop("Name", (_:Customer).getName)(name)
+ *   prop("Age", (_:Customer).getAge)(age)
  * }
- * class Customers(actualCustomers: Seq[Customer]) extends SeqForm[T](actualCustomers) {
- *   def expect(n: String, a: Int) = line { (customer: Option[T]) => 
- *     new CustomerLine {
- *       name(n), age(a) 
- *     }.entityIs(customer)
- *   } 
+ * class Customers(actualCustomers: Seq[Customer]) extends SeqForm[T](actualCustomers)
+ *  
+ * // example usage
+ * new Customers(listFromTheDatabase) {
+ *   tr(CustomerLine("Eric", 36))
+ *   tr(CustomerLine("Bob", 27))
  * }
- * 
  * </code>
  */
-class SeqForm[T](seq: Seq[T]) extends Form {
+class SeqForm[T](title: Option[String], val seq: Seq[T]) extends TableForm(title) with SeqFormEnabled[T] {
+  def this(seq: Seq[T]) = this(None, seq)
+  def this() = this(None, List())
+}
+trait SeqFormEnabled[T] extends TableFormEnabled {
+  val seq: Seq[T]
   /** list of declared lines which are expected but not received as actual */
   private var unmatchedLines = new ListBuffer[LineForm]
+  /** number of already expected lines */
+  private var expectedLinesNb = 0
   /** 
    * add a new line with a function taking an object (which may be None, if the set of actual values doesn't contain enough values), 
    * returning a LineForm
    * 
    * If this is the first line, a table header is added
    */
-  def line(l : Option[T] => LineForm) = {
+  def line(l : Option[T] => LineForm): LineForm = {
     var currentLine: LineForm = null
-    def addHeader = if (rowsNb == 0) inNewRow(currentLine.header) 
-    if (rowsNb >= seq.size) {
+    if (expectedLinesNb >= seq.size) {
       currentLine = l(None)
-      addHeader
+      setHeader(currentLine)
       unmatchedLines.append(currentLine.comment)
+      currentLine
     } else {
-      currentLine = l(Some(seq(rowsNb)))
-      addHeader
+      currentLine = l(Some(seq(expectedLinesNb)))
+      setHeader(currentLine)
       trs(currentLine.rows)
       form(currentLine)
     }
+    expectedLinesNb = expectedLinesNb + 1
+    currentLine
   }
+  def tr(l: EntityLineForm[T]): LineForm = line { (actual: Option[T]) => 
+    l.entityIs(actual)
+  }
+  def setHeader[F <: LineForm](line: F): F = {
+    if (rowsNb == 0) inNewRow(line.header)
+    line
+  }
+
   /**
    * upon execution a new row will be added to notify the user of unmatched lines
    */
   override def executeThis = {
     val i = unmatchedLines.size
     if (i > 0) { 
-      th3("There ".bePlural(i) + i + " unmatched line".plural(i), "failure")
+      th3("There ".bePlural(i) + i + " unmatched line".plural(i), Status.Failure)
       unmatchedLines.foreach { (line: LineForm) => trs(line.rows) }
     }
     super.executeThis

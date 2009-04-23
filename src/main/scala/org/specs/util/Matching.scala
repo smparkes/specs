@@ -16,24 +16,30 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS INTHE SOFTWARE.
  */
-package org.specs.form
+package org.specs.util
+import scala.Math._
+import org.specs.collection.ExtendedList._
+import org.specs.collection.ExtendedIterable._
 
-class EntityLineForm[T] extends LineForm {
-  var entity: Option[T] = None
-  /** add a new LineProp to that line */
-  def prop[S](s: String, f:(T => S)): LineProp[S] = {
-    lazy val actual: Option[S] = entity.map(f(_))
-    val p = new LineProp(label, None, actual, Some(MatcherConstraint((m:org.specs.matcher.Matcher[S]) => actual.map(_ must m))))
-    lineProperties.append(p)
-    add(p)
-    p
+object Matching extends Matching
+trait Matching {
+  /**
+   * @return a list containing the matched vertices and corresponding edges
+   */
+  def bestMatch[A, B, E](firstSet: Set[A], 
+                         secondSet: Set[B], 
+                         edgeFunction: Function1[(A, B), E], 
+                         edgeWeight: E => Int): List[(A, B, E)] = {
+    
+    // brutal force approach
+    // create all possible combinations and take the least costly
+    val combined: List[List[(A, B, E)]] = combine(firstSet, secondSet).map { (l: List[(A, B)]) => 
+      l.map { (e: (A, B)) => 
+        val (a, b) = e
+        (a, b, edgeFunction(a, b))
+      }
+    }
+    def graphWeight(graph: List[(A, B, E)]) = graph.maximum((e: (A, B, E)) => edgeWeight(e._3))
+    combined.maxElement((l:List[(A, B, E)]) => graphWeight(l)).getOrElse(Nil).unique
   }
-  /** add a new LineProp to that line */
-  def prop[S](f:(T => S)): LineProp[S] = prop("", f) 
-  /** in that case a LineField is modeled as a commented line prop */
-  def field[S](s: String, f:(T => S)): LineProp[S] = prop(s, f).comment
-  /** in that case a LineField is modeled as a commented line prop */
-  def field[S](f:(T => S)): LineProp[S] = field("", f) 
-  def entityIs(a: T): this.type = entityIs(Some(a))
-  def entityIs(a: Option[T]): this.type = { entity = a; this }
 }

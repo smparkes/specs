@@ -16,24 +16,16 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS INTHE SOFTWARE.
  */
-package org.specs.form
+package org.specs.specification
+import org.specs.form._
 
-class EntityLineForm[T] extends LineForm {
-  var entity: Option[T] = None
-  /** add a new LineProp to that line */
-  def prop[S](s: String, f:(T => S)): LineProp[S] = {
-    lazy val actual: Option[S] = entity.map(f(_))
-    val p = new LineProp(label, None, actual, Some(MatcherConstraint((m:org.specs.matcher.Matcher[S]) => actual.map(_ must m))))
-    lineProperties.append(p)
-    add(p)
-    p
+class literateSpecUnit extends spex.Specification { outer =>
+  "a literate spec can include forms with a report method" in {
+    object l extends HtmlSpecification { 
+      new Form {
+        prop(1)(1)
+      }.report
+    }
+    l.examples must have size 1
   }
-  /** add a new LineProp to that line */
-  def prop[S](f:(T => S)): LineProp[S] = prop("", f) 
-  /** in that case a LineField is modeled as a commented line prop */
-  def field[S](s: String, f:(T => S)): LineProp[S] = prop(s, f).comment
-  /** in that case a LineField is modeled as a commented line prop */
-  def field[S](f:(T => S)): LineProp[S] = field("", f) 
-  def entityIs(a: T): this.type = entityIs(Some(a))
-  def entityIs(a: Option[T]): this.type = { entity = a; this }
 }

@@ -18,22 +18,15 @@
  */
 package org.specs.form
 
-class EntityLineForm[T] extends LineForm {
-  var entity: Option[T] = None
-  /** add a new LineProp to that line */
-  def prop[S](s: String, f:(T => S)): LineProp[S] = {
-    lazy val actual: Option[S] = entity.map(f(_))
-    val p = new LineProp(label, None, actual, Some(MatcherConstraint((m:org.specs.matcher.Matcher[S]) => actual.map(_ must m))))
-    lineProperties.append(p)
-    add(p)
-    p
+class DataTableSetForm[T](title: Option[String], set: Set[T]) extends SetForm[T](set) with DataTableFormEnabled {
+  def this(title: String, set: Set[T]) = this(Some(title), set)
+  override def setHeader[F <: LineForm](line: F): F = super[DataTableFormEnabled].setHeader(line)
+  
+  /** add a header row if it hasn't been done */
+  override def tr[F <: Form](line: F): F = {
+    line match {
+      case l: EntityLineForm[_] => super[SetForm].tr(line)
+      case _ => super[DataTableFormEnabled].tr(line)
+    }
   }
-  /** add a new LineProp to that line */
-  def prop[S](f:(T => S)): LineProp[S] = prop("", f) 
-  /** in that case a LineField is modeled as a commented line prop */
-  def field[S](s: String, f:(T => S)): LineProp[S] = prop(s, f).comment
-  /** in that case a LineField is modeled as a commented line prop */
-  def field[S](f:(T => S)): LineProp[S] = field("", f) 
-  def entityIs(a: T): this.type = entityIs(Some(a))
-  def entityIs(a: Option[T]): this.type = { entity = a; this }
 }
