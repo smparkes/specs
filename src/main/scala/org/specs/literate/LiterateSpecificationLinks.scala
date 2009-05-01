@@ -14,39 +14,23 @@
  * TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
  * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS INTHE SOFTWARE.
+ * DEALINGS IN THE SOFTWARE.
  */
-package org.specs.runner
-import scala.xml._
-import org.specs.Sugar._
+package org.specs.literate
 import org.specs.specification._
-import org.specs.runner._
-
-class descriptionFormatterSpec extends Specification with JUnit {
-
-  "A description formatter" should {
-    "format a description as text if it has the text tag" in {
-      format(<text>Hello world</text>).text must_==
-        "Hello world"
-    }
-    detailedDiffs()
-    "format a description as wiki markup if it has the wiki tag" in {
-      format(<wiki>h1. Hello world</wiki>) must \\("h1")
-    }
-    "format a description as html if it has the html tag" in {
-      format(<html>This is some <i>html</i> text</html>) must \\("i")
-    }
+/**
+ * This trait allows to add links to other specifications inside a literate specification.
+ * The link will be displayed as a Html link
+ * 
+ * The "parent/child" relationship is kept in that trait to allow the Html runner
+ * to be reported when reporting the parent.
+ */
+trait LiterateSpecificationLinks extends LinkedSpecification with Links { this: Specification => 
+  def linkTo(subSpec: Specification with runner.Html): String = linkTo(subSpec.description, subSpec)
+  def linkTo(desc: String, subSpec: Specification with runner.Html): String = {
+    super.linkTo(desc, subSpec)
+    // execute the subSpec
+    subSpec.failures
+    relativeLink(desc, subSpec.fileName(subSpec))
   }
-  "A wiki description formatter" should {
-    val example = new Example("example desc", this).in { 1 must_== 1 }
-    "set the status of the example descriptions depending on the example status" in {
-      wikiFormatter.setStatus("this is the " + example.description + " to be highlighted", List(example)) must (
-        include("""this is the ==<ex class="success" """) and
-        include("</ex>== to be highlighted")
-      )
-    }
-  }
-  def formatter = new DescriptionFormatter()
-  def format(node: Elem) = formatter.format(node, Nil)
-  def wikiFormatter = new WikiFormatter
 }

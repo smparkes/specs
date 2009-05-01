@@ -96,7 +96,7 @@ class extendedIterableUnit extends IterableData with JUnit with ScalaCheck {
         List(("Art", "Ann"), ("Chris", "Bess")),
         List(("Art", "Bess"), ("Chris", "Ann")),
         List(("Bill", "Ann"), ("Chris", "Bess")),
-        List(("Bill", "Bess"), ("Chris", "Ann")),
+        List(("Bill", "Bess"), ("Chris", "Ann"))
       )
     }
     "combine 2 simple sets with 3 elements each" in {
@@ -104,8 +104,22 @@ class extendedIterableUnit extends IterableData with JUnit with ScalaCheck {
       val set2 = List("Ann", "Bess", "Clara")
       combine(set1, set2) must have size 6
     }
+    "combine 2 sets with duplicates" in {
+      combine(List("Ar", "Ar", "Charles"), 
+              List("An", "An")).flatMap(x=>x) must contain(("Charles", "An"))
+    }
   }
-
+  "A difference method" should {
+    "remove one element" in {
+       List(1, 2).difference(List(2)) must_== List(1)
+    }
+    "remove all elements only once" in {
+       List(1, 2).difference(List(1, 2)) must_== List()
+    }
+    "remove elements only once" in {
+       List(1, 2, 2).difference(List(2)) must_== List(1, 2)
+    }
+  }
 }
 import org.specs._
 import scalacheck.Gen._

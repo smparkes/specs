@@ -16,27 +16,27 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS INTHE SOFTWARE.
  */
-package org.specs.runner
+package org.specs.literate
 import org.specs._
 import org.specs.specification._
 import scala.xml._
-import org.specs.Sugar._
 
-class wikiFormatterSpec extends Specification with JUnit {
+class wikiFormatterSpec extends spex.Specification {
   "A wiki formatter" should {
-    def formatString(s: String): String = new WikiFormatter().format(s)
-    def formatElem(e: Elem): Node = new WikiFormatter().format(e)
+    def formatString(s: String): String = new WikiFormatter(){}.format(s)
+    def formatElem(e: Elem): Node = new TextileFormatter(){}.format(e)
 
     "return a string as it is if isn't some html text" in {
       formatString("a description") must_== "a description"
     }
     "format the description of example as some xml text" in {
       val example = new Example("", this).in { 1 must_== 1 }
-      example.exampleDescription = new WikiExampleDescription("a description")
-      new WikiFormatter().formatDesc(example) must_== <t>a description</t>
+      val formatter = new WikiFormatter(){}
+      example.exampleDescription = formatter.makeExampleDescription(<ex>a description</ex>)
+      formatter.formatDesc(example) must_== <t>a description</t>
     }
     "format single quotes as single quotes inside brackets when using html escape convention ==" in {
-      formatElem(<wiki>==['a description']==</wiki>) must \\(<p>['a description']</p>)
+      formatElem(<t>==['a description']==</t>) must \\(<p>['a description']</p>)
     }
     "format single quotes as single quotes" in {
       formatString("don't") must include("don't")
@@ -45,7 +45,7 @@ class wikiFormatterSpec extends Specification with JUnit {
   "A wiki formatter setStatus function" should {
     val exampleDesc = "a description"
     val example = new Example("a description", this).in { 1 must_== 1 }
-    val descWithStatus = new WikiFormatter().setStatus(exampleDesc, List(example))
+    val descWithStatus = new WikiFormatter(){}.setStatus(exampleDesc, List(example))
 
     "set the example status as an xml attribute" in {
       descWithStatus must include("<ex class=\"success\"")
@@ -56,11 +56,16 @@ class wikiFormatterSpec extends Specification with JUnit {
     "set a mouseout function to close the tooltip for the example" in {
       descWithStatus must include("onmouseout=\"hideToolTip();\"")
       descWithStatus must include("a description")
-      descWithStatus must beMatching("==\\<ex.*\\>.*\\<\\/ex\\>==")
+      descWithStatus must beMatching("\\<ex.*\\>.*\\<\\/ex\\>")
     }
     "leave the example description" in {
       descWithStatus must include("a description")
     }
+  }
+  "A Textile formatter" should { 
+    val exampleDesc = "a description"
+    val example = new Example("a description", this).in { 1 must_== 1 }
+    val descWithStatus = new TextileFormatter(){}.setStatus(exampleDesc, List(example))
     "enclose the description with ex tags protected by wiki markup" in {
       descWithStatus must beMatching("==\\<ex.*\\>a description\\<\\/ex\\>==")
     }

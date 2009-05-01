@@ -29,6 +29,7 @@ import org.specs._
 import org.specs.xml.Xhtml._
 import org.specs.util.ExtendedString._
 import org.specs.util.Classes._
+import org.specs.util.Property
 /**
  * This trait defines Forms which are used to group and display Props properties together.
  *
@@ -61,22 +62,57 @@ class Form(val titleString: Option[String], val factory: ExpectableFactory) exte
     f.delegate = this.factory
     super.form(f)
   }
+  override def copy: Form = {
+    val form = new Form(label, factory)
+    copyPropertiesAndFields(form)
+  }
+  def copyPropertiesAndFields[F <: Form](form: F) = {
+    properties.foreach { (p: FormProperty with Copyable[FormProperty]) =>
+      val c: FormProperty with Copyable[FormProperty] = p.copy
+      c.genericFormatterIs(genericFormatter)
+      form.properties.append(c)
+    }
+    fields.foreach { (f: Field[_]) =>
+      val c = f.copy
+      c.genericFormatterIs(genericFormatter)
+      form.fields.append(c)
+    }
+    form
+  }
 }
-trait FormEnabled extends DefaultExecutable with LabeledXhtml with Layoutable with ExpectableFactory {
+/** 
+ * This trait declares that an instance can return a copy of itself via the copy method.
+ * It is especially used to copy EntityLineForms when testing different combinations
+ * on a BagForm
+ */        
+trait Copyable[+T] { this : T with Copyable[T] => 
+  def copy = this 
+}    
+trait FormEnabled extends DefaultExecutable with LabeledXhtml with Layoutable with ExpectableFactory with Copyable[FormEnabled] 
+ with GenericFormatter {
   /** @return the title if set or build a new one based on the class name (by uncamelling it) */
   def title: String
   /** implementation of the HasLabel trait */
   lazy val label = title
   /** alias for properties or forms held by this Form */
-  type FormProperty = DefaultExecutable with LabeledXhtml
+  type FormProperty = DefaultExecutable with LabeledXhtml with GenericFormatter
   /** Props or Forms held by this Form */
-  val properties: ListBuffer[FormProperty] = new ListBuffer
+  val properties: ListBuffer[FormProperty with Copyable[FormProperty]] = new ListBuffer
   /** Fields held by this Form */
-  val fields: ListBuffer[Field[_]] = new ListBuffer
+  val fields: ListBuffer[Field[_] with Copyable[Field[_]]] = new ListBuffer
+  /** alias for genericFormatterIs */
+  def formatterIs(f: (String =>  String)): this.type = {
+    this.genericFormatterIs(f)
+  }
+  override def genericFormatterIs(f: (String =>  String)) = {
+    super.genericFormatterIs(f)
+    propertiesAndFields.foreach(_.genericFormatterIs(f))
+    this
+  }
   /**
    * add a Prop to the Form.
    */
-  def add(p: FormProperty): this.type = { properties.append(p); this }
+  def add(p: FormProperty with Copyable[FormProperty]): this.type = { properties.append(p); this }
   /**
    * add a Field to the Form.
    */
@@ -89,12 +125,15 @@ trait FormEnabled extends DefaultExecutable with LabeledXhtml with Layoutable wi
    * }
    */
   def set(f: this.type => Any): this.type = { f(this); this }
+
+  /** default execution function with a matcher */
+  def executor[T]: Function2[T, Matcher[T], org.specs.specification.Result[T]] = (a: T, m: Matcher[T]) => (a must m) 
   /**
    * factory method for creating a property linked to an actual value.
    * Using this method adds the property to the Form
    */
   def prop[T](label: String, actual: =>T): MatcherProp[T] = {
-    val p = Prop(label, actual, MatcherConstraint((m:Matcher[T]) => actual must m))
+    val p: MatcherProp[T] = Prop(label, actual, new MatcherConstraint(Some(actual), executor[T]))
     add(p)
     p
   }
@@ -104,7 +143,7 @@ trait FormEnabled extends DefaultExecutable with LabeledXhtml with Layoutable wi
    * Using this method adds the property to the Form
    */
   def field[T](label: String, value: =>T): Field[T] = {
-    val f = Field(label, value)
+    val f = new Field(label, Property(value))
     add(f)
     f
   }
@@ -136,7 +175,7 @@ trait FormEnabled extends DefaultExecutable with LabeledXhtml with Layoutable wi
    * Using this method adds the property to the Form.
    */
   def propIterable[T](label: String, actual: =>Iterable[T]): MatcherPropIterable[T] = {
-    val matcherConstraint: MatcherConstraint[Iterable[T]] = new MatcherConstraint[Iterable[T]](m => actual must m)
+    val matcherConstraint: MatcherConstraint[Iterable[T]] = new MatcherConstraint[Iterable[T]](Some(actual), executor)
     val p = PropIterable(label, actual, matcherConstraint)
     p.matchesWith(new HaveTheSameElementsAs(_))
     add(p)
@@ -201,7 +240,7 @@ trait FormEnabled extends DefaultExecutable with LabeledXhtml with Layoutable wi
   /** reset the included/excluded properties of the Form. */
   def resetIncludeExclude() = super[Layoutable].reset()
   /** @return all properties and fields for this form */
-  def propertiesAndFields: List[LabeledXhtml] = properties.toList ::: fields.toList
+  def propertiesAndFields: List[LabeledXhtml with GenericFormatter with DefaultExecutable] = properties.toList ::: fields.toList
   /** decorate all the properties held by this form */
   override def decorateLabelsWith(x: Node => Node): this.type = { 
     propertiesAndFields.foreach(_.decorateLabelsWith(x)) 
@@ -212,7 +251,16 @@ trait FormEnabled extends DefaultExecutable with LabeledXhtml with Layoutable wi
     propertiesAndFields.foreach(_.decorateValuesWith(x)) 
     this 
   }
-
+  /** decorate all the properties held by this form */
+  override def decorateValuesCellsWith(x: Node => Node): this.type = { 
+    propertiesAndFields.foreach(_.decorateValuesCellsWith(x)) 
+    this
+  }
+  /** decorate all the properties held by this form */
+  override def decorateLabelsCellsWith(x: Node => Node): this.type = { 
+    propertiesAndFields.foreach(_.decorateLabelsCellsWith(x)) 
+    this
+  }
 }
 /**
  * Some Forms can be declared as building an element of type T

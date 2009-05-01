@@ -16,13 +16,19 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS INTHE SOFTWARE.
  */
-package org.specs.runner
-import com.petebevin.markdown.MarkdownProcessor
+package org.specs.literate
+import org.specs._
 
-class MarkdownFormatter extends WikiFormatter {
-  override protected def parseToHtml(s: String) = {
-     val markup = new MarkdownProcessor
-     "<div>" + markup.markdown(s) + "</div>"
-  }
-
+object literateSpecifications extends Specification {
+    "The literate specifications" areSpecifiedBy (
+        new descriptionFormatterSpec,
+        new literateSnippetSpec,
+        new literateSpec,
+        new markdownFormatterSpec,
+        new wikiFormatterSpec,
+    )
+}
+object literateUnits extends Specification {
+    "The literate unit tests" areSpecifiedBy (
+         new literateSpecUnit)
 }

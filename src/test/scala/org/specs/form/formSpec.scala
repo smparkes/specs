@@ -28,7 +28,7 @@ import org.specs.Sugar._
 import org.specs.specification._
 import org.junit.runner.RunWith
 
-class formSpec extends HtmlSpecification with PersonForms with JUnit { persons =>
+class formSpec extends HtmlSpecification with PersonForms with JUnit with org.specs.SystemContexts { persons =>
   val address = Address(37, "Nando-cho")
   val person = Person("Eric", "Torreborre", address, List("Jerome", "Olivier"))
 
@@ -64,6 +64,12 @@ class formSpec extends HtmlSpecification with PersonForms with JUnit { persons =
       }
       form.firstName.label must_== "First Name"
       form.firstName.get must_== "Eric"
+    }
+    "have a labelled field" in {
+      val form = new Form {
+        val name = field("Name", "")
+      }
+      form.name("Eric").get must_== "Eric"
     }
     "embedded another following form as if it was a property" in {
       val form = new PersonForm("person", person) {
@@ -118,6 +124,34 @@ class formSpec extends HtmlSpecification with PersonForms with JUnit { persons =
     "have its title spanning all columns - 2 columns, 2 properties" in {
       val form = new PersonForm("Customer", person) { tr(firstName("Eric"), lastName("T")) }
       form.toXhtml must \\(<th>Customer</th>, Map("colspan"->"4"))
+    }
+  }
+  trait AProp { val p: Prop[Int] }
+  Map("Form" -> systemContext(new Form with AProp { val p = prop(1) }),
+      "LineForm" -> systemContext(new LineForm with AProp { val p = prop(1)}),
+      "BagForm" -> systemContext(new BagForm with AProp { val p = prop(1)})
+    ) foreach { c =>
+    ("A " + c._1).definedAs(c._2) should {
+      "decorate all fields and properties when decorated with bold" in { (form: Form with AProp) =>
+        form.bold
+        form.p.toXhtml must \\("b")
+      }
+      "decorate all fields and properties when decorated with italic" in { (form: Form with AProp) =>
+        form.italic
+        form.italic.toXhtml must \\("i")
+      }
+      "format its values when changed formatter" in { (form: Form with AProp) =>
+        form.formatterIs(s => "v: "+s.toString)
+        form.p.formattedValue.toString must_== "v: 1"
+      }
+    }
+  }
+  "A form with an embedded form" should {
+    "pass on the generic value formatter" in {
+      val f = new Form {
+        val n = form(new Form { val p = prop(1) })
+      }.formatterIs(s => "v: "+s.toString)
+      f.n.p.formattedValue.toString must_== "v: 1"
     }
   }
 }

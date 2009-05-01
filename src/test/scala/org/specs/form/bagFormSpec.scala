@@ -68,6 +68,7 @@ class bagFormSpec extends org.specs.Specification with JUnit {
         tr(PersonLine("Eric", 36)) 
         tr(PersonLine("Bob",  40)) 
       }
+      form.execute.expectedLines aka "expected lines" must have size 3
       form.execute.matchedLines aka "matched lines" must have size 2
       form.execute.matchedLines.toString aka "matched lines toString" must include("Eric") and include("Bob")
       form.execute.matchedExpectedLines aka "matched expected lines" must have size 2
@@ -81,11 +82,40 @@ class bagFormSpec extends org.specs.Specification with JUnit {
         tr(PersonLine("Eric", 38)) 
         tr(PersonLine("Bob",  40)) 
       }
+      form.execute.expectedLines aka "expected lines" must have size 3
       form.execute.matchedLines aka "matched lines" must have size 2
       form.execute.matchedLines.toString aka "matched lines toString" must include("Eric") and include("Bob") and include("36")
       form.execute.matchedExpectedLines aka "matched expected lines" must have size 2
       form.execute.matchedActual aka "matched actual lines" must have size 2 
       form.execute.unmatchedExpectedLines aka "unmatched expected lines" must have size 1
     }
+    "decorate all fields and properties when decorated" in {
+      val form = new BagForm(actual) {
+        val p = PersonLine("Eric", 36)
+        tr(p)
+      }.italic
+      form.p.toXhtml must \\("i")
+    }
+    "format all values according to a value formatter" in {
+      val form = new BagForm(actual) {
+        val p = PersonLine("Eric", 36)
+        tr(p)
+        val p2 = PersonLine("Bob", 42)
+        tr(p2)
+      }.formatterIs(s => "v: " + s.toString)
+      form.p.properties(0).asInstanceOf[Prop[_]].formattedValue.toString must_== "v: Eric"
+      form.p2.properties(0).asInstanceOf[Prop[_]].formattedValue.toString must_== "v: Bob"
+    }
+    "format all datatable values according to a value formatter" in {
+      val form = new DataTableBagForm("Persons", actual) {
+        "Name" | "Age" |
+        "Eric" ! 36    | 
+        "Bob"  ! 42    | { (name, age) =>
+          tr(PersonLine(name, age))
+        }
+      }.execute.formatterIs(s => "v: " + s.toString)
+      form.properties(0).asInstanceOf[Form].properties(0).asInstanceOf[Prop[_]].formattedValue.toString must_== "v: Eric"
+    }
+
   }
 }

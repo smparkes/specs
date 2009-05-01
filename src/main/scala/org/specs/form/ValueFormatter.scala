@@ -21,11 +21,11 @@ package org.specs.form
 /**
  * Format values using a default formatter (for Doubles) or a custom one (set with the formatWith  function)
  */
-trait ValueFormatter[T] {
+trait ValueFormatter[T] extends GenericFormatter {
   /** value formatter. By default formats Doubles with all decimals */
   private[form] var formatter = (t:Option[T]) => t match {
-    case Some(d: Double) => new java.text.DecimalFormat("#.###############").format(d)
-    case Some(x: Any) => x.toString
+    case Some(d: Double) => genericFormatter(new java.text.DecimalFormat("#.###############").format(d))
+    case Some(x: Any) => genericFormatter(x.toString)
     case None => ""
   }
   /**
@@ -50,6 +50,16 @@ trait ValueFormatter[T] {
     }
     this 
   }
+  def copy(c: ValueFormatter[T]) = {
+    c.formatter = this.formatter
+  }
+}
+trait GenericFormatter {
+  private[form] var genericFormatter = (s: String) => s
+  def genericFormatterIs(function: String => String): this.type = {
+    genericFormatter = function
+    this
+  } 
 }
 /**
  * Formatter for an Iterable
@@ -100,10 +110,13 @@ trait ValuesFormatter[T] {
    * change the value formatter to display the value differently. This formatter displays "" for a missing value
    */
   def formatterIs(function: T => String): this.type = { 
-    valueFormatter = (t: Option[T]) => t match {
+    formatValueWith((t: Option[T]) => t match {
       case None => ""
       case Some(x) => function(x)
-    }
-    this 
+    })
+  }
+  def copy(c: ValuesFormatter[T]) = {
+    c.valueFormatter = valueFormatter
+    c.valuesFormatter = valuesFormatter
   }
 }

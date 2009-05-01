@@ -18,43 +18,63 @@
  */
 package org.specs.form
 import org.specs.util.Property
-
+import org.specs.execute.DefaultExecutable
 /**
  * A Field is a property which is used only to display input values or output values.
+ * The apply method can be used to retrieve the Fields value:<code>
+ *   val f = Field(label, 1)
+ *   f() must_== 1
+ * </code>
  * 
- * val f = Field(label, 1)
- * 
- * Note that the value is not evaluated until explicitly queried
+ * The value is stored in a Property object so it will not be evaluated until explicitly queried.
  */
-class Field[T](val label: String, value: =>T) extends Property(Some(value)) with LabeledXhtml with ValueFormatter[T] {
-  
+class Field[T](val label: String, val value: Property[T]) extends LabeledXhtml with ValueFormatter[T] with Copyable[Field[T]] with DefaultExecutable {
+  /** @return a copy of this Field with the same value */
+  override def copy: Field[T] = {
+    val f = new Field(label, value)
+    copy(f)
+    f
+  }
+  def copy(f: Field[T]) = {
+    super[ValueFormatter].copy(f)
+    super[LabeledXhtml].copy(f)
+  }
+  /** executing a field does nothing */
+  override def executeThis = this
   /**
    * set a new value on the field. 
    */
-  override def apply[S <% T](value: =>S): this.type = {
-    super.apply(value)
+  def apply(v: =>T): this.type = {
+    value(v)
     this
   }
-
-  /** shortcut method for this().apply() returning the contained value. */
-  def get: T = this()
-
-  /** @return label: value */
+  /** @return the field value */
+  def apply(): T = value()
+  /** alias for apply() */
+  def get: T = apply()
+  /** @return "label: value" */
   override def toString = label + ": " + this.get
-  
-  /** return the value <td> cell */
+  /** return the value in a <td> cell, formated and decorated */
   protected def valueCell = <td class="info">{ decorateValue(format(this.get)) }</td>
-  /** return the value <td> cell */
+  /** return the value <td> cell with a td cell for the label if it is not empty */
   override def toXhtml = {
     if (label.isEmpty) 
       decorateValueCell(valueCell)
     else
       decorateLabelCell(<td>{decorateLabel(label)}</td>) ++ decorateValueCell(valueCell)
   }
-  /** don't add a supplementary <td> when embbedding the xhtml */
+  /** don't add a supplementary <td> when embedding the xhtml */
   override def toEmbeddedXhtml = toXhtml
-  /** transforms this typed Field as a Field containing the toString of the value*/
-  def toStringField = new Field(label, value.toString)
+  /** transforms this typed Field as a Field containing the toString value of the Fields value*/
+  def toStringField = Field(label, value.toString)
+  
+  override def equals(a: Any): Boolean = {
+    a match {
+      case f: Field[_] => f.label == label && f.value == value
+      case _ => false 
+    }
+  }
+  override def hashCode = label.hashCode + value.hashCode
 }
 /**
  * Factory methods for creating Fields. Fields values can also be concatenated to produce "summary" fields.
@@ -68,13 +88,16 @@ class Field[T](val label: String, value: =>T) extends Property(Some(value)) with
  * concatenatedFields2.toString == label: hello, world
  */
 case object Field {
-  def apply[T](label: String, value: =>T): Field[T] = new Field(label, value)
+  def apply[T](value: =>T): Field[T] = new Field("", Property(value))
+  def apply[T](label: String, value: =>T): Field[T] = new Field(label, Property(value))
   def apply[T](label: String, value1: Field[T], values: Field[T]*): Field[String] = Field(label, "/", value1, values:_*)
   def apply[T](label: String, separator: String, value1: Field[T], values: Field[T]*): Field[String] = {
-    if (values.isEmpty)
-      new Field(label, value1.get.toString)
+    val f = if (values.isEmpty)
+      Field(label, value1.get.toString)
     else
-      new Field(label, (value1 :: values.toList).map(_.get).mkString(separator))
+      Field(label, (value1 :: values.toList).map(_.get).mkString(separator))
+    value1.copy(f)
+    f
   }
 }
 

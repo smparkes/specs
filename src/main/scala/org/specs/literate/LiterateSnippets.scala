@@ -14,18 +14,31 @@
  * TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
  * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS INTHE SOFTWARE.
+ * DEALINGS IN THE SOFTWARE.
  */
-package org.specs.specification
-import org.specs.form._
+package org.specs.literate
+import org.specs.specification._
+import org.specs.matcher._
 
-class literateSpecUnit extends spex.Specification { outer =>
-  "a literate spec can include forms with a report method" in {
-    object l extends HtmlSpecification { 
-      new Form {
-        prop(1)(1)
-      }.report
-    }
-    l.examples must have size 1
+/**
+ * This trait adds the possibility to define and execute fragments of code in Literate specifications
+ */
+trait LiterateSnippets extends SnipIt with ExpectableFactory with Matchers { 
+  def executeIs(s: String) = { execute(it) must include(s) }
+  def executeIsNot(s: String) = execute(it) mustNot include(s)
+  implicit def toOutputSnippet(s: String) = OutputSnippet(s)
+  case class OutputSnippet(s: String) {
+    def add_> = {
+      s add it
+      "> " + execute(it)
+    } 
+  }
+  def >(s: String) = outputIs(s)
+  def outputIs(s: String) = {
+    val result = execute(it)
+    var out = "> " + result
+    try  { result must include(s) }
+    catch { case e => out = "> " + e.getMessage }
+    out
   }
 }

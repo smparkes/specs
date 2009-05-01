@@ -48,5 +48,26 @@ class lineFormSpec extends spex.Specification {
       update(Some("Hello")).execute.isOk must be(true)
       update(Some("My dear")).execute.isOk must be(false)
     }
+    "have a testWith method returning a copy of the form with a specific entity" in {
+      val stringSize = new EntityLineForm[String] {
+        val p = prop((_:String).size)(5)
+      }
+      stringSize.entityIs("Helloooooo")
+      val stringSize2 = stringSize.testWith("World")
+      stringSize must !=(stringSize2)
+
+      stringSize2.entity.isDefined must beTrue
+      stringSize2.entity.get must_== "World"
+      stringSize2.execute.isOk must beTrue
+      stringSize2.rows aka "table rows" must not be empty
+      stringSize2.rows(0) aka "table first row" must not be empty
+    }
+    "decorate all fields and properties when decorated" in {
+      val form = new EntityLineForm[String]{
+        val p = prop((_:String).size)(5)
+      }.italic
+      form.p.toXhtml must \\("i")
+    }
+
   }
 }

@@ -21,11 +21,12 @@ package org.specs.runner
 import org.specs.specification._
 import org.specs.Sugar._
 import org.specs._
+import org.specs.literate._
 import org.specs.util._
 import org.specs.io.mock._
 import scala.xml._
 
-class htmlRunnerRules(name: String) extends LiterateSpecification(name) with XmlProperties with JUnit with Html {
+class htmlRunnerRules(name: String) extends HtmlSpecification(name) with XmlProperties {
   override def htmlDir = "target"
 
   def title = run must \\(<title>{specification.name}</title>)
@@ -96,7 +97,7 @@ class htmlRunnerRules(name: String) extends LiterateSpecification(name) with Xml
 }
 import org.specs.specification._
 
-object specification extends LiterateSpecification("Sample Specification") {
+object specification extends LiterateSpecification("Sample Specification") with Textile {
     include(subSpecification)
     "this literate sus" is
 <wiki>h1. A h1 title

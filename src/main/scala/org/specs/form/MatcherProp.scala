@@ -18,14 +18,19 @@
  */
 package org.specs.form
 import org.specs.matcher.Matcher
-
+import org.specs.util.Property
 /**
  * A MatcherProp contains a MatcherConstraint which matcher can be changed from the default BeEqualTo matcher
  */
 class MatcherProp[T](
   override val label: String,
-  expectedValue: Option[T], 
-  actual: =>Option[T], constraint: Option[MatcherConstraint[T]]) extends Prop(label, expectedValue, actual, constraint) {
+  expectedValue: Property[T], 
+  actual: Property[T], constraint: Option[MatcherConstraint[T]]) extends Prop(label, expectedValue, actual, constraint) {
+  override def copy: MatcherProp[T] = {
+    val p = new MatcherProp(label, expectedValue, actual, constraint)
+    super.copy(p)
+    p
+  }
 
   /**
    * changes the matcher on the constraint

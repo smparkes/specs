@@ -32,7 +32,7 @@ trait TableFormEnabled extends FormEnabled {
   /** this variable becomes false when there is no more need to insert a header row in the table */
   private var unsetHeader = true
   /** automatically transform a value into a Field for easier declaration of tr(...) lines */
-  implicit def toField[T](a: T) = new Field("", a)
+  implicit def toField[T](a: T) = Field("", a)
   /**
    * adds properties in a line form 
    */
@@ -41,8 +41,15 @@ trait TableFormEnabled extends FormEnabled {
       case List(t: Tabs) => super.tr(t)
       case _ => {
         val lineForm = new LineForm {
-          override val lineProperties = { val l = new ListBuffer[LabeledXhtml](); l.appendAll(props); l }
+          override val lineProperties = { 
+            val l = new ListBuffer[LabeledXhtml]()
+            l.appendAll(props)
+            l 
+          }
+          props.foreach(p => properties.append(p.asInstanceOf[FormProperty with Copyable[FormProperty]]))
+
         }
+        lineForm.formatterIs(genericFormatter)
         this.tr(lineForm)
       }
     }

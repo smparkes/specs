@@ -18,25 +18,26 @@
  */
 package org.specs.specification
 import org.specs.util._
+import org.specs.literate._
 
 trait Snippets extends ScalaInterpreter {
-  def format(code: String): String = code
+  def formatCode(code: String): String = code
   implicit def asSnippet(s: java.lang.String) = new SnippetAdder(Snippet(s))
   class SnippetAdder(snippet: Snippet) {
 	def add(prop: Property[Snippet]): String = addTo(prop)
 	def addTo(prop: Property[Snippet]): String = {
-	  prop.forceUpdate(prop() ++ snippet)
-	  format(snippet.snippet)
+	  prop.forceUpdate(prop.get ++ snippet)
+	  formatCode(snippet.snippet)
 	}
 	def prelude(prop: Property[Snippet]): String = {
-	  prop().prelude(snippet.snippet)
-	  format(snippet.snippet)
+	  prop.get.prelude(snippet.snippet)
+	  formatCode(snippet.snippet)
 	}
 	def snip(prop: Property[Snippet]): String = {
 	  val newSnippet = Snippet(snippet.snippet)
-	  newSnippet.prelude(prop().prelude)
+	  newSnippet.prelude(prop.get.prelude)
 	  prop(newSnippet) 
-	  format(snippet.snippet)
+	  formatCode(snippet.snippet)
 	}
   }
 
@@ -70,8 +71,3 @@ case class Snippet(snippetCode: Property[String]) {
   def reset = snippetCode("")
 }
 object Snippets extends Snippets
-trait SnipIt extends Snippets with Wiki {
-  val it: Property[Snippet] = Property(Snippet(""))
-  override def format(code: String) = code >@
-  override def execute(it: Property[Snippet]) = super[Snippets].execute(it) >@
-}

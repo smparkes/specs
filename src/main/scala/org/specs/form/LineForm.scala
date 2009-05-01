@@ -20,7 +20,8 @@ package org.specs.form
 import scala.collection.mutable._
 import scala.xml._
 import org.specs.xml.NodeFunctions._
-
+import org.specs.util.Property
+import org.specs.execute.DefaultExecutable
 /**
  * A LineForm is a set of LineProps or LineFields which are displayed on the same line.
  * 
@@ -37,25 +38,26 @@ class LineForm extends Form {
 
   /** add a new LineField to that line */
   override def field[T](label: String, actual: =>T) = {
-    val f = new LineField(label, actual)
+    val f = new LineField(label, Property(actual))
     lineProperties.append(f)
     f
   }
   /** add a new LineProp to that line */
   override def prop[T](label: String, actual: =>T) = {
-    val p = new LineProp(label, None, Some(actual), Some(MatcherConstraint((m:org.specs.matcher.Matcher[T]) => actual must m)))
+    val p = new LineProp(label, Property[T](), Property(actual), Some(new MatcherConstraint(Some(actual), executor)))
     lineProperties.append(p)
     add(p)
     p
   }
   /** add a new LineProp to that line with expected and actual value */
   def prop[T](label: String, expected: Option[T], actual: =>Option[T]) = {
-    val p = new LineProp(label, expected, actual, Some(MatcherConstraint((m:org.specs.matcher.Matcher[T]) => actual.map(_ must m))))
+    val p = new LineProp(label, new Property(() => expected), new Property(() => actual), Some(new MatcherConstraint(actual, executor)))
     lineProperties.append(p)
     add(p)
     p
   }
-  /** when rows are requested (one row only in that case), the properties are added on the same row.  */
+  /** when rows are requested (one row only in that case), the properties are added on t
+   * he same row.  */
   override def rows = {
     if (!propertiesAreLayedout) {
       tr(lineProperties:_*)
@@ -63,11 +65,19 @@ class LineForm extends Form {
     }
     super.rows
   }
-  override def propertiesAndFields = lineProperties.toList ::: super.propertiesAndFields
   /** extract a header from all the property labels */
   def header = reduce(lineProperties.map(_.label), { (cur: String) => <th>{cur}</th> })
   /** return the xhtml of all properties without the label (because they are LineProp and LineField) */
   override def toXhtml = reduce(lineProperties, { (p: LabeledXhtml) => p.toXhtml })
+  
+  override def copy: LineForm = {
+    val f = new LineForm
+    this.lineProperties.foreach { (p: LabeledXhtml) => 
+      f.lineProperties.append(p.copy)
+    }
+    copyPropertiesAndFields(f)
+  }
+
 }
 object LineForm {
   /** create a LineForm with labels only to create header rows */

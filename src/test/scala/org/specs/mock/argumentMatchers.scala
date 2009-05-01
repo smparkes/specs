@@ -18,11 +18,10 @@
  */
 
 package org.specs.mock
-import org.specs.specification._
-import org.specs.runner._
+import org.specs._
 
 object argumentMatchers extends argumentMatchers
-class argumentMatchers extends LiterateSpecification("Argument Matchers") with MockitoSpecification {
+class argumentMatchers extends HtmlSpecification("Argument Matchers") with MockitoSpecification {
 <wiki>
 
 h3. Argument matchers
@@ -69,7 +68,7 @@ and <ex>calling the mocked list @contains@ method with a valid argument must ret
   }
   args2.successes""" snip it }
   { >("example 1")}
-
+ 
 <ex>Instead of Hamcrest matchers, a specs matcher can be used</ex>:{"""
   object args3 extends Specification with Mockito {
     val mockedList = mock[List[String]]

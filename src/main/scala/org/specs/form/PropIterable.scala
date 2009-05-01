@@ -18,19 +18,40 @@
  */
 package org.specs.form
 import scala.xml.NodeSeq
-
+import org.specs.util.Property
 /**
  * Matcher prop on an Iterable value.
  * This subclass of Prop is able to display its values differently, like one per line.
  */
 class MatcherPropIterable[T](override val label: String,
-                             expectedIt: Option[Iterable[T]],
-                             actual: =>Option[Iterable[T]], constraint: Option[MatcherConstraint[Iterable[T]]]) extends
+                             expectedIt: Property[Iterable[T]],
+                             actual: Property[Iterable[T]], constraint: Option[MatcherConstraint[Iterable[T]]]) extends
   MatcherProp[Iterable[T]](label, expectedIt, actual, constraint) with ValuesFormatter[T] {
+
+  override def copy: MatcherPropIterable[T] = {
+    val p = new MatcherPropIterable(label, expectedIt, actual, constraint)
+    super[MatcherProp].copy(p)
+    super[ValuesFormatter].copy(p)
+    p
+  }
+  /**
+   * change the value formatter to display the value differently
+   */
+  override def formatWith(function: Option[Iterable[T]] => String): this.type = { 
+    formatIterableWith(function)
+    super.formatWith(function)
+  }
+  /**
+   * change the value formatter to display the value differently. This formatter displays "" for a missing value
+   */
+  override def formatterIs(function: T => String): this.type = {
+    super[ValuesFormatter].formatterIs(function)
+    super.formatterIs(function)
+  }
 
   /** apply method with multiple args for better readability */
   def apply(v: T*): this.type = {
-    super.apply(Some(v))
+    expected(v)
     this
   }
   /**
@@ -39,7 +60,7 @@ class MatcherPropIterable[T](override val label: String,
    * label: "this" (expected: "that")
    */
   override def toString = {
-    label + ": " + formatStringValue(this.actual) + " (expected: " + formatStringValue(expected) + ")"
+    label + ": " + formatStringValue(this.actual.optionalValue) + " (expected: " + formatStringValue(expected.optionalValue) + ")"
   }
   
   private def formatStringValue(v: Option[Iterable[T]]) = {
@@ -52,6 +73,7 @@ class MatcherPropIterable[T](override val label: String,
  * Companion object containing default factory methods
  */
 case object PropIterable {
-  def apply[T](label: String, value: =>Iterable[T]): MatcherPropIterable[T] = new MatcherPropIterable(label, None, Some(value), None)
-  def apply[T](label: String, value: =>Iterable[T], c: MatcherConstraint[Iterable[T]]): MatcherPropIterable[T] = new MatcherPropIterable(label, None, Some(value), Some(c))
+  def apply[T](value: =>Iterable[T]): MatcherPropIterable[T] = PropIterable.apply("", value)
+  def apply[T](label: String, value: =>Iterable[T]): MatcherPropIterable[T] = new MatcherPropIterable(label, Property[Iterable[T]](), Property(value), None)
+  def apply[T](label: String, value: =>Iterable[T], c: MatcherConstraint[Iterable[T]]): MatcherPropIterable[T] = new MatcherPropIterable(label, Property[Iterable[T]](), Property(value), Some(c))
 }

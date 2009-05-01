@@ -18,12 +18,20 @@
  */
 package org.specs.form
 import org.specs.util.Property
+import org.specs.matcher.Matcher
+import scala.collection.mutable._
+import scala.xml._
 
 class EntityLineForm[T] extends LineForm {
-  var entity: Property[Option[T]] = Property(None)
+  var entity: Property[T] = Property[T]()
+  val entityProperties = new ListBuffer[EntityLineProp[T, _]]
   /** add a new LineProp to that line */
   def prop[S](s: String, f:(T => S)): LineProp[S] = {
-    super.prop(label, None, entity().map(f(_)))
+    val p: EntityLineProp[T, S] = new EntityLineProp[T, S](label, Property[S](), f, entity, Some(new MatcherConstraint(entity.map(f(_)).optionalValue, executor)))
+    entityProperties.append(p)
+    lineProperties.append(p)
+    properties.append(p)
+    p
   }
   /** add a new LineProp to that line */
   def prop[S](f:(T => S)): LineProp[S] = prop("", f) 
@@ -33,7 +41,24 @@ class EntityLineForm[T] extends LineForm {
   def field[S](f:(T => S)): LineProp[S] = field("", f) 
   def entityIs(a: T): this.type = entityIs(Some(a))
   def entityIs(a: Option[T]): this.type = { 
-    entity(a)
+    a.map(entity(_))
+    a.map(e => entityProperties.foreach(_.entity(e)))
     this 
+  }
+  def testWith(a: T): EntityLineForm[T] = testWith(Some(a))
+  def testWith(a: Option[T]): EntityLineForm[T] = {
+    val c = copy
+    a.map(c.entityIs(_))
+    a.map(e => c.entityProperties.foreach(_.entity(e)))
+    c
+  }
+    
+  override def copy = {
+    val form = new EntityLineForm[T]
+    this.lineProperties.foreach(p => form.lineProperties.append(p.copy))
+    this.properties.foreach(p => form.properties.append(p.copy))
+    this.fields.foreach(f => form.fields.append(f.copy))
+    super.copy(form)
+    form
   }
 }

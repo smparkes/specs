@@ -16,41 +16,28 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS INTHE SOFTWARE.
  */
-package org.specs.runner
+package org.specs.literate
+import org.specs.specification.Example
 import scala.xml._
-import org.specs.specification._
-import org.specs.util.Classes._
 
-trait LiterateDescriptionFormatter {
-  
-  /** 
-   * return the literate description as a xml node which can be easily transformed to a string with 
-   * the text method. 
-   */
-  def format(desc: Elem, examples: Iterable[Example]): Node
-  def formatDesc(example: Example): Node = Text(example.exampleDescription.toString) 
-}
+class markdownFormatterSpec extends spex.Specification {
+  def formatString(s: String): String = new MarkdownFormatter{}.format(s)
+  def formatElem(e: Elem): Node = new MarkdownFormatter{}.format(e)
 
-class DescriptionFormatter extends LiterateDescriptionFormatter {
-  def className(name: String) = "org.specs.runner." + name.toLowerCase.capitalize + "Formatter"
-  def formatter(n: String) = createObject[LiterateDescriptionFormatter](className(n)) match {
-    case Some(f) =>  f
-    case None => new TextFormatter
-  }
-  
-  def format(desc: Elem, examples: Iterable[Example]) = {
-    formatter(desc.label).format(desc, examples)
-  }
-  override def formatDesc(ex: Example): Node = {
-    ex.exampleDescription match {
-      case desc: WikiExampleDescription =>  formatter("wiki").formatDesc(ex)
-      case _ =>  new Text(ex.exampleDescription.format)
+  "A markdown formatter" should {
+    "return a string as it is if isn't some html text" in {
+      formatString("a description") must_== "a description"
+    }
+    "format the description of example as some xml text" in {
+      val example = new Example("", null)
+      example.exampleDescription = new Markdown(){}.makeExampleDescription(<ex>a description</ex>)
+      new MarkdownFormatter().formatDesc(example) must_== <t>a description</t>
+    }
+    "format single quotes as single quotes" in {
+      formatString("don't") must include("don't")
+    }
+    "format html which is well formed for further parsing" in {
+      formatElem(<ex>this is some *text* to format</ex>) must ==/(<div><p>this is some <em>text</em> to format</p></div>)
     }
   }
-}
-class TextFormatter extends LiterateDescriptionFormatter {
-  def format(desc: Elem, examples: Iterable[Example]) = Group(desc.child)
-}
-class HtmlFormatter extends LiterateDescriptionFormatter {
-  def format(desc: Elem, examples: Iterable[Example]) = Group(desc.child)
 }

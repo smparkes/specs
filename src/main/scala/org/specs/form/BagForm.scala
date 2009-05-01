@@ -22,6 +22,7 @@ import scala.xml._
 import org.specs.util.Plural._
 import org.specs.util.Matching._
 import org.specs.execute.Status
+import org.specs.collection.ExtendedList._
 /**
  * A BagForm is a TableForm containing a Bag of LineForms
  * and using a Bag of values as the actual values.
@@ -37,18 +38,16 @@ class BagForm[T](title: Option[String], val bag: Seq[T]) extends TableForm(title
 trait BagFormEnabled[T] extends TableFormEnabled {
   val bag: Seq[T]
   /** list of declared lines which are expected but not received as actual */
-  protected val expectedLines = new ListBuffer[Option[T] => LineForm]
+  private val expectedEntities = new ListBuffer[EntityLineForm[T]]
+  def expectedLines = expectedEntities.toList
   private var unsetHeader = true
-  /** 
-   * add a new expected line 
-   */
-  def line(l : Option[T] => LineForm): LineForm = {
-    expectedLines.append(l)
-    l(None)
-  }
+
   override def tr[F <: Form](l: F): F = {
     l match {
-      case entityLine: EntityLineForm[T] => this.line { (actual: Option[T]) => entityLine.entityIs(actual) }
+      case entityLine: EntityLineForm[T] => {
+        expectedEntities.append(entityLine)
+        properties.append(entityLine)
+      }
       case _ => super[TableFormEnabled].tr(l)
     }
     l
@@ -62,11 +61,15 @@ trait BagFormEnabled[T] extends TableFormEnabled {
    * upon execution a new row will be added to notify the user of unmatched lines
    */
   override def executeThis = {
+    matchedLines.foreach(_.genericFormatterIs(genericFormatter))
     addLines(matchedLines)
     val i = unmatchedExpectedLines.size
     if (i > 0) { 
       th3("There ".bePlural(i) + " " + i + " unmatched expected line".plural(i), Status.Failure)
-      unmatchedExpectedLines.foreach { (line: Option[T] => LineForm) => trs(line(None).reset().rows) }
+      unmatchedExpectedLines.foreach { (line: EntityLineForm[T]) => {
+          trs(line.testWith(None).reset().rows) 
+        }
+      }
     }
     val j = unmatchedActual.size
     if (j > 0) { 
@@ -75,17 +78,16 @@ trait BagFormEnabled[T] extends TableFormEnabled {
     }
     this
   }
-  type ExpectedLine = Function1[Option[T], LineForm]
-  val edgeFunction = (t: (ExpectedLine, T)) => t
-  val edgeWeight = (l: (ExpectedLine, T)) => (l._1(Some(l._2))).execute.properties.filter(_.isOk).size
-  lazy val matches = bestMatch[ExpectedLine, T, (ExpectedLine, T)](expectedLines.toList, bag, 
+  val edgeFunction = (t: (EntityLineForm[T], T)) => t
+  val edgeWeight = (l: (EntityLineForm[T], T)) => (l._1.entityIs(l._2)).execute.properties.filter(_.isOk).size
+  lazy val matches = bestMatch(expectedLines, bag, 
                        edgeFunction, 
                        edgeWeight)
-  def matchedLines = matches.map(_._3).map(t => t._1(Some(t._2)).execute)
+  def matchedLines = matches.map(_._3).map((t: (EntityLineForm[T], T)) => (t._1:EntityLineForm[T]).entityIs(t._2).execute)
   def matchedExpectedLines = matches.map(_._1)
   def matchedActual = matches.map(_._2)
-  def unmatchedExpectedLines = expectedLines.toList -- matchedExpectedLines
-  def unmatchedActual = bag.toList -- matchedActual
+  def unmatchedExpectedLines = expectedLines.difference(matchedExpectedLines)
+  def unmatchedActual = bag.toList.difference(matchedActual)
 
   private def addLines(lines: List[LineForm]): this.type = {
     lines.foreach { line => 

@@ -17,13 +17,22 @@
  * DEALINGS INTHE SOFTWARE.
  */
 package org.specs.form
-
+import org.specs.util.Property
 /**
  * A LineProp is a property which is displayed on a line without its lable
  */
 class LineProp[T](override val label: String,
-                  expectedValue: Option[T], 
-                  actual: =>Option[T], constraint: Option[MatcherConstraint[T]]) extends MatcherProp[T](label, expectedValue, actual, constraint) {
+                  expectedValue: Property[T], 
+                  actual: Property[T], constraint: Option[MatcherConstraint[T]]) extends MatcherProp[T](label, expectedValue, actual, constraint) {
+  override def copy = {
+    val p = new LineProp(label, expectedValue, actual, constraint)
+    super.copy(p)
+    p
+  }
   override def toXhtml = decorateValueCell(valueCell)
   override def toEmbeddedXhtml = decorateValueCell(valueCell)
+}
+object LineProp {
+  def apply[T](label: String, actual: =>T): LineProp[T] = new LineProp(label, Property[T](), Property(actual), None)
+  def apply[T](actual: =>T): LineProp[T] = LineProp.apply("", actual)
 }

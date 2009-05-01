@@ -26,6 +26,7 @@ import org.specs.specification._
 import org.specs.ExtendedThrowable._
 import org.specs.execute._
 import org.specs.util.Plural._
+import org.specs.literate._
 /**
  * This trait reports the result of a specification on a simple <code>Output</code>
  * which must support <code>print</code>-like methods
@@ -153,7 +154,7 @@ trait OutputReporter extends Reporter with Output {
    */
   def printSus(sus: Sus, padding: String) = {
     println(padding + sus.description + " " + sus.verb + sus.skippedSus.map(" (skipped: " + _.getMessage + ")").getOrElse(""))
-    sus.literateDescription map { desc => println(padding + new TextFormatter().format(desc, sus.examples).text) }
+    println(padding, sus.literateDesc.text)
     reportExamples(sus.examples, padding)
     println("")
   }
