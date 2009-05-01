@@ -89,7 +89,7 @@ trait Copyable[+T] { this : T with Copyable[T] =>
   def copy = this 
 }    
 trait FormEnabled extends DefaultExecutable with LabeledXhtml with Layoutable with ExpectableFactory with Copyable[FormEnabled] 
- with GenericFormatter {
+ with GenericFormatter { outer =>
   /** @return the title if set or build a new one based on the class name (by uncamelling it) */
   def title: String
   /** implementation of the HasLabel trait */
@@ -154,6 +154,16 @@ trait FormEnabled extends DefaultExecutable with LabeledXhtml with Layoutable wi
     add(f)
     f
   }
+  /** implicit def allowing to write new Form {...}.formTr */
+  implicit def formInRow[F <: Form](f: F) = new FormInRow(f: F)
+  /** implicit def allowing to write new Form {...}.formTr */
+  class FormInRow[F <: Form](f: F) {
+    def formTr: F = {
+      outer.form(f)
+      outer.tr(f)
+      f
+    }
+  }
   /** create a field with no label */
   def field[T](value: =>T): Field[T] = field("", value)
   /**
@@ -190,11 +200,11 @@ trait FormEnabled extends DefaultExecutable with LabeledXhtml with Layoutable wi
     layoutRows(formRows)
   }
   /** the Form failures are all the failures of the Form properties. */
-  override def failures = properties.toList.flatMap(_.failures)
+  override def failures = super.failures ::: properties.toList.flatMap(_.failures)
   /** the Form skipped are all the skipped of the Form properties. */
-  override def skipped = properties.toList.flatMap(_.skipped)
+  override def skipped = super.skipped ::: properties.toList.flatMap(_.skipped)
   /** the Form errors are all the errors of the Form properties. */
-  override def errors = properties.toList.flatMap(_.errors)
+  override def errors = super.errors ::: properties.toList.flatMap(_.errors)
   /** @return a string representation of the Form with the title and one property per row. */
   override def toString = {
     title +
