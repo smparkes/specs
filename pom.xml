@@ -29,7 +29,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.scala-tools.testing</groupId>
   <artifactId>specs</artifactId>
-  <version>1.5.0</version>
+  <version>1.5.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>${project.artifactId}</name>
   <description>specs is a Behaviour-Driven-Design
@@ -315,7 +315,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
           <jvmArgs>
             <jvmArg>-Xmx512m</jvmArg>
           </jvmArgs>
-          <vscaladocVersion>1.2-SNAPSHOT</vscaladocVersion>
+        <!--  <vscaladocVersion>1.2-SNAPSHOT</vscaladocVersion> -->
           <scalaVersion>${scala.version}</scalaVersion>
         </configuration>
       </plugin>
