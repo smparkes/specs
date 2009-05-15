@@ -16,28 +16,20 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS INTHE SOFTWARE.
  */
-package org.specs.specification
-import org.specs._
-import org.specs.runner._
-import org.specs.util.Property
+package org.specs
 
-class snippetSpec extends SpecificationWithJUnit with Snippets {
-  "A snippet" should {
-    "have a prelude method" in {
-      val s = Snippet("").prelude("prelude")
-      s.code must include("prelude")
-    }
-    "cumulate preludes" in {
-      val s = Snippet("").prelude("prelude1").prelude("prelude2")
-      s.code must include("prelude1") and include("prelude2")
-    }
-  }
-  "The Snippets trait" should {
-    "allow a property to store the current snippet" in {
-      val it = Property[Snippet](Snippet(""))
-      "import org.specs._" prelude it
-      "object s extends Specification" snip it
-      it.get.code must include("import") //and include("Specification")
-    }
-  }
+import org.junit.runner.RunWith
+import org.specs.runner.{ JUnitSuiteRunner, JUnit }
+/**
+ * This class is a Specification which is runnable as a JUnit suite, where each 
+ * system is a Test suite and each example a test.
+ *
+ */
+@RunWith(classOf[JUnitSuiteRunner])
+abstract class SpecificationWithJUnit extends Specification with JUnit {
+  /**
+   * Alternate constructor with the name of the specification
+   */
+  def this(n: String) = { this(); name = n; description = n; this }
+
 }
