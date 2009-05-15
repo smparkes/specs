@@ -16,34 +16,23 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS INTHE SOFTWARE.
  */
-package org.specs.specification
-import org.specs._
-import org.specs.specification._
-import org.specs.runner._
-import org.specs.util._
-import scala.xml._
-import org.specs.Sugar._
+package org.specs
 
-class timerSpecificationSpec extends TimerSpecificationActionWords {
-  "The timer specification" is <p>
-   A Simple timer is an object which can measure time. Let's create a timer.
-   When a timer is stopped{stop}, the timer should {"fail to return the elapsed time" in failTime} then
-   {"return the elapsed time" in succeeds}
-
-   A person can have its name reset. If the person's name is set to {"Peter" as personName},
-   then {"the person must be named Peter" in checkName}
-</p>
+import org.junit.runner.RunWith
+import org.specs.runner.{ JUnitSuiteRunner, JUnit }
+/**
+ * LiterateSpecification with Html reporting, runnable as a JUnit suite, where each 
+ * system is a Test suite and each example a test.
+ */
+@RunWith(classOf[JUnitSuiteRunner])
+abstract class HtmlSpecificationWithJUnit extends HtmlSpecification with JUnit {
+  /**
+   * Alternate constructor with the name of the specification
+   */
+  def this(n: String) = { 
+    this()
+    name = n
+    description = n
+    this 
+  }
 }
-
-class TimerSpecificationActionWords extends HtmlSpecificationWithJUnit {
-  val simpleTimer = new SimpleTimer
-  class Person {var name: String = ""; def setName(n: String) = name = n}
-  val person = new Person;
-  val Peter = "Peter"
-  def stop = simpleTimer.stop.shh
-  def failTime = simpleTimer.hms must beMatching("\\d second")
-  def succeeds = simpleTimer.hms must beMatching("\\d second")
-  def personName = person.setName _
-  def checkName = person.name must_== Peter
-}
-
