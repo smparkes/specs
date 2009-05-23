@@ -34,11 +34,12 @@ import org.specs.execute._
  * This traits adds before / after capabilities to specifications, so that a context can be defined for
  * each system under test being specified.
  */
-trait BeforeAfter extends BaseSpecification { outer =>
+trait BeforeAfter { outer: BaseSpecification =>
   /** 
    * adds a "before" function to the last sus being defined 
    */
-  private def usingBefore(actions: () => Any) = currentSus.before = stackActions(actions, currentSus.before)
+  private def usingBefore(actions: () => Any) = stackBeforeActions(currentSus, actions)
+  def stackBeforeActions(sus: Sus, actions: () => Any) = sus.before = stackActions(actions, sus.before)
   
   /** @return a function with actions being executed after the previous actions. */
   private def stackActions(actions: () => Any, previousActions: Option[() => Any]) = {
@@ -59,10 +60,13 @@ trait BeforeAfter extends BaseSpecification { outer =>
   def doBefore(actions: =>Any) = usingBefore(() => actions)
 
   /** adds a "firstActions" function to the last sus being defined */
-  def doFirst(actions: =>Any) = currentSus.firstActions = stackActions(() => actions, currentSus.firstActions)
-
+  def doFirst(actions: =>Any) = stackFirstActions(currentSus, actions)
+  /** adds "firstActions" to a sus */
+  def stackFirstActions(sus: Sus, actions: =>Any) = sus.firstActions = stackActions(() => actions, sus.firstActions)
   /** adds a "lastActions" function to the last sus being defined */
-  def doLast(actions: =>Any) = currentSus.lastActions = reverseStackActions(() => actions, currentSus.lastActions)
+  def doLast(actions: =>Any) = stackLastActions(currentSus, actions) 
+  /** adds "lastActions" to a sus */
+  def stackLastActions(sus: Sus, actions: =>Any) = sus.lastActions = reverseStackActions(() => actions, currentSus.lastActions)
 
   /** adds a "beforeSpec" function to the current specification */
   def doBeforeSpec(actions: =>Any) = beforeSpec = stackActions(() => actions, beforeSpec)
@@ -112,7 +116,7 @@ trait BeforeAfter extends BaseSpecification { outer =>
     def afterSpec = outer.doAfterSpec(actions)
   }
 }
-trait Contexts extends BeforeAfter {
+trait Contexts extends BeforeAfter { this: BaseSpecification =>
   /** Factory method to create a context with beforeAll only actions */
   def contextFirst(actions: => Any) = new Context { first(actions) }
 
@@ -192,7 +196,7 @@ abstract class SystemContext[S] extends Context with java.lang.Cloneable {
   def before(s: S) = {}
   def newInstance: SystemContext[S] = this.clone.asInstanceOf[SystemContext[S]]
 }
-trait SystemContexts extends Contexts {
+trait SystemContexts extends Contexts { this: BaseSpecification => 
   class SystemContextCaller(s: String) {
     def withSome[T](context: SystemContext[T])(f: T => Any): Example = into(f)(context)
     def withAn[T](context: SystemContext[T])(f: T => Any): Example = into(f)(context)

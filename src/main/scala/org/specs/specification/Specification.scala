@@ -40,8 +40,8 @@ import org.specs.execute._
  * be collected with the corresponding methods
  *
  */
-abstract class Specification extends Expectations with FailOrSkip with Console with SpecsFilter 
-               with Contexts {
+abstract class Specification extends BaseSpecification with Expectations with FailOrSkip with Console with SpecsFilter 
+               with Contexts with ContextProperties {
 
   /** A specification is its own specs holder. */
   val specs = List(this)
