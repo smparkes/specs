@@ -74,22 +74,13 @@ case class ExampleWithContext[S](val context: SystemContext[S], var exampleDesc:
     copyExecutionTo(ExampleWithContext(context, exampleDesc, cyc))
   }
 }
-case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLifeCycle) extends Tagged with HasResults {
+case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLifeCycle) extends Tagged with DefaultResults {
   def this(desc: String, cycle: ExampleLifeCycle) = this(ExampleDescription(desc), cycle)
 
   def description = exampleDescription.toString
 
-  /** failures created by Assert objects inside the <code>in<code> method */
-  var thisFailures = new Queue[FailureException]
-
-  /** skipped created by Assert objects inside the <code>in<code> method */
-  var thisSkipped = new Queue[SkippedException]
-
-  /** errors created by Assert objects inside the <code>in<code> method */
-  var thisErrors = new Queue[Throwable]
-
   /** number of <code>Assert</code> objects which refer to that Example */
-  private var expectationsNumber = 0
+  protected[specification] var expectationsNumber = 0
 
   /** @return the number of expectations, executing the example if necessary */
   def expectationsNb = { execute; expectationsNumber }
@@ -106,6 +97,12 @@ case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLif
     val ex = new Example(ExampleDescription(desc), lifeCycle)
     addExample(ex)
     ex
+  }
+  def copyExecutionResults(other: Example) = {
+    this.copyResults(other)
+    this.expectationsNumber = other.expectationsNumber
+    this.subExs = other.subExs
+    this.execution.executed = true
   }
 
   /** @return the subexamples, executing the example if necessary */
@@ -134,7 +131,7 @@ case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLif
   }
 
   /** execute the example, checking the expectations. */
-  def execute: Unit =  execution.execute
+  def execute = if (!execution.executed) cycle.executeExample(this)
 
   def before = {}
   def after = {}
@@ -148,28 +145,19 @@ case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLif
       throw new SkippedException("PENDING: not yet implemented").removeTracesAsFarAsNameMatches("(specification.Example|LiterateSpecification)")
   }
 
-  /** creates and adds a new error from an exception t */
-  def addError(t: Throwable) = thisErrors += t
-
-  /** creates and adds a failure exception */
-  def addFailure(failure: FailureException) = thisFailures += failure
-
-  /** creates and adds a skipped exception */
-  def addSkipped(skip: SkippedException) = thisSkipped += skip
-
   /** @return the failures of this example and its subexamples, executing the example if necessary */
-  def failures: Seq[FailureException] = { execute; thisFailures ++ subExamples.flatMap { _.failures } }
+  override def failures: List[FailureException] = { ownFailures ++ subExamples.flatMap { _.failures } }
   /** @return the failures of this example, executing the example if necessary */
-  def ownFailures: Seq[FailureException] = { execute; thisFailures }
+  def ownFailures: List[FailureException] = { execute; thisFailures.toList }
 
   /** @return the skipped messages for this example and its subexamples, executing the example if necessary  */
-  def skipped: Seq[SkippedException] = { execute; thisSkipped ++ subExamples.flatMap { _.skipped } }
+  override def skipped: List[SkippedException] = { ownSkipped ++ subExamples.flatMap { _.skipped } }
   /** @return the skipped messages for this example, executing the example if necessary  */
-  def ownSkipped: Seq[SkippedException] = { execute; thisSkipped }
+  def ownSkipped: List[SkippedException] = { execute; thisSkipped.toList }
 
   /** @return the errors of this example, executing the example if necessary  */
-  def errors: Seq[Throwable] = { execute; thisErrors ++ subExamples.flatMap {_.errors} }
-  def ownErrors: Seq[Throwable] = { execute; thisErrors }
+  override def errors: List[Throwable] = { ownErrors ++ subExamples.flatMap {_.errors} }
+  def ownErrors: List[Throwable] = { execute; thisErrors.toList }
 
   /** @return a user message with failures and messages, spaced with a specific tab string (used in ConsoleReport) */
   def pretty(tab: String) = tab + description + failures.foldLeft("") {_ + addSpace(tab) + _.message} +
@@ -177,6 +165,7 @@ case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLif
   /** @return the example description */
   override def toString = description.toString
 
+  def executeThis = execution.execute
   /** reset in order to be able to run the example again */
   def resetForExecution: this.type = {
     execution.resetForExecution
@@ -212,16 +201,15 @@ object ExampleDescription {
 class ExampleExecution(example: Example, val expectations: () => Any) {
   /** function containing the expectations to be run */
   private var toRun: () => Any = () => {
-      if (example.isAccepted) {
-        execution()
-        while (!example.cycle.until) execution()
-      } else
-        example.addSkipped(new SkippedException("not tagged for execution"))
+    if (example.isAccepted) {
+      execution()
+      while (!example.cycle.until) execution()
+    } else
+      example.addSkipped(new SkippedException("not tagged for execution"))
   }
 
   /** flag used to memorize if the example has already been executed once. In that case, it will not be re-executed */
-  private[this] var executed = false
-
+  private[specification] var executed = false
   val execution = () => {
     var failed = false
     // try the "before" methods. If there is an exception, add an error and return the current example
@@ -254,7 +242,7 @@ class ExampleExecution(example: Example, val expectations: () => Any) {
   }
   /** execute the example, setting a flag to make sure that it is only executed once */
   def execute = {
-    if (!executed){
+    if (!executed) {
       toRun()
       executed = true
     }
