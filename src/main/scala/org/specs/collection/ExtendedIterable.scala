@@ -41,12 +41,10 @@ object ExtendedIterable {
      * @return a Stream created from the iterable
      */
     def toStream = Stream.fromIterator(xs.elements)
-
     /**
      * alias for any type of Iterable
      */
-    type anyIterable = Iterable[T] forSome {type T}
-
+    type anyIterable = Iterable[T] forSome { type T }
     /**
      * @return the representation of the elements of the iterable using the toString method recursively
      */
@@ -54,11 +52,10 @@ object ExtendedIterable {
       if (!xs.isEmpty && xs == xs.elements.next)
         xs.toString
       else
-          "[" + xs.toList.map { x =>
+        "[" + xs.toList.map { x =>
             if (x.isInstanceOf[anyIterable]) x.asInstanceOf[anyIterable].toDeepString else x.toString
-          }.mkString(", ") + "]"
+        }.mkString(", ") + "]"
     }
-
     /**
      * @return true if the 2 iterables contain the same elements, in the same order, according to a function f
      */
@@ -89,12 +86,10 @@ object ExtendedIterable {
          }
       }
     }
-
     /**
      * @return true if the 2 iterables contain the same elements recursively, in any order
      */
     def sameElementsAs(that: Iterable[A]): Boolean = sameElementsAs(that, (x, y) => x == y)
-
     /**
      * @return true if the 2 iterables contain the same elements (according to a comparision function f) recursively, in any order
      */
@@ -124,33 +119,15 @@ object ExtendedIterable {
         case _ => ita == itb
       }
     }
-
     /**
      * adds the sameElementsAs method to any object in order to do that comparison recursively
      */
     implicit def anyToSameElements(x: Any) = new AnyWithSameElements(x)
-
     /**
      * Class adding the <code>sameElementsAs</code> method to any object. The default implementation uses standard equality (==)
      */
     class AnyWithSameElements(x: Any) {
-       def sameElementsAs(that: Any): Boolean = x == that
+      def sameElementsAs(that: Any): Boolean = x == that
     }
-  }
-  def combine[A, B](firstSet: Iterable[A], secondSet: Iterable[B]): List[List[(A, B)]] = {
-    val values = for { 
-          a  <- everyOrder(firstSet.toList)
-          b  <- everyOrder(secondSet.toList)
-    } yield List(a.zip(b):_*)
-    values
-    var result: List[List[(A, B)]] = Nil
-    for (v <- values) {
-      if (!result.exists { listOfPairs =>
-        v.forall(p => listOfPairs.exists(_ == p)) 
-      }) {
-        result = v :: result
-      }
-    }
-    result
   }
 }
