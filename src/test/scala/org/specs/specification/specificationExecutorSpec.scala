@@ -2,12 +2,7 @@ package org.specs.specification
 import org.specs.util.Configuration
 
 class specificationExecutorSpec extends spex.Specification {
-  "A specification executor" should { 
-    "have a cloneSpecification method creating a new instance of a given specification" in {
-      this.cloneSpecification must be some
-    }
-  }
-  "A executed specification, with one spec instance per example" should {
+  "An executed specification, with one spec instance per example" should {
     "execute examples only once" in {
       specWithCountedExamples.failures // execute the specification
       examplesExecutionCounter.nb must_== 2
@@ -17,10 +12,9 @@ class specificationExecutorSpec extends spex.Specification {
       val example = specificationWithASharedVariable.examples(0)
       example.expectationsNb must_== 1
     }
-    "include all subexamples" in {
-      specificationWithASharedVariable.failures // execute the specification
-      val example = specificationWithASharedVariable.examples(2)
-      example.subExamples.size must_== 2
+    "execute all subexamples" in {
+      specificationWithSubexamples.allExamples.flatMap(_.subExamples) must have size(3)
+      specificationWithSubexamples.failures must have size(1)
     }
   }
   include(specificationWithASharedVariable, 
@@ -44,9 +38,9 @@ object specificationWithASharedVariable extends spex.Specification {
   "When executing each example, a shared variable" should {
     "be set to its initial value: 0" in { i must_== 0; i = i + 1 }
     "still be set to its initial value: 0" in { i must_== 0 }
-    "be possibly used in subexamples" >> {
-      "here" >> { i must_== 0 }
-      "there" >> { i must_== 0 }
+    "be possibly used in subexamples" in {
+      "here" in { i must_== 0 }
+      "there" in { i must_== 0 }
     }
   }
 }
@@ -91,6 +85,20 @@ object specificationWithANestedCaseClassSpecification extends spex.Specification
   }
   include(new caseClassSpecification)
 }
-
+object specificationWithSubexamples extends spex.Specification {
+  "execute all subexamples" should {
+    "ex" >> {
+      "subex1" in {
+        1 must_== 1 
+      }
+      "subex2" in {
+        1 must_== 0
+      }
+      "subex3" in {
+        1 must_== 1 
+      }
+    }
+  }
+}
 
 

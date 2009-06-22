@@ -83,6 +83,7 @@ object basicFeatures extends SpecificationWithSamples {
          "for all its examples" in { 1 mustBe 1 }
        }
      }
+     skipAll.systems(0).examples // execute the should part
      skipAll.systems must exist { s: Sus => s.skippedSus != None }
      skipAll.expectationsNb mustBe 0
    }
@@ -104,7 +105,7 @@ object basicFeatures extends SpecificationWithSamples {
          "do ex2" in {executions = executions:::List("ex2")}
        }
      }
-     spec.name
+     spec.systems(0).examples // execute the should part
      executions must_== List("ex1", "ex2")
    }
  }
@@ -211,8 +212,8 @@ trait SpecificationWithSamples extends Specification {
   }
   case class SpecWithTwoEx(behaviours1: List[(that.Value)], behaviours2: List[(that.Value)]) extends TestSpec {
     "This system under test" should {
-      "have example 2.1 ok" in { expectations(behaviours1).head.apply }
-      "have example 2.2 ok" in { expectations(behaviours2).last.apply }
+      "have example 2.1 ok" in { expectations(behaviours1).head.apply; () }
+      "have example 2.2 ok" in { expectations(behaviours2).last.apply; () }
     }
   }
   case class twoSystems(behaviours1: List[(that.Value)], behaviours2: List[(that.Value)]) extends TestSpec {
