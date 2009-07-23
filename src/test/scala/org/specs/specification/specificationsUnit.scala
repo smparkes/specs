@@ -46,61 +46,49 @@ class specificationsUnit extends SpecificationWithJUnit with ScalaCheck {
     }
   }
   "A specification with one sus and an example alone" should {
-    object testSpec extends Specification { 
-      "this sus" should { "ex1" in { 1 must_== 1 } }
-      "ex2" in { 1 must_== 1 }
-    }
+    object s extends specWith2Sus
     "have two sus" in {
-      testSpec.systems must have size(2)
-      testSpec.systems(0).examples must have size(1)
-      testSpec.systems(0).examples(0).description must_== "ex1" 
-      testSpec.systems(1).examples must have size(1)
-      testSpec.systems(1).examples(0).description must_== "ex2" 
+      s.systems must have size(2)
+      s.systems(0).examples must have size(1)
+      s.systems(0).examples(0).description must_== "ex1" 
+      s.systems(1).examples must have size(1)
+      s.systems(1).examples(0).description must_== "ex2" 
     }
   }
   "A specification with one expectation only" should {
-    object nudeSpec extends Specification { "name" mustEqual "name" }
     "create a default sus" in {
-      nudeSpec.systems.size mustBe 1
+      nudeSpecification.systems.size mustBe 1
     }
     "create a default example" in {
-      nudeSpec.systems.head.examples.size mustBe 1
+      nudeSpecification.systems.head.examples.size mustBe 1
     }
     "create a default example named 'example 1'" in {
-      nudeSpec.systems.head.examples.first.description must_== "example 1"
+      nudeSpecification.systems.head.examples.first.description must_== "example 1"
     }
     "count 1 expectation" in {
-      nudeSpec.expectationsNb mustBe 1
+      nudeSpecification.expectationsNb mustBe 1
     }
   }
   "the location of a failure" should {
+    val startLine = 105
     "indicate the precise location if it is an anonymous example" in {
-      anonymousSpecification.failures(0).location must_== "specificationsUnit.scala:117"
+      anonymousSpecification.failures(0).location must_== "specificationsUnit.scala:" + startLine
     }
     "indicate the precise location if it is in a sus" in {
-      failedSpecification.failures(0).location must_== "specificationsUnit.scala:118"
+      failedSpecification.failures(0).location must_== "specificationsUnit.scala:" + (startLine + 1)
     }
     "indicate the precise location if it is a skipped example" in {
-      skippedSpecification.skipped(0).location must_== "specificationsUnit.scala:119"
+      skippedSpecification.skipped(0).location must_== "specificationsUnit.scala:" + (startLine + 2)
     }
     "indicate the precise location if it is a skipped example with a skipped matcher" in {
-      skippedMatcherSpecification.skipped(0).location must_== "specificationsUnit.scala:120"
+      skippedMatcherSpecification.skipped(0).location must_== "specificationsUnit.scala:" + (startLine + 3)
     }
     "indicate the precise location if it is in an example" in {
       failedSpecification.failures(0).getMessage must_== "'1' is not equal to '0'"
-      failedSpecification.failures(0).location must_== "specificationsUnit.scala:118"
+      failedSpecification.failures(0).location must_== "specificationsUnit.scala:" + (startLine + 1)
     }
   }
   "A specification with 2 expectations only" should {
-    object twoNamedExamples extends Specification {
-      val n = "name" aka "the string"
-      n mustEqual "name"
-      n mustEqual "name2"
-    }
-    object twoExamples extends Specification {
-      "name" mustEqual "name"
-      "name" mustEqual "name2"
-    }
     "create 2 default examples with a normal assert" in {
       twoNamedExamples.systems.head.examples.size mustBe 2
     }
@@ -119,6 +107,19 @@ object failedSpecification extends Specification { "it" should { 1 must_== 0; ""
 object skippedSpecification extends Specification { "it" should { "be skipped" in { skip("be skipped") } } }
 object skippedMatcherSpecification extends Specification { "it" should { "be skipped" in { 1 must be_==(0).orSkipExample } } }
 
-
-
-
+class specWith2Sus extends Specification { 
+  "this sus" should { "ex1" in { 1 must_== 1 } }
+  "ex2" in { 1 must_== 1 }
+}
+object nudeSpecification extends Specification { "name" mustEqual "name"; systems }
+object twoNamedExamples extends Specification {
+  val n = "name" aka "the string"
+  n mustEqual "name"
+  n mustEqual "name2"
+  systems
+}
+object twoExamples extends Specification {
+  "name" mustEqual "name"
+  "name" mustEqual "name2"
+}
+    

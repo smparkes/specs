@@ -1,6 +1,6 @@
 package org.specs.specification
-import org.specs.util.Classes._
 import org.specs.util.{ Configuration }
+import org.specs.util.Classes._
 /**
  * This trait executes an example by cloning the enclosing specification first.
  * 
@@ -10,9 +10,9 @@ import org.specs.util.{ Configuration }
  * Warning: this works by considering that the "examples" method is stable on a BaseSpecification and
  * will always return the same examples in the same order
  */
-trait SpecificationExecutor extends ExampleLifeCycle { this: BaseSpecification =>
+trait SpecificationExecutor extends LifeCycle { this: BaseSpecification with ExampleExpectationsListener =>
   /** execute an example by cloning the specification and executing the cloned example */
-  override def executeExample(example: Example): this.type = {
+  override def executeExample(example: Examples): this.type = {
     var executed = false
     try {
       val path  = example.pathFromRoot
@@ -21,12 +21,15 @@ trait SpecificationExecutor extends ExampleLifeCycle { this: BaseSpecification =
           case None => example.executeThis
           case Some(s) => {
             s.executeOneExampleOnly = true
+            s.expectationsListener = this
+            s.parent = Some(this)
             val cloned = s.getExample(path)
             cloned match {
               case None => throw PathException(path + "not found for " + example)
               case Some(c) => {
-                c.tagWith(this)
-                c.execution.execute
+                c.tagWith(example)
+                c.examplesFilter = example.examplesFilter
+                c.execution.map(_.execute)
                 example.copyExecutionResults(c)
               }
             }
@@ -39,13 +42,13 @@ trait SpecificationExecutor extends ExampleLifeCycle { this: BaseSpecification =
       case _ => ()
     }
     if (!executed)
-      example.execution.execute
+      example.execution.map(_.execute)
     
     this
   }
   /** @return a clone of the specification */
   private[specification] def cloneSpecification = {
-    tryToCreateObject[BaseSpecification](getClass.getName, false, false)
+    tryToCreateObject[BaseSpecification with ExpectableFactory](getClass.getName, false, false)
   }
 }
 case class PathException(m: String) extends Exception(m)

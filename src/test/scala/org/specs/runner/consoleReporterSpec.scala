@@ -117,10 +117,14 @@ class reporterSpecification extends TestSpecs {
       spec.setNoStacktrace()
       spec.run mustNot containMatch("org.specs.runner.SpecWithOneExample\\$")
     }
+    "not print out an empty sus" in {
+      new SpecWithAnEmptySus().run.toList must not containMatch("An empty system")
+      new SpecWithAnEmptySus().run.toList must not containMatch("Total for SUS")
+    }
   }
 }
 class consoleTraitSpecification extends TestSpecs {
-  val specRunner = new ConsoleRunner(specWithTags) with MockOutput
+  val specRunner = new ConsoleRunner(new specWithTags) with MockOutput
   val specTwoSystemsRunner = new ConsoleRunner(specTwoSystems) with MockOutput
   "A console trait" should {
     "setNoStackTrace on the ConsoleReporter when passed the -ns or --nostacktrace argument" in {
@@ -140,19 +144,21 @@ class consoleTraitSpecification extends TestSpecs {
       runWith("-acc") must containMatch("\\[WARNING\\] accept/reject tags omitted")
     }
   }
-  "A console trait" can { 
+  "A console trait with tagged specifications" should { 
     "accept a --reject argument to only exclude examples having some tags in the specification" in {
-      runWith("--reject", "out") must (containMatch("\\+ included") and containMatch("o excluded"))
+      runWith("--reject", "out", "-ns") must (containMatch("\\+ included") and containMatch("o excluded"))
     }
     "accept a -rej argument to only exclude examples having some tags in the specification" in {
-      runWith("-rej", "out") must (containMatch("\\+ included") and containMatch("o excluded"))
+      runWith("-rej", "out", "-ns") must (containMatch("\\+ included") and containMatch("o excluded"))
     }
     "accept a --accept argument to only include examples having some tags in the specification" in {
-      runWith("--accept", "in") must (containMatch("\\+ included") and containMatch("o excluded"))
+      runWith("--accept", "in", "-ns") must (containMatch("\\+ included") and containMatch("o excluded"))
     }
     "accept a -acc argument to only exclude examples having some tags in the specification" in {
-      runWith("-acc", "in") must (containMatch("\\+ included") and containMatch("o excluded"))
+      runWith("-acc", "in", "-ns") must (containMatch("\\+ included") and containMatch("o excluded"))
     }
+  }
+  "A console trait" should {
     "not display the statistics with the -finalstats or --finalstatistics flag" in {
       run2SystemsWith("-finalstats") must notContainMatch("for SUS")
     }
@@ -164,16 +170,16 @@ class consoleTraitSpecification extends TestSpecs {
       runWith("--color") must containMatch(asString(AnsiColors.green))
     }
     "report a success in green when passed the -c or --color flag" in {
-      runWith("-c", "-ex", "included") must containMatch(asString(AnsiColors.green))
+      runWith("-c") must containMatch(asString(AnsiColors.green))
     }
     "report a failure in red when passed the -c or --color flag" in {
-      runWith("-c", "-ex", "failure") must containMatch(asString(AnsiColors.red))
+      runWith("-c") must containMatch(asString(AnsiColors.red))
     }
     "report an error in red when passed the -c or --color flag" in {
-      runWith("-c", "-ex", "error") must containMatch(asString(AnsiColors.red))
+      runWith("-c") must containMatch(asString(AnsiColors.red))
     }
     "report a skipped example in yellow when passed the -c or --color flag" in {
-      runWith("-c", "-ex", "skipped") must containMatch(asString(AnsiColors.yellow))
+      runWith("-c") must containMatch(asString(AnsiColors.yellow))
     }
     "print a help message with the options description if passed the -h or --help flag" in {
       mainWith("--help") must containMatch("--help")
@@ -207,15 +213,15 @@ class TestSpecs extends org.specs.Specification {
     "this is system one" should { "do nothing" in { 1 must_== 1 } }
     "this is system two" should { "do nothing" in { 1 must_== 1 } }
   }
-  def specWithTags = new Specification {
-	"this sus" should {
-	  ("excluded" in { 1 must_== 1 }).tag("out")
-	  ("included" in { 1 must_== 1 }).tag("in")
-	  "failed" in { 1 must_== 0 }
-	  "error" in { 1 / 0 }
-	  "skipped" in { skip("skipped") }
-	}
-  }
+}
+class specWithTags extends Specification {
+  "this sus" should {
+    ("excluded" in { 1 must_== 1 }).tag("out")
+    ("included" in { 1 must_== 1 }).tag("in")
+    "failed" in { 1 must_== 0 }
+    "error" in { 1 / 0 }
+    "skipped" in { skip("skipped"); 1 }
+  } tag "in"
 }
 abstract class TestSpecification extends org.specs.Specification with Expectations with MockOutput {
   override val specs = List(this)
@@ -269,7 +275,14 @@ class SpecWithAnAnonymousSystem(behaviours: List[(that.Value)]) extends TestSpec
     messages
   }
 }
-
+class SpecWithAnEmptySus extends TestSpecification {
+  def run = {
+    "An empty system" should {
+    }
+    reportSpecs
+    messages
+  }
+}
 class SpecWithSubexamples extends TestSpecification {
   "A specification" should {
       "have example 1 ok" in { "1.1" in { 1 must_== 1 } }

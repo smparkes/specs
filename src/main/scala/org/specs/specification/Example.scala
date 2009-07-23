@@ -45,54 +45,70 @@ import org.specs.execute._
  * <p>
  * When expectations have been evaluated inside an example they register their failures and errors for later reporting
  */
-case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLifeCycle) extends TreeNode with Tagged with DefaultResults {
-  def this(desc: String, cycle: ExampleLifeCycle) = this(ExampleDescription(desc), cycle)
 
+abstract class Examples(var exampleDescription: ExampleDescription, var parentCycle: Option[LifeCycle]) extends
+  ExampleContext with DefaultResults {
+  parent = parentCycle
+  /** example description as a string */
   def description = exampleDescription.toString
+  /** @return the example description */
+  override def toString = description.toString
 
-  /** number of <code>Assert</code> objects which refer to that Example */
-  protected[specification] var expectationsNumber = 0
-
-  /** @return the number of expectations, executing the example if necessary */
-  def expectationsNb = { execute; expectationsNumber }
-
-  /** increment the number of expectations in this example */
-  def addExpectation = { expectationsNumber += 1; this }
-
-  /** sub-examples created inside the <code>in</code> method */
-  private[specification] var subExs = new Queue[Example]
-
-  /** add a new sub-example to this example */
-  def addExample(e: Example) = {
-    addChild(e)
-    subExs += e
+  /** @return a user message with failures and messages, spaced with a specific tab string (used in ConsoleReport) */
+  def pretty(tab: String) = tab + description + failures.foldLeft("") {_ + addSpace(tab) + _.message} +
+                                                errors.foldLeft("") {_ + addSpace(tab) + _.getMessage}
+  
+  def executeThis = {
+    execution.map(_.execute)
+    execution.map { e => 
+      if (!(e.example eq this))
+        this.copyExecutionResults(e.example) 
+    }
   }
-  def createExample(desc: String, lifeCycle: ExampleLifeCycle) = {
-    val ex = new Example(ExampleDescription(desc), lifeCycle)
+  
+  /** execute this example but not if it has already been executed. */
+  override def executeExamples = {
+    if (!executed) 
+      parent.map(_.executeExample(this))
+  }
+  override def allExamples: List[Examples] = {
+    if (examples.isEmpty)
+      List(this)
+    else
+      examples.flatMap(_.allExamples).toList
+  }
+    /** @return the example for a given Activation path */
+  def getExample(path: TreePath): Option[Examples] = {
+    path match {
+      case TreePath(Nil) => Some(this)
+      case TreePath(i :: rest) if !this.examples.isEmpty => this.examples(i).getExample(TreePath(rest))
+      case _ => None
+    }
+  }
+  /** create the main block to execute when "execute" will be called */
+  def specifyExample(a: =>Any): Unit = {
+    execution = Some(new ExampleExecution(this, () => {
+      withCurrent(this) {
+        a
+      }
+    }))
+    if (parent.map(_.isSequential).getOrElse(false))
+      executeExamples
+  }
+  /** increment the number of expectations in this example */
+  def addExpectation: Examples = { thisExpectationsNumber += 1; this }
+  /** create a new example with a description and add it to this. */
+  def createExample(desc: String): Example = {
+    val ex = new Example(desc, this)
     addExample(ex)
     ex
   }
-  def copyExecutionResults(other: Example) = {
-    this.hardCopyResults(other)
-    other.subExs.foreach(e => this.createExample(e.description.toString, this.cycle))
-    this.expectationsNumber = other.expectationsNumber
-    this.execution.executed = true
-  }
-
-  /** @return the subexamples, executing the example if necessary */
-  def subExamples = { execute; subExs }
-  /** @return this example if it doesn't have subexamples or return the subexamples */
-  def allExamples: List[Example] = {
-    if (subExs.isEmpty)
-      List(this)
-    else
-      subExs.flatMap(_.allExamples).toList
-  }
-  def doTest[T](expectations: => T) = cycle.executeTest(this, expectations)
-
-  /** encapsulates the expectations to execute */
-  var execution = new ExampleExecution(this, () => ())
-
+}
+class Example(var exampleDesc: ExampleDescription, var p: Option[ExampleContext]) extends Examples(exampleDesc, p) {
+      /** constructor with a simple string */
+  def this(desc: String, parent: ExampleContext) = this(ExampleDescription(desc), Some(parent))
+  /** constructor with a simple string */
+  def this(desc: String) = this(ExampleDescription(desc), None)
   /**
    * creates a new Example object and store as an ExampleExecution object the expectations to be executed.
    * This <code>expectations</code> parameter is a block of code which may contain expectations with matchers.
@@ -102,80 +118,17 @@ case class Example(var exampleDescription: ExampleDescription, cycle: ExampleLif
    * @return a new <code>Example</code>
    */
   def in(expectations: =>Any): this.type = {
-    setExecution(expectations)
+    specifyExample(expectations)
     this
   }
-  def in(example: =>Example): Unit = setExecution(example)
-  
-  private def setExecution(a: =>Any): Unit = {
-    execution = new ExampleExecution(this, () => {
-      cycle.setCurrentExample(Some(this))
-      a
-      cycle.setCurrentExample(None)
-    })
-    if (cycle.isSequential)
-      execute
-  }
+  /** this version of in allows to declare examples inside examples */
+  def in(example: =>Examples): Unit = specifyExample(example)
   /** alias for the <code>in</code> method */
   def >>(expectations: =>Any) = in(expectations)
-  def >>(example: =>Example) = in(example)
-
-  /** execute the example, checking the expectations. */
-  def execute = if (!execution.executed) cycle.executeExample(this)
-
-  def before = {}
-  def after = {}
-  def execute(t: => Any): Any = {
-    val executed = t
-    skipIfNoExpectations()
-    executed
-  }
-  protected def skipIfNoExpectations() = {
-    if (this.expectationsNumber == 0 && 
-          this.subExs.isEmpty && //this.thisSkipped.isEmpty && this.thisFailures.isEmpty && this.thisErrors.isEmpty && 
-          Configuration.config.examplesWithoutExpectationsMustBePending)
-      throw new SkippedException("PENDING: not yet implemented").removeTracesAsFarAsNameMatches("(specification.Example|LiterateSpecification)")
-  }
-
-  /** @return the failures of this example and its subexamples, executing the example if necessary */
-  override def failures: List[FailureException] = { ownFailures ++ subExamples.flatMap { _.failures } }
-  /** @return the failures of this example, executing the example if necessary */
-  def ownFailures: List[FailureException] = { execute; thisFailures.toList }
-
-  /** @return the skipped messages for this example and its subexamples, executing the example if necessary  */
-  override def skipped: List[SkippedException] = { ownSkipped ++ subExamples.flatMap { _.skipped } }
-  /** @return the skipped messages for this example, executing the example if necessary  */
-  def ownSkipped: List[SkippedException] = { execute; thisSkipped.toList }
-
-  /** @return the errors of this example, executing the example if necessary  */
-  override def errors: List[Throwable] = { ownErrors ++ subExamples.flatMap {_.errors} }
-  def ownErrors: List[Throwable] = { execute; thisErrors.toList }
-
-  /** @return a user message with failures and messages, spaced with a specific tab string (used in ConsoleReport) */
-  def pretty(tab: String) = tab + description + failures.foldLeft("") {_ + addSpace(tab) + _.message} +
-                                                errors.foldLeft("") {_ + addSpace(tab) + _.getMessage}
-  /** @return the example description */
-  override def toString = description.toString
-
-  def executeThis = execution.execute
-  /** reset in order to be able to run the example again */
-  def resetForExecution: this.type = {
-    execution.resetForExecution
-    thisFailures.clear
-    thisErrors.clear
-    thisSkipped.clear
-    subExs.foreach(_.resetForExecution)
-    this
-  }
-  /** @return the example for a given Activation path */
-  def getExample(path: TreePath): Option[Example] = {
-    path match {
-      case TreePath(Nil) => Some(this)
-      case TreePath(i :: rest) if !this.subExamples.isEmpty => this.subExamples(i).getExample(TreePath(rest))
-      case _ => None
-    }
-  }
+  /** alias for the <code>in</code> method to create subexamples */
+  def >>(example: =>Examples) = in(example)
 }
+
 /**
  * Description of the example
  */
@@ -185,58 +138,4 @@ case class ExampleDescription(desc: String, toXhtml: Node) {
 }
 object ExampleDescription {
   def apply(desc: String): ExampleDescription = ExampleDescription(desc, <ex>{desc}</ex>)
-}
-/**
- * This class encapsulates the execution of an example
- */
-class ExampleExecution(example: Example, val expectations: () => Any) {
-  /** function containing the expectations to be run */
-  private var toRun: () => Any = () => {
-    if (example.isAccepted) {
-      execution()
-      while (!example.cycle.until) execution()
-    } else
-      example.addSkipped(new SkippedException("not tagged for execution"))
-  }
-
-  /** flag used to memorize if the example has already been executed once. In that case, it will not be re-executed */
-  private[specification] var executed = false
-  val execution = () => {
-    var failed = false
-    // try the "before" methods. If there is an exception, add an error and return the current example
-    try { example.cycle.beforeExample(example) } catch {
-      case t: Throwable => {
-        example.addError(t)
-        failed = true
-      }
-    }
-    // execute the <code>expectations</code> parameter. If it contains expectations with matchers they will be automatically executed
-    try {
-      if (!failed) {
-        example.cycle.beforeTest(example)
-        example.cycle.executeTest(example, expectations())
-        example.cycle.afterTest(example)
-      }
-    } catch {
-      // failed expectations will launch a FailureException
-      // skipped expectations will launch a SkippedException
-      case f: FailureException => example.addFailure(f)
-      case s: SkippedException => example.addSkipped(s)
-      case t: Throwable => example.addError(t)
-      }
-      // try the "after" methods. If there is an exception, add an error and return the current example
-      try {
-        if (!failed)
-          example.cycle.afterExample(example)
-      } catch { case t: Throwable => example.addError(t) }
-      example
-  }
-  /** execute the example, setting a flag to make sure that it is only executed once */
-  def execute = {
-    if (!executed) {
-      toRun()
-      executed = true
-    }
-  }
-  def resetForExecution = executed = false
 }

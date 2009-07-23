@@ -24,27 +24,33 @@ import org.specs.matcher._
  * and associate them with the latest defined example<br>
  * Usage: <code>
  * 2.1 must beCloseTo(2.0, .1)
- * </code>or<br><code>
+ * </code>or<br><code
  * theDouble(2.1) must beCloseTo(2.0, .1)
  * </code><p>
  *
  * Then StringMatchers are expecting values with String as an upper bound so that effectively only String instances
  * will be used with the implicit def (only solution found to make it all work, to my current understanding)
  */
-trait ExpectableFactory extends ExampleExpectationsListener with SuccessValues {
+trait ExpectableFactory extends ExampleExpectationsListener with SuccessValues with FailureFactory {
+
+  var expectationsListener: ExampleExpectationsListener = this
+  /** create a FailureExceptionWithResult when an expectation is failing */
+  def createFailure[T](message: String, result: Result[T]): Throwable with HasResult[T] = new FailureExceptionWithResult(message, result)
 
   /** implicit transformation of an object into one supporting AnyMatcher matchers */
   implicit def theValue[A](value: =>A): Expectation[A] = {
     val a = new Expectation(value)
     a.setSuccessValueToString(successValueToString _)
-    a.setExpectationsListener(this)
+    a.setExpectationsListener(expectationsListener)
+    a.setFailureFactory(this)
   }
 
   /** implicit transformation of a String into an object supporting String matchers */
   implicit def theString(value: =>String) = {
     val a = new StringExpectable(value.toString)
     a.setSuccessValueToString(successValueToString _)
-    a.setExpectationsListener(this)
+    a.setExpectationsListener(expectationsListener)
+    a.setFailureFactory(this)
   }
 
   /**
@@ -54,25 +60,28 @@ trait ExpectableFactory extends ExampleExpectationsListener with SuccessValues {
   implicit def theBlock(value: =>Nothing): Expectation[Nothing] = {
     val a = new Expectation(value)
     a.setSuccessValueToString(successValueToString _)
-    a.setExpectationsListener(this)
+    a.setExpectationsListener(expectationsListener)
+    a.setFailureFactory(this)
   }
   /** implicit transformation of an Iterable[String] into an object supporting IterableString matchers */
   implicit def theStrings(value: =>Iterable[String]): IterableStringExpectable = {
     val a = new IterableStringExpectable(value)
     a.setSuccessValueToString(successValueToString _)
-    a.setExpectationsListener(this)
+    a.setExpectationsListener(expectationsListener)
+    a.setFailureFactory(this)
   }
 
   /** implicit transformation of an Iterable into an object supporting Iterable matchers */
   implicit def theIterable[I <: AnyRef](value: =>Iterable[I]): IterableExpectable[I] = {
     val a = new IterableExpectable(value)
     a.setSuccessValueToString(successValueToString _)
-    a.setExpectationsListener(this)
+    a.setExpectationsListener(expectationsListener)
+    a.setFailureFactory(this)
   }
 }
 class DelegatedExpectableFactory(var delegate: ExpectableFactory) extends ExpectableFactory {
-  def forExample: Example = delegate.forExample
-  def lastExample: Option[Example] = delegate.lastExample
+  def forExample: Examples = delegate.forExample
+  def lastExample: Option[Examples] = delegate.lastExample
 }
 class DefaultExpectableFactory extends ExpectableFactory {
   private val defaultExample = new Example("", DefaultLifeCycle)
