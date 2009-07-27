@@ -46,7 +46,7 @@ class NotifierRunner(val specs: Array[Specification], val notifiers: Array[Notif
                       totalSpecification
                     }
     
-    notifiers.foreach { _.runStarting(specToRun.examplesNb) } 
+    notifiers.foreach { _.runStarting(specToRun.firstLevelExamplesNb) } 
     reportASpecification(specToRun)
   }
   def reportASpecification(spec: Specification): this.type = {
@@ -68,6 +68,7 @@ class NotifierRunner(val specs: Array[Specification], val notifiers: Array[Notif
   }
   def reportExample(example: Example): this.type = {
     notifiers.foreach { _.exampleStarting(example.description) }
+    example.examples.foreach(reportExample(_))
     if (example.isOk)
       notifiers.foreach { _.exampleSucceeded(example.description) }
     else if (!example.failures.isEmpty)
