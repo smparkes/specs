@@ -39,20 +39,20 @@ class editDistanceSpec extends SpecificationWithJUnit with EditDistance with Dat
   }
   "The show distance" should {
     "work on insertions" in {
-      showDistance("kitte", "kittei") must_== ("kitte", "kitte(i)")
-      showDistance("kitten", "kittein") must_== ("kitten", "kitte(i)n")
+      showDistance("kitte", "kittei") must_== ("kitte", "kitte[i]")
+      showDistance("kitten", "kittein") must_== ("kitten", "kitte[i]n")
     }
     "work on suppressions" in {
-      showDistance("kitten", "kit") must_== ("kit(ten)", "kit")
+      showDistance("kitten", "kit") must_== ("kit[ten]", "kit")
     }
     "work on substitutions" in {
-      showDistance("kitten", "kitsin") must_== ("kit(te)n", "kit(si)n")
+      showDistance("kitten", "kitsin") must_== ("kit[te]n", "kit[si]n")
     }
     "not show any difference for the same string" in {
       showDistance("kitte", "kitte") must_== ("kitte", "kitte")
     }
     "show the differences with another separator" in {
-      showDistance("kitten", "kitsin", "[]") must_== ("kit[te]n", "kit[si]n")
+      showDistance("kitten", "kitsin", "()") must_== ("kit(te)n", "kit(si)n")
     }
     "show the differences with another separator like <<>>" in {
       showDistance("kitten", "kitsin", "<<>>") must_== ("kit<<te>>n", "kit<<si>>n")
@@ -63,10 +63,10 @@ class editDistanceSpec extends SpecificationWithJUnit with EditDistance with Dat
     "work on 0-sized strings" in {
        "a"	| "b" 		| "result" 			|>
        "" 	! ""	   	! ("", "")    		|
-       "" 	! "a"	   	! ("", "(a)")  		|
-       "a" 	! ""	   	! ("(a)", "")    	|
-       "" 	! "ab"	   	! ("", "(ab)")		|
-       "ab" ! ""   		! ("(ab)", "") 		|
+       "" 	! "a"	   	! ("", "[a]")  		|
+       "a" 	! ""	   	! ("[a]", "")    	|
+       "" 	! "ab"	   	! ("", "[ab]")		|
+       "ab" ! ""   		! ("[ab]", "") 		|
        { (a: String, b: String, result: (String, String)) =>
          showDistance(a, b) must_== result
        }
@@ -74,12 +74,36 @@ class editDistanceSpec extends SpecificationWithJUnit with EditDistance with Dat
     "work on 1-sized strings" in {
        "a"	| "b" 		| "result" 			|>
        "a" 	! "a"	   	! ("a", "a")    	|
-       "a" 	! "b"	   	! ("(a)", "(b)")	|
-       "a" 	! "bc"	   	! ("(a)", "(bc)")  	|
-       "a" 	! "ab"	   	! ("a", "a(b)")		|
+       "a" 	! "b"	   	! ("[a]", "[b]")	|
+       "a" 	! "bc"	   	! ("[a]", "[bc]")  	|
+       "a" 	! "ab"	   	! ("a", "a[b]")		|
        { (a: String, b: String, result: (String, String)) =>
          showDistance(a, b) must_== result
        }
+    }
+  }
+  "The diff shortener" should {
+    import DiffShortener._
+    "not shorten a regular string" in {
+      shorten("abcd") must_== "abcd"
+    }
+    "shorten a diff before if too many letters" in {
+      shorten("abcdefghijkl(mn)opqr") must_== "...hijkl(mn)opqr"
+    }
+    "shorten a diff even at the end" in {
+      shorten("abcdefghijkl(mn)") must_== "...hijkl(mn)"
+    }
+    "shorten a diff even at the beginning" in {
+      shorten("(mn)abcdefghijkl") must_== "(mn)abcde..."
+    }
+    "shorten right and left" in {
+      shorten("abcdefghijkl(mn)opqrstuv") must_== "...hijkl(mn)opqrs..."
+    }
+    "shorten in the center" in {
+      shorten("hijkl(zz)abcdefghijklmno(xx)abcde") must_== "hijkl(zz)ab...no(xx)abcde"
+    }
+    "shorten left, center and right" in {
+      shorten("abcdefg(zz)abcdefghijklmno(xx)abcdefg") must_== "...cdefg(zz)ab...no(xx)abcde..."
     }
   }
 }

@@ -17,17 +17,21 @@
  * DEALINGS INTHE SOFTWARE.
  */
 package org.specs.specification
-
+import org.specs.util.Configuration
 /**
  * This traits adds the possibility to add declarations for detailed failures when matching strings.
  */
 trait DetailedFailures {
   /** by default no full details are reported by specifications */
-  implicit var detailedFailures: Detailed = noDetails()
+  implicit var detailedFailures: Detailed = if (Configuration.config.smartDiffs) new fullDetails("[]", 30, 20) else noDetails()
   /** detailled diffs enable showing the differences when comparing the toString result of 2 objects supposed to be == */
-  def detailedDiffs() = { detailedFailures = fullDetails("()") }
+  def detailedDiffs(): Unit = detailedDiffs("[]", 0, 20)
   /** detailled diffs enable showing the differences when comparing the toString result of 2 objects supposed to be == */
-  def detailedDiffs(separators: String) = { detailedFailures = fullDetails(separators) }
+  def detailedDiffs(separators: String): Unit = detailedDiffs(separators, 0, 20)
+  /** detailled diffs enable showing the differences when comparing the toString result of 2 objects supposed to be == */
+  def detailedDiffs(separators: String, shortenSize: Int): Unit = detailedDiffs(separators, 0, shortenSize)
+  /** detailled diffs enable showing the differences when comparing the toString result of 2 objects supposed to be == */
+  def detailedDiffs(separators: String, startDiffSize: Int, shortenSize: Int): Unit = { detailedFailures = new fullDetails(separators, startDiffSize, shortenSize) }
   /** reset the detailled diffs to no diffs */
   def noDetailedDiffs() = { detailedFailures = noDetails() }
 }
@@ -36,6 +40,7 @@ abstract class Detailed
 /** no details should be shown */
 case class noDetails() extends Detailed
 /** all details should be shown */
-case class fullDetails(separators: String) extends Detailed {
-  def this() = this("()") 
+case class fullDetails(separators: String, startDiffSize: Int, shortenSize: Int) extends Detailed {
+  def this(sep: String) = this(sep, 30, 20)
+  def this() = this("[]") 
 }

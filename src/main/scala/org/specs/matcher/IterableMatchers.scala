@@ -47,12 +47,13 @@ trait IterableBaseMatchers { outer =>
   def containAll[T](l: Iterable[T])(implicit details: Detailed) = new Matcher[Iterable[T]]() {
     def apply(v: => Iterable[T]) = {
       val iterable = v;
-      import org.specs.Products._
-      val failureMessage = details match {
-        case full: fullDetails => EditMatrix(d(iterable.mkString("\n")), q(l.mkString("\n"))).showDistance(full.separators).toList.mkString(" doesn't contain all of ")
-        case no: noDetails => d(iterable) + " doesn't contain all of " + q(l)
-      }
-      (l.forall(x => iterable.exists(_ == x)), d(iterable) + " contains all of " + q(l), failureMessage)
+      val failureMessage = if (iterable.mkString("").size >= 50) 
+        d(iterable.mkString("\n")) + "\n\ndoesn't contain all of\n\n" + q(l.mkString("\n"))
+      else
+        d(iterable) + " doesn't contain all of " + q(l)
+      (l.forall(x => iterable.exists(_ == x)), 
+       d(iterable) + " contains all of" + q(l), 
+       failureMessage)
     }
   }
 
@@ -67,12 +68,13 @@ trait IterableBaseMatchers { outer =>
   def containInOrder[T](l: Iterable[T])(implicit details: Detailed) = new Matcher[Iterable[T]](){
     def apply(v: => Iterable[T]) = {
       val iterable = v;
-      import org.specs.Products._
-      val failureMessage = details match {
-        case full: fullDetails => EditMatrix(d(iterable.mkString("\n")), q(l.mkString("\n"))).showDistance(full.separators).toList.mkString("", " doesn't contain all of ", " in order")
-        case no: noDetails => d(iterable) + " doesn't contain all of " + q(l) + " in order"
-      }
-      (iterable.containsInOrder(l), d(iterable) + " contains all of " + q(l) + " in order", failureMessage)
+      val failureMessage = if (iterable.mkString("").size >= 50) 
+        d(iterable.mkString("\n")) + "\n\ndoesn't contain all of\n\n" + q(l.mkString("\n")) + " in order"
+      else
+        d(iterable) + " doesn't contain all of " + q(l) + " in order"  
+      (iterable.containsInOrder(l), 
+       d(iterable) + " contains all of " + q(l) + " in order", 
+       failureMessage)
     }
   }
 

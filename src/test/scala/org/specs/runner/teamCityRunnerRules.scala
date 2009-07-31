@@ -23,7 +23,6 @@ import org.specs.util.Property
 
 class teamCityRunnerRules extends HtmlSpecificationWithJUnit("Team city runner") {
   override def htmlDir = "target"
-  detailedDiffs()
   def clearDetails(messages: Seq[String]) = messages.map(_.replaceAll("details='.*'", "details='exception stacktrace'"))
   val message: Property[String] = Property("")
   val messages: Property[List[String]] = Property[List[String]](Nil)
@@ -31,6 +30,7 @@ class teamCityRunnerRules extends HtmlSpecificationWithJUnit("Team city runner")
   def messagesMustBeCreated = clearDetails(runSpec.messages) must containInOrder(messages())
   def runSpec = (new TeamCityRunner(testingSpecification) with MockOutput).reportSpecs
 } 
+
 object testingSpecification extends Specification("specification name") {
 
   "sus1 description" should {
