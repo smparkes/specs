@@ -108,9 +108,14 @@ class BaseSpecification extends TreeNode with SpecificationSystems with Specific
    * <code>"A complex specification".isSpecifiedBy(spec1, spec2)</code>
    * It changes the name of this specification with the parameter
    */
-  implicit def declare(newName: String): BaseSpecification = { 
+  implicit def declare(newName: String): ComposedSpecification = { 
     name = newName
-    this 
+    new ComposedSpecification(this) 
+  }
+  class ComposedSpecification(s: BaseSpecification) {
+    def isSpecifiedBy(specifications: Specification*) = s.isSpecifiedBy(specifications:_*)
+    def areSpecifiedBy(specifications: Specification*) = s.areSpecifiedBy(specifications:_*)
+    def include(specifications: Specification*) = s.include(specifications:_*)
   }
   /** @return recursively all the systems included in this specification */
   def allSystems: List[Sus] = {
@@ -137,8 +142,17 @@ class BaseSpecification extends TreeNode with SpecificationSystems with Specific
    * Alternatively, it could be created with:
    * <code>forExample("return 0 when asked for (0+0)").in {...}</code>
    */
-  implicit def forExample(desc: String) = {
-    exampleContainer.createExample(desc)
+  implicit def specifyExample(desc: String): ExampleSpecification = {
+    new ExampleSpecification(exampleContainer.createExample(desc))
+  }
+  class ExampleSpecification(val example: Example) {
+    def in(expectations: =>Any) = example.in(expectations)
+    def in(e: =>Examples): Unit = example.in(e)
+    def >>(expectations: =>Any) = example.>>(expectations)
+    def >>(e: =>Examples) = example.>>(e)
+  }
+  def forExample(desc: String): Example = {
+    specifyExample(desc).example
   }
   /**
    * Create an anonymous example, giving it a number depending on the existing created examples/
@@ -210,12 +224,16 @@ class BaseSpecification extends TreeNode with SpecificationSystems with Specific
    * In this example we suppose that there is a system under specification with the same name previously defined.
    * Otherwise, an Exception would be thrown, causing the specification failure at construction time.
    */
-  object behave {
+   object behave {
     def like(other: Sus): Example = {
       val behaveLike: Example = forExample("behave like " + other.description.uncapitalize)
-      other.examples.foreach { o => 
-        val e = behaveLike.createExample(o.description.toString)
-        e.execution = o.execution
+      behaveLike.in {
+        other.examples.foreach { o => 
+          val e = behaveLike.createExample(o.description.toString)
+          e.execution = o.execution
+          e.execution.map(_.example = e)
+          e.parent = Some(behaveLike)
+        }
       }
       behaveLike
     }
@@ -225,6 +243,7 @@ class BaseSpecification extends TreeNode with SpecificationSystems with Specific
                                          outer.systems.map(_.description).mkString(" (available sus are: ", ", ", ")"))
     }
   }
+
   /** @return the first level examples number (i.e. without subexamples) */
   def firstLevelExamplesNb: Int = subSpecifications.foldLeft(0)(_+_.firstLevelExamplesNb) + systems.foldLeft(0)(_+_.examples.size)
   /** @return the failures of each sus */
