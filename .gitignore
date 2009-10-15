@@ -1,3 +1,4 @@
+bin*
 *.svn*
 .classpath
 .project
@@ -14,3 +15,11 @@ target*
 *.iml
 *.ipr
 *.iws
+*.jar
+*.log
+out/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+build/
