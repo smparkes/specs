@@ -65,6 +65,16 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
   </properties>
   <repositories>
     <repository>
+      <id>nexus-releases</id>
+      <name>Nexus Scala Repository</name>
+      <url>http://nexus.scala-tools.org/content/repositories/releases</url>
+    </repository>
+    <repository>
+	  <id>nexus-snapshots</id>
+      <name>Nexus Scala Repository</name>
+      <url>http://nexus.scala-tools.org/content/repositories/snapshots</url>
+    </repository>
+    <repository>
       <id>scala-tools.org</id>
       <name>Scala-Tools Maven2 Repository</name>
       <url>http://scala-tools.org/repo-releases</url>
@@ -145,6 +155,12 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
       <groupId>org.scala-tools.testing</groupId>
       <artifactId>scalacheck</artifactId>
       <version>1.6</version>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-tools.testing</groupId>
+      <artifactId>test-interface</artifactId>
+      <version>0.2</version>
       <optional>true</optional>
     </dependency>
     <dependency>
