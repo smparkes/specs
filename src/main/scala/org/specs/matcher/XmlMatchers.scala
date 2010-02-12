@@ -146,6 +146,14 @@ trait XmlBeHaveMatchers { this: XmlBaseMatchers =>
   class ElemResultMatcher(result: Result[Elem]) {
     def equalToIgnoringSpace(node: Elem) = result.matchWithMatcher(beEqualToIgnoringSpace(node))
   }
+  implicit def toNodeSeqResult(result: Result[NodeSeq]) = new NodeSeqResultMatcher(result)
+  class NodeSeqResultMatcher(result: Result[NodeSeq]) {
+    def size(n: Int) = result.matchWithMatcher(new SizeMatcher(2))
+  }
+  implicit def toGroupResult(result: Result[Group]) = new GroupResultMatcher(result)
+  class GroupResultMatcher(result: Result[Group]) {
+    def size(n: Int) = result.matchWithMatcher(new SizeMatcher(2))
+  }
 }
 /**
  * Matcher for equalIgnoreSpace comparison, ignoring the nodes order
@@ -173,8 +181,12 @@ class EqualIgnoringSpaceMatcherOrdered(node: Iterable[Node]) extends Matcher[Ite
  * search function which tries to match the result of the preceding function. For example<pre>
  * <a><b><c><d></d></c></b></a> must \\("c").\("d")</pre> will be ok.
 */
-case class XmlMatcher(functions: List[PathFunction]) extends Matcher[Iterable[Node]]() {
+case class XmlMatcher(functions: List[PathFunction]) extends Matcher[Iterable[Node]]() with MatchExactly {
   
+  override def exactly = {
+    functions.map(_.exactly)
+    this
+  }
   /**
    * checks that the <code>nodes</code> satisfy the <code>functions</code>
    */
@@ -268,7 +280,7 @@ trait XPathFunctions {
  * The PathFunction object encapsulate a search for a node and/or attributes or attributeValues with an XPath function
  * If <code>node</code> has some children, then they are searched using equality
  */
-class PathFunction(val node: Node, val attributes: List[String], val attributeValues: Map[String, String], val function: XPathFunction) extends Function1[Iterable[Node], Iterable[Node]] with XPathFunctions {
+class PathFunction(val node: Node, val attributes: List[String], val attributeValues: Map[String, String], val function: XPathFunction) extends Function1[Iterable[Node], Iterable[Node]] with XPathFunctions with MatchExactly {
 
   /**
    * @returns a PathFunction looking for a Node
@@ -302,13 +314,26 @@ class PathFunction(val node: Node, val attributes: List[String], val attributeVa
    */
   def matchNode(found: Node): Boolean = {
     // returns true if m matches the attribute names or attribute names + values
-    def attributesMatch(m: MetaData) = if (!attributes.isEmpty)
-                                         m.map((a: MetaData) => a.key).toList.intersect(attributes) == attributes
-                                       else if (!attributeValues.isEmpty)
-                                         Map(m.map((a: MetaData) => a.key -> a.value.toString).toList: _*) == attributeValues
-                                       else
-                                         true
-
+    def attributesMatch(m: MetaData) = {
+      if (!attributes.isEmpty) {
+        if (allAttributes)
+          m.map((a: MetaData) => a.key).toList.intersect(attributes) == attributes
+        else {
+          val attributesNames = m.map((a: MetaData) => a.key).toList
+          attributes.forall(attributesNames.contains(_))
+        }
+      }
+      else if (!attributeValues.isEmpty) {
+        if (allAttributes)
+          Map(m.map((a: MetaData) => a.key -> a.value.toString).toList: _*) == attributeValues
+        else {
+          val attributesNamesAndValues: Map[String, String] = Map(m.map((a: MetaData) => a.key -> a.value.toString).toList: _*)
+          attributeValues.forall((pair: (String, String)) =>  attributesNamesAndValues.isDefinedAt(pair._1) && attributesNamesAndValues(pair._1) == pair._2)
+        }
+      }
+      else
+        true
+    }
     // returns true if the node matches the specified children
     def childrenMatch(n: Node) = {
       if (node.child.isEmpty) 
@@ -324,5 +349,13 @@ class PathFunction(val node: Node, val attributes: List[String], val attributeVa
    * @returns a string representation of attributes or attributeValues (one of them being empty by construction)
    */
   def searchedAttributes = attributes.mkString(", ") + attributeValues.map(a=> a._1 + "=\"" + a._2 + "\"").mkString(" ")
-  
+}
+trait MatchExactly {
+  /** if allAttributes is true then all the attributes names and values will be checked */
+  protected[specs] var allAttributes = false
+  /** check that all attribute names and values are indeed present on the found node */
+  def exactly: this.type = {
+    allAttributes = true
+    this
+  }
 }
