@@ -36,8 +36,9 @@ trait TableFormEnabled extends FormEnabled {
   /**
    * adds properties in a line form 
    */
-  override def tr(props: LabeledXhtml*): this.type = {
-    props.toList match {
+  override def tr(props: LabeledXhtml*): this.type = addProps(props.toList)
+  protected def addProps(props: List[LabeledXhtml]): this.type = {
+    props match {
       case List(t: Tabs) => super.tr(t)
       case _ => {
         val lineForm = new LineForm {
@@ -59,19 +60,29 @@ trait TableFormEnabled extends FormEnabled {
    * adding a new form on a line. If this form is a LineForm, add a new header before, from the LineForm header 
    */
   def tr[F <: Form](line: F): F = {
-    if (unsetHeader) {
-      line match {
-        case l: LineForm => { unsetHeader = false; inNewRow(l.header) }
-        case _ => ()
-      }
-    } else {
-      line match {
-        case l: LineForm => ()
-        case _ => unsetHeader = true
-      }
+    line match {
+      case l: LineForm => setHeader(l)
+      case _ => ()
     }
+    
     super.form(line)
     trs(line.rows)
+    line
+  }
+  /**
+   * sets a header on the table
+   */
+  def header(names: String*) = {
+    setHeader(new LineForm { names.map(n => field(n, n)) })
+  }
+  
+  def setHeader[F <: LineForm](line: F): F = {
+    if (unsetHeader) {
+      unsetHeader = false
+      inNewRow(line.header) 
+    } else {
+      unsetHeader = true
+    }
     line
   }
 }
