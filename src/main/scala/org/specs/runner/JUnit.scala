@@ -32,7 +32,7 @@ import org.specs.util.Property
  * -the specifications are used to create JUnit3 TestSuite and TestCase objects
  * -however, since TestSuite is not an interface, a JUnitSuite trait is used to represent it (and the JUnitSuite uses a TestSuite internally to hold the tests)
  *   -a specification is represented as a JUnitSuite
- *   -a system under test (sus) is represented as an ExamplesTestSuite <: JUnitSuite
+ *   -a system under specification (sus) is represented as an ExamplesTestSuite <: JUnitSuite
  *   -an example is represented as an ExampleTestCase <: TestCase
  *
  * Then, the JUnitSuite which implements the junit.framework.Test interface can be run using
@@ -45,7 +45,7 @@ import org.specs.util.Property
 trait JUnitSuite extends Test {
   /** embedded JUnit3 TestSuite object */
   val testSuite = new TestSuite
-
+  
   /**this variable is set to true if the suite has been initialized */
   private var initialized = false
 
@@ -155,8 +155,9 @@ class ExamplesTestSuite(description: String, examples: Iterable[Examples], skipp
       val exampleDescription = (if (isExecutedFromMaven) (description + " ") else "") + example.description
       if (JUnitOptions.planOnly() || !example.hasSubExamples)
         addTest(new ExampleTestCase(example, exampleDescription))
-      else
+      else {
         addTest(new ExamplesTestSuite(exampleDescription, example.examples, None))
+      }
     }
   }
 

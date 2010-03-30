@@ -34,11 +34,20 @@ class testInterfaceRunnerSpec extends Specification {
     "report a failure" in {
       logOutput must include("[info]   x failure")      
     }
+    "report a message" in {
+      logOutput must include("[info]     '1' is not equal to '2'")      
+    }
+    "report the location of the failure" in {
+      logOutput must beMatching("'1' is not equal to '2'.*testInterfaceRunnerSpec.scala")      
+    }
     "report an error" in {
       logOutput must include("[info]   x error")      
     }
     "report the stacktrace of an error" in {
-      logOutput must include("[info]      " + testInterfaceSpecification.exception.getStackTrace()(0))      
+      logOutput must include("[info]     " + testInterfaceSpecification.exception.getStackTrace()(0))      
+    }
+    "report the location of the error" in {
+      logOutput must beMatching("bad.*testInterfaceRunnerSpec.scala")      
     }
     "report a skipped" in {
       logOutput must include("[info]   o skipped")      
@@ -67,6 +76,18 @@ class testInterfaceRunnerSpec extends Specification {
     "create the html page for a literate spec" in {
       testRunner.run(Some(sbtLiterateSpecification))
       sbtLiterateSpecification.files must not be empty
+    }
+    "use the passed arguments to filter out examples in the specification" in {
+      testRunner.run("org.specs.runner.testInterfaceSpecification", null, handler, Array("-ex", "success"))
+      testInterfaceLogger.out must not include("error")
+    }
+    "use the passed arguments to remove stacktraces in the output" in {
+      testRunner.run("org.specs.runner.testInterfaceSpecification", null, handler, Array("-ns"))
+      testInterfaceLogger.out must not include(testInterfaceSpecification.exception.getStackTrace()(0).toString)
+    }
+    "use the passed arguments to filter tags for the examples to execute" in {
+      testRunner.run("org.specs.runner.testInterfaceSpecification", null, handler, Array("-rej", "tag1"))
+      testInterfaceLogger.out must include("o success")
     }
   }
   class TestInterfaceLogger extends Logger {
@@ -112,7 +133,7 @@ class testInterfaceSpecification extends Specification {
   "this sus" should {
     "success" in {
       1 must_== 1
-    }
+    } tag "tag1"
     "failure" in {
       1 must_== 2
     }
