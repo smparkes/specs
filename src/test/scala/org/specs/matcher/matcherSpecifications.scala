@@ -28,6 +28,7 @@ object matcherSpecifications extends Specification {
 	new fileMatchersSpec,
     new mapMatchersSpec,
 	new objectMatchersSpec,
+    new eitherMatchersSpec,
     new patternMatchersSpec,
     new scalacheckMatchersSpec,
     new stringMatchersSpec,

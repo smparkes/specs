@@ -52,23 +52,29 @@ class scalaTestSpec extends SpecificationWithJUnit with ScalaTestMocks {
   "A ScalaTest runner"->-(c) should {
     "report failures and errors as test failed, skipped as ignored and the rest as success" in {
       sampleSuite.run(None, reporter, stopper, Filter(), Map(), None, new Tracker())
-      reporter.apply(any[SuiteStarting]) was called.atLeastOnce
-      reporter.apply(any[TestFailed])   was called.atLeastOnce
-      reporter.apply(any[TestIgnored]) was called
-      reporter.apply(any[TestSucceeded]) was called
-      reporter.apply(any[SuiteCompleted]) was called.atLeastOnce
+      got {
+        atLeastOne(reporter).apply(any[SuiteStarting])
+        atLeastOne(reporter).apply(any[TestFailed])
+        one(reporter).apply(any[TestIgnored])
+        one(reporter).apply(any[TestSucceeded])
+        atLeastOne(reporter).apply(any[SuiteCompleted])
+     }
     }
     "use the tags defined on the examples when executing included groups only" in {
       suiteWithGroups.run(None, reporter, stopper, new Filter(Some(Set("unit")), Set()), Map(), None, new Tracker())
-      reporter.apply(any[SuiteStarting]) was called.atLeastOnce
-      reporter.apply(any[TestSucceeded]) was called.once
-      reporter.apply(any[SuiteCompleted]) was called.atLeastOnce
+      got {
+	    atLeastOne(reporter).apply(any[SuiteStarting])
+        one(reporter).apply(any[TestSucceeded]) 
+        atLeastOne(reporter).apply(any[SuiteCompleted]) 
+	  }
     }
     "use the tags defined on the examples, and not executing excluded groups" in {
       suiteWithGroups.run(None, reporter, stopper, new Filter(None, Set("functional")), Map(), None, new Tracker())
-      reporter.apply(any[SuiteStarting]) was called.atLeastOnce
-      reporter.apply(any[TestSucceeded]) was called.twice
-      reporter.apply(any[SuiteCompleted]) was called.atLeastOnce
+      got {
+	    atLeastOne(reporter).apply(any[SuiteStarting]) 
+        two(reporter).apply(any[TestSucceeded])
+        atLeastOne(reporter).apply(any[SuiteCompleted])
+	  }
     }
   }
   def suite(behaviours: that.Value*) = new ScalaTestSuite(new SimpleSpecification(behaviours.toList))
