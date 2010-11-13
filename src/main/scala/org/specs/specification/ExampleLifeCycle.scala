@@ -48,7 +48,7 @@ trait LifeCycle extends SequentialExecution {
    * current list of examples defining the context of this execution. Every example created during by the executeExpectations method
    * will be attached to this list
    */
-  private[specs] var current: Option[Examples] = None
+  private[specs] var currentExample: Option[Examples] = None
   /** a predicate which will decide if an example must be re-executed */
   private[specs] var untilPredicate: Option[() => Boolean] = None
   /** if this variable is true then the doFirst block is not executed and the example execution must fail */
@@ -63,9 +63,11 @@ trait LifeCycle extends SequentialExecution {
   }
   /** set an example as the current example for this lifecycle and its parent */
   private[specs] def setCurrent(ex: Option[Examples]): Unit = {
-    current = ex
+    currentExample = ex
     parent.map(_.setCurrent(ex))
   }
+  /** @return the current example */
+  private[specs] def current: Option[Examples] = currentExample
   /** @return true if there is an until predicate, and if it is true */
   def until: Boolean = parent.map(_.until).getOrElse(true) && untilPredicate.getOrElse(() => true)()
   /** define the actions to be done before an example is executed */
@@ -98,7 +100,6 @@ trait ExampleLifeCycle extends LifeCycle with ExampleStructure {
   private[specs] var execution: Option[ExampleExecution] = None
   /** @return true if the execution has been executed */
   private[specs] def executed = execution.map(_.executed).getOrElse(true)
-
   /** abstract method (defined in Example) executing the example itself */
   def executeThis: Unit
   /** 
@@ -115,17 +116,14 @@ trait ExampleLifeCycle extends LifeCycle with ExampleStructure {
    * for isolated execution
    */
   override def executeExample(ex: Examples): this.type = { 
-    if (!exampleList.isEmpty  && exampleList.head == ex)
-      ex.executeThis
-    else
-      parent.map(_.executeExample(ex)) // forward the execution strategy to the parent 
+    parent.map(_.executeExample(ex)) // forward the execution strategy to the parent 
     this
   }
   /**
    * copy the execution results from another example.
    * This method is used when an example has been executed in isolation in another spec.
    */
-  def copyExecutionResults(other: Examples) = {
+  def copyExecutionResults(other: Examples) {
     copyFrom(other)
     execution.map(_.executed = true)
   }
@@ -157,9 +155,9 @@ trait SequentialExecution {
   /** @return true if if examples should be executed as soon as defined  */
   def isSequential = sequential
   /** examples should be executed as soon as defined */
-  def setSequential() = sequential = true
+  def setSequential() = setSequentialIs(true)
   /** examples should not be executed as soon as defined */
-  def setNotSequential() = sequential = false
+  def setNotSequential() = setSequentialIs(false)
   /** setter for is sequential */
   def setSequentialIs(b: Boolean) = sequential = b
 

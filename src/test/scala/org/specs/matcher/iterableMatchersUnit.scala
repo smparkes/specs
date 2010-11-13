@@ -55,7 +55,7 @@ class iterableMatchersUnit extends MatchersSpecification {
       containMatch("") must evalOnce(exp(nil))
     }
     "not evaluate the expressions twice: beEmpty" in {
-      beEmpty[Iterable[String]] must evalOnce(exp(nil))
+      beEmpty must evalOnce(exp(nil))
     }
     "not evaluate the expressions twice: beIn" in {
       beIn(List("")) must evalOnce(exp(""))
@@ -80,16 +80,16 @@ class iterableMatchersUnit extends MatchersSpecification {
       ones must containAll(List(1))
     }
     "provide a failure message even for an infinite collection, provided the exist method works ok" in {
-      case class Numbers(first: Int) extends Iterable[Int] {
-        def elements: Iterator[Int] = rest.elements
-        def rest = Numbers(first + 1)
+      case class Numbers(seed: Int) extends Iterable[Int] {
+        def iterator: Iterator[Int] = rest.iterator
+        def rest = Numbers(seed + 1)
         override def exists(f: Int => Boolean) = {
-          if (f(first)) 
+          if (f(seed)) 
             true
           else
             false
         } 
-        override def toString = "Numbers(" + (first to (first + 51)).mkString(", ") + "...)" 
+        override def toString = "Numbers(" + (seed to (seed + 51)).mkString(", ") + "...)" 
       }
       lazy val fromTwo = Numbers(3);
       { fromTwo must containAll(List(1, 2)); "" } must throwA[org.specs.execute.FailureException]
@@ -102,6 +102,18 @@ class iterableMatchersUnit extends MatchersSpecification {
     "provide a have size method working on a Group, even with list implicits - see issue 117" in {
       import org.specs.Sugar._
       Group(<test></test><secondtest></secondtest>) must have size(2)
+    }
+  }
+  "Iterable matchers should work with arrays" >> {
+	"Arrays can have a haveSize matcher" in {
+      Array(1, 2) must haveSize(2)
+      Array(1, 2) must haveSize(2).when(true)
+      Array(1, 2) must have size(2)
+    }
+	"Arrays can have a isEmpty matcher" in {
+      Array[String]() must beEmpty
+      Array[String]() must beEmpty.when(true)
+      Array[String]() must be empty
     }
   }
 }

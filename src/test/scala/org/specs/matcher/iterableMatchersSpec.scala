@@ -122,8 +122,8 @@ class iterableMatchersSpec extends MatchersSpecification {
       (Nil:Iterable[Int]) must be empty
       val list: List[Int] = Nil
       list must be empty
-      val collection: Collection[Int] = Nil
-      collection must be empty
+      val iterable: Iterable[Int] = Nil
+      iterable must be empty
       val seq: Seq[Int] = Nil
       seq must be empty
       val map: Map[Int, Int] = Map()
@@ -135,6 +135,18 @@ class iterableMatchersSpec extends MatchersSpecification {
     }
     "provide a 'be the sameSetAs' matcher" in {
       Set("1") must be the sameSetAs(Set("1"))
+    }
+    "provide a 'be the sameSeqAs' matcher" in {
+      "on empty seqs" >> {
+        List[Int]() must be the sameSeqAs(List[Int]())
+      }
+      "on non-empty seqs" >> {
+        List(1) must be the sameSeqAs(List(1))
+      }
+      "on seqs of different sizes" >> {
+        expectation(List(1) must beTheSameSeqAs(List(1, 2))) must failWith("List(1) doesn't have the same size as List(1, 2)")
+        expectation(List(1, 2) must beTheSameSeqAs(List())) must failWith("List(1, 2) doesn't have the same size as List()")
+      }
     }
   }
 }

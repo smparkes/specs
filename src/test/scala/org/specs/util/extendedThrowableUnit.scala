@@ -21,6 +21,7 @@ import org.specs.runner._
 import org.specs.Sugar._
 import org.specs.specification._
 import org.specs.util.ExtendedThrowable._
+import org.specs._
 
 class extendedThrowableUnit extends SpecificationWithJUnit with ExceptionSamples {
 
@@ -46,17 +47,17 @@ class extendedThrowableUnit extends SpecificationWithJUnit with ExceptionSamples
   }
   "an extended Throwable with stack traces methods" ->- ex should provide {
     "a removeTracesWhileNameMatches function removing stacktraces until a line doesn't match the name" in {
-      e.removeTracesWhileNameMatches("extendedThrowableUnit").getStackTrace.toList.first.toString aka
+      e.removeTracesWhileNameMatches("extendedThrowableUnit").getStackTrace.toList.head.toString aka
       "the first element of the remaining stack" must_== "org.specs.specification.method0(Specification.scala:23)"
     }
     "a removeTracesAsFarAsNameMatches function removing stacktraces until the last match with a name is found" in {
-      e.removeTracesAsFarAsNameMatches("extendedThrowableUnit").getStackTrace.toList.first.toString aka
+      e.removeTracesAsFarAsNameMatches("extendedThrowableUnit").getStackTrace.toList.head.toString aka
       "the first element of the remaining stack" must_== "org.specs.specification.method1(Specification.scala:24)"
     }
     "a hideCallerAndThrow method to throw the exception but removing stack trace elements having the caller class name" in {
       try { e.hideCallerAndThrow(this) }
       catch {
-        case ex => ex.getStackTrace.toList.first.toString aka
+        case ex => ex.getStackTrace.toList.head.toString aka
                    "the first element of the thrown exception" must_== "org.specs.specification.method0(Specification.scala:23)"
       }
     }
@@ -65,10 +66,19 @@ class extendedThrowableUnit extends SpecificationWithJUnit with ExceptionSamples
       catch {
         case ex =>
                ex.getMessage must_== "failure"
-               ex.getStackTrace.toList.first.toString aka
+               ex.getStackTrace.toList.head.toString aka
                "the first element of the thrown exception" must_== "org.specs.Specification.apply(Specification.scala:5)"
       }
     }
+  }
+  "an extended Throwable" should {
+    "return the full stacktrace of an exception including all causes recursively" in {
+	  val cause2 = new Exception("cause2")
+	  val cause1 = new Exception("cause1", cause2)
+	  val e = new Exception("root", cause1)
+	  val fullStack = e.getFullStackTrace.map(_.toString).filter(_.contains("JUnitSuiteRunner"))
+	  fullStack.size must_== 3
+	}
   }
   def provide = addToSusVerb("provide")
 }

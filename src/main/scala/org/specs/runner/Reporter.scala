@@ -24,6 +24,7 @@ import org.specs.specification._
 import org.specs.util.Configuration._
 import org.specs.util.Configuration
 import org.specs.util.Property
+import org.specs._
 
 /**
  * The SpecsHolder trait is used by any class providing access to a sequence of specifications
@@ -137,9 +138,11 @@ trait Reporter extends SpecsFilter with ConsoleLog {
       displayHelp    
     } else {
       reportSpecs
-      if (filteredSpecs.exists(_.isFailing)) System.exit(1) else System.exit(0)
+      if (filteredSpecs.exists(_.isFailing)) exit(1) else exit(0)
     }
   }
+  /** override this method for a different handling of exiting. */
+  private[specs] def exit(code: Int) = System.exit(code)
   /** display all help options. */
   protected def displayHelp = {
     displayUsage
@@ -232,7 +235,7 @@ trait Reporter extends SpecsFilter with ConsoleLog {
     def acceptSpecTags(s: Specification, i: Int) = s.acceptTag(specArgs(i + 1).split(","):_*)
     def rejectSpecTags(s: Specification, i: Int) = s.rejectTag(specArgs(i + 1).split(","):_*)
     def setAcceptedTags(specifications: Seq[Specification], argumentNames: List[String], f: (Specification, Int) => Specification) = {
-      specArgs.map(_.toLowerCase).findIndexOf(arg => argumentNames.contains(arg)) match {
+      specArgs.map(_.toLowerCase).indexWhere(arg => argumentNames.contains(arg)) match {
         case -1 => ()
         case i if (i < specArgs.length - 1) => filteredSpecs.foreach(f(_, i))
         case _ => if (!specArgs.isEmpty) printWarning
@@ -247,7 +250,7 @@ trait Reporter extends SpecsFilter with ConsoleLog {
    * for example: argValue(Array("-ex", ".*ex.*"), List("-ex", "--example")) = Some(".*ex.*")
    */
   protected def argValue(arguments: Array[String], argumentNames: List[String]): Option[String] = {
-    arguments.map(_.toLowerCase).findIndexOf(arg => argumentNames.contains(arg)) match {
+    arguments.map(_.toLowerCase).indexWhere(arg => argumentNames.contains(arg)) match {
       case -1 => None
       case i if (i < arguments.length - 1) => Some(arguments(i + 1))
       case _ => {

@@ -17,12 +17,13 @@
  * DEALINGS IN THE SOFTWARE.
  */
 package org.specs.collection
-import matcher.MatchersSpecification
+import org.specs.matcher.MatchersSpecification
 import org.specs.collection.ExtendedIterable._
 import org.specs.collection.ExtendedList._
 import org.specs.runner._
+import org.specs._
 
-class extendedIterableUnit extends IterableData with ScalaCheck {
+class extendedIterableUnit extends SpecificationWithJUnit  with IterableData with ScalaCheck {
   "A sameElementsAs function" should returnTrue {
     "if 2 lists of lists contain the same elements in a different order" in {
       List(List(1), List(2, 3)) must haveSameElementsAs(List(List(3, 2), List(1)))
@@ -61,9 +62,9 @@ class extendedIterableUnit extends IterableData with ScalaCheck {
   import scala.Math.min
   val sets = for {
         size1   <- Gen.choose(1, 3)
-        set1    <- Gen.listOfN(size1, Gen.oneOf("Art", "Bill", "Chris"))
+        set1    <- Gen.listOf(size1, Gen.oneOf("Art", "Bill", "Chris"))
         size2   <- Gen.choose(1, 3)
-        set2   <- Gen.listOfN(size2, Gen.oneOf("Ann", "Bess", "Clara"))
+        set2   <- Gen.listOf(size2, Gen.oneOf("Ann", "Bess", "Clara"))
   } yield (Set(set1:_*), Set(set2:_*)) 
 
   "A subtract method" should {
@@ -79,21 +80,20 @@ class extendedIterableUnit extends IterableData with ScalaCheck {
   }
 }
 import org.specs._
-import scalacheck.Gen._
-import scalacheck.Gen
+import org.scalacheck.Gen._
 import org.specs.ScalaCheck
 import org.specs.collection.ExtendedIterable._
 import org.specs.collection.ExtendedList._
 import org.specs.Sugar._
 
-trait IterableData extends SpecificationWithJUnit with Sugar with ScalaCheck {
+trait IterableData extends Sugar with ScalaCheck { this: SpecificationWithJUnit =>
   def returnTrue = addToSusVerb("return true")
 
-  val sameIterables = for (i0 <- listOf(Gen.oneOf(1, 2, 3));
-                           i1 <- listOf(Gen.oneOf(1, 4, 5, i0));
-                           i2 <- listOf(Gen.oneOf(i0, i1, 2, 3));
+  val sameIterables = for (i0 <- listOf(oneOf(1, 2, 3));
+                           i1 <- listOf(oneOf(1, 4, 5, i0));
+                           i2 <- listOf(oneOf(i0, i1, 2, 3));
                            val i3 = i2.scramble) yield (i2, i3)
-  val sameIterablesOfDifferentTypes = for (i1 <- listOf(Gen.oneOf(1, 2, 3, listOf(Gen.oneOf(1, 2, 3)).toStream));
+  val sameIterablesOfDifferentTypes = for (i1 <- listOf(oneOf(1, 2, 3, listOf(oneOf(1, 2, 3)).toStream));
                                            val i2 = i1.scramble.toList) yield (i1.toStream, i2)
 
 }

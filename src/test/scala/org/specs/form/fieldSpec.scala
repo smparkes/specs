@@ -20,7 +20,7 @@ package org.specs.form
 import Field._
 import org.specs.util.Property
 
-class fieldSpec extends spex.Specification {
+class fieldSpec extends org.spex.Specification {
   "A Field" should {
     "update its value with the apply method and get it with the get method" in {
       Field("label", 1)(2).get must_== 2
@@ -71,7 +71,7 @@ class fieldSpec extends spex.Specification {
     }
     "set the bg color of a cell, setting the class attribute to 'none'" in {
       val f = Field("Result", 1.12).valueBgcolor("#FF6699").toXhtml(1)
-      f must ==/(<td class="none" bgcolor="#FF6699">1.12</td>)
+	  f must ==/(<td bgcolor="#FF6699" class="none">1.12</td>)
     }
   }
   "The Field object" can {

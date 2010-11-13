@@ -66,7 +66,7 @@ class tagsSpec extends HtmlSpecificationWithJUnit with Fixtures {
 
 </t> isSus
 }
-trait Fixtures extends LiterateSpecification { this: LiterateSpecification =>
+trait Fixtures { this: LiterateSpecification =>
    object mySpec extends Specification with ScalaCheck {
      "example 1" in { 1 must_== 2 }
      "example 2" in {
@@ -77,7 +77,7 @@ trait Fixtures extends LiterateSpecification { this: LiterateSpecification =>
    def onlyTaggedExamples = eg {
      val acceptedExamples = mySpec.systems.flatMap(_.examples).filter(_.isAccepted)
      acceptedExamples.size must_== 1
-     acceptedExamples.first.description must_== "example 2"
+     acceptedExamples.head.description must_== "example 2"
    }
    object specWithSus extends Specification {
      "this sus" should {

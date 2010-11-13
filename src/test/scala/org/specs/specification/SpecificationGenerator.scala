@@ -17,11 +17,12 @@
  * DEALINGS IN THE SOFTWARE.
  */
 package org.specs.specification
-import org.scalacheck.Gen.{ choose, sized, listOfN }
+import org.scalacheck.Gen.{ choose, sized, listOfN, listOf }
 import org.scalacheck._
 import org.scalacheck.Arbitrary
 import org.scalacheck.Prop._
 import org.specs.matcher._
+import org.specs._
 
 trait SpecificationGenerator { self: Specification =>
   object spec extends Specification("generated spec")
@@ -44,7 +45,7 @@ trait SpecificationGenerator { self: Specification =>
   def genSizedSus(size: Int, s: Specification): Gen[Sus] = {
     val sus = new Sus("sus with " + size + " max examples", s)
     for { n <- choose(0, size)
-          e <- listOfN(n, genExample(sus))
+          e <- listOf(n, genExample(sus))
     } yield sus
   }
   def genSus = sized(size => genSizedSus(size))

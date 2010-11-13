@@ -30,6 +30,7 @@ import org.mockito.internal.stubbing._
 import org.mockito.stubbing.{ OngoingStubbing, Stubber }
 import org.specs.matcher._
 import org.specs.matcher.MatcherUtils._
+import org.specs._
 
 /**
  * The Mockito trait can be mixed with Specifications to provide mocking capabilities using the Mockito library.
@@ -63,18 +64,18 @@ trait MocksCreation extends TheMockitoMocker {
   /**
    * create a mock object: val m = mock[java.util.List[Stringg]]
    */
-  def mock[T](implicit m: scala.reflect.Manifest[T]): T = mocker.mock(m)
+  def mock[T](implicit m: scala.reflect.ClassManifest[T]): T = mocker.mock(m)
   /**
    * create a mock object with a name: val m = mockAs[java.util.List[String]]("name")
    */
-  def mockAs[T](name: String)(implicit m: scala.reflect.Manifest[T]): T = mocker.mock(name)(m)
+  def mockAs[T](name: String)(implicit m: scala.reflect.ClassManifest[T]): T = mocker.mock(name)(m)
   /**
    * implicit allowing the following syntax for a named mock: val m = mock[java.util.List[String]],as("name")
    */
-  implicit def mockToAs[T](t: =>T)(implicit m: scala.reflect.Manifest[T]) = new NamedMock(t)(m)
+  implicit def mockToAs[T](t: =>T)(implicit m: scala.reflect.ClassManifest[T]) = new NamedMock(t)(m)
   
   /** support class to create a mock object with a name */
-  class NamedMock[T](t: =>T)(implicit m: scala.reflect.Manifest[T]) {
+  class NamedMock[T](t: =>T)(implicit m: scala.reflect.ClassManifest[T]) {
     def as(name: String): T = mockAs[T](name)
   }
 
@@ -83,7 +84,7 @@ trait MocksCreation extends TheMockitoMocker {
    * 
    * This is the equivalent of Mockito.mock(List.class, SMART_NULLVALUES) but testing shows that it is not working well with Scala.
    */
-  def smartMock[T](implicit m: scala.reflect.Manifest[T]): T = mocker.smartMock(m)
+  def smartMock[T](implicit m: scala.reflect.ClassManifest[T]): T = mocker.smartMock(m)
   /**
    * create a spy on an object. 
    * 
@@ -291,11 +292,23 @@ trait MockitoStubs extends MocksCreation {
     def returns(t: T, t2: T*): OngoingStubbing[T] = {
       if (t2.isEmpty) 
         mocker.when(c).thenReturn(t)
-      else
-        mocker.when(c).thenReturn(t, t2:_*)
+      else { // written like this to avoid a 2.8 compiler error: "cannot find class ClassManifest for element type of T*"
+    	var stub = mocker.when(c).thenReturn(t)
+    	t2 foreach { x =>
+    		stub = stub.thenReturn(x)
+    	}
+    	stub
+      }
     }
     def answers(function: Any => T) = mocker.when(c).thenAnswer(new MockAnswer(function))
-    def throws[E <: Throwable](e: E*): OngoingStubbing[T] = mocker.when(c).thenThrow(e:_*)
+    def throws[E <: Throwable](e: E*): OngoingStubbing[T] = {
+      if (e.isEmpty) throw new java.lang.IllegalArgumentException("The parameter passed to throws must not be empty")
+      var stub = mocker.when(c).thenThrow(e.head)
+      e.drop(1) foreach { x =>
+    	stub = stub.thenThrow(x)
+      }
+      stub
+    }
   }
   /** @return an object allowing the chaining of returned values on doNothing calls. */
   implicit def aStubber(stub: =>Stubber) = new AStubber(stub)
@@ -316,7 +329,7 @@ trait MockitoStubs extends MocksCreation {
   /** allows to use a hamcrest matchers to match parameters. */
   def argThat[T](m: org.hamcrest.Matcher[T]): T = org.mockito.Matchers.argThat(m)
 
-    /** 
+  /** 
    * This class is an implementation of the Answer interface allowing to pass functions as an answer.
    * 
    * It does a bit of work for the client:
@@ -340,18 +353,22 @@ trait MockitoStubs extends MocksCreation {
        val mock = invocation.getMock
        if (args.size == 0) {
          function match {
-           case f: Function0[_] => f()
-           case f: Function1[_,_] => f(mock)
+           case f: Function0[_] => return f()
+           case f: Function1[_,_] => return f(mock)
          }
        } else if (args.size == 1) {
          function match {
-           case f: Function1[_, _] => f(args(0))
-           case f: Function2[_, _, _] => f(args(0), mock)
+           case f: Function1[_, _] => return f(args(0))
+         }
+         function match {
+           case f2: Function2[_, _, _] => return f2(args(0), mock)
          }
        } else {
          function match {
-           case f: Function1[_, _] => f(args)
-           case f: Function2[_, _, _] => f(args, mock)
+           case f: Function1[_, _] => return f(args)
+         }
+         function match {
+           case f2: Function2[_, _, _] => return f2(args, mock)
          }
        }
      } 
@@ -374,7 +391,7 @@ trait MockitoFunctions extends TheMockitoMocker {
  * Type-inference friendly Mockito matcher for 'any'
  */
 trait MockitoMatchers {
-  def any[T](implicit m: scala.reflect.Manifest[T]): T = org.mockito.Matchers.isA(m.erasure).asInstanceOf[T]
+  def any[T](implicit m: scala.reflect.ClassManifest[T]): T = org.mockito.Matchers.isA(m.erasure).asInstanceOf[T]
 }
 /** delegate to Mockito static methods with appropriate type inference. */
 trait TheMockitoMocker {

@@ -18,6 +18,8 @@
  */
 package org.specs.matcher
 import org.specs.specification._
+import org.specs._
+
 /**
  * This trait provides methods to help the transition for xUnit users
  */
@@ -29,5 +31,5 @@ trait xUnit { self: Specification =>
   def assertNotSame[T](a: =>T, b: =>T) = a mustNotBe b
   def assertNull[T](a: =>T) = a must beNull
   def assertNotNull[T](a: =>T) = a must notBeNull
-  def assertArrayEquals[T](a: =>Array[T], b: =>Array[T]) = a must ((beEqualTo(_:T)).toSeq)(b)
+  def assertArrayEquals[T](a: =>Array[T], b: =>Array[T]) = a.toList must ((beEqualTo(_:T)).toSeq)(b.toList)
 }

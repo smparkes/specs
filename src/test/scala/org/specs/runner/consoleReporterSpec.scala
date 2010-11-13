@@ -81,8 +81,8 @@ class reporterSpecification extends TestSpecs {
     }
     "display the failure message next to the corresponding example" in {
       specWithTwoExamples(that.isKo, that.isOk) verifies(messages =>
-            messages.findIndexOf(matches("first failure")) ==
-            messages.findIndexOf(matches("example 2.1 ok")) + 1)
+            messages.indexWhere(matches("first failure")) ==
+            messages.indexWhere(matches("example 2.1 ok")) + 1)
     }
     "display nested examples in the right order" in {
       specWithOneExampleAndTwoNestedExamples verifies(messages =>
@@ -128,6 +128,9 @@ class reporterSpecification extends TestSpecs {
     }
     "print only the high-level examples of an anonymous sus" in {
 	  new SpecWithAnAnonymousSystem(that.isOk).run.toList must not containMatch("specifies")
+	}
+    "execute the actions after a specification even if the specification is sequential" in {
+	  new SequentialSpecWithAfterSpecification().run.toList must containInOrder("  + ex2", "afterSpec")
 	}
   }
 }
@@ -198,7 +201,7 @@ class consoleTraitSpecification extends TestSpecs {
   }
   def runWith(args: String*): List[String] = {
     specRunner.args = args.toArray
-    specRunner.messages.clear
+    specRunner.clearMessages
     specRunner.reportSpecs
     specRunner.messages.toList
   }
@@ -208,7 +211,7 @@ class consoleTraitSpecification extends TestSpecs {
     specTwoSystemsRunner.messages.toList
   }
   def mainWith(args: String*): List[String] = {
-    specRunner.messages.clear
+    specRunner.clearMessages
     specRunner.main(args.toArray)
     specRunner.messages.toList
   }
@@ -234,7 +237,7 @@ class specWithTags extends Specification {
 abstract class TestSpecification extends org.specs.Specification with Expectations with MockOutput {
   override val specs = List(this)
 }
-trait Expectations extends org.specs.Specification {
+trait Expectations  { this: org.specs.Specification =>
   val success = () => true mustBe true
   val isSkipped = () => skip("irrelevant")
   val isSkippedBecauseOfAFaultyMatcher = () => 1 must be(0).orSkipExample
@@ -282,6 +285,19 @@ class SpecWithAnAnonymousSystem(behaviours: List[(that.Value)]) extends TestSpec
   def run = {
     "have example 1 ok" in {
       expectations(behaviours) foreach {_.apply}
+    }
+    reportSpecs
+    messages
+  }
+}
+class SequentialSpecWithAfterSpecification extends TestSpecification {
+  setSequential()
+  shareVariables()
+  doAfterSpec { println("afterSpec") }
+  def run = {
+    "it" should {
+      "ex1" in { 1 must_== 1 }
+      "ex2" in { 1 must_== 1 }
     }
     reportSpecs
     messages

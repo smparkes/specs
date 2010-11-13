@@ -25,7 +25,9 @@ trait SpecificationSystems { this: BaseSpecification =>
   /** list of systems under test */
   private[specs] var systemsList : List[Sus] = Nil
   /** @return the list of systems under test */
-  def systems = systemsList
+  def systems = {
+	systemsList
+  }
 
   /**
    * implicit definition allowing to declare a new system under test described by a string <code>desc</code><br>
@@ -33,8 +35,13 @@ trait SpecificationSystems { this: BaseSpecification =>
    * Alternatively, it could be created with:
    * <code>specify("my system under test").should {}</code>
    */
-  implicit def specifySus(desc: String): SpecifiedSus = {
-    new SpecifiedSus(addSus(new Sus(desc, this)))
+  implicit def specifySus(desc: String): SpecifiedSus = new SpecifiedSus(createSus(desc))
+  /**
+   * Create a new Sus, first checking if it is really top-level in the Specification
+   */
+  protected[specs] def createSus(desc: String) = {
+	current.foreach(c => throw new SpecificationBuildException("The system under specification '"+desc+"' can not be nested"))
+	addSus(new Sus(desc, this))
   }
   def specify(desc: String): Sus = specifySus(desc).sus
   /** 
@@ -42,9 +49,11 @@ trait SpecificationSystems { this: BaseSpecification =>
    * to Strings
    */
   class SpecifiedSus(val sus: Sus) {
-    def should(a: =>Any) = sus.should(a)
+    def should(a: =>Examples) = sus.should(a)
+    def should(a: PrefixedExamples) = sus.should(a)
     def should(a: =>Unit) = sus.should(a)
-    def can(a: =>Any) = sus.can(a)
+    def can(a: =>Examples) = sus.can(a)
+    def can(a: PrefixedExamples) = sus.can(a)
     def can(a: =>Unit) = sus.can(a)
   }
   /**
@@ -68,13 +77,19 @@ trait SpecificationSystems { this: BaseSpecification =>
    * if the following function is declared:
    * <code>def provide = addToSusVerb("provide")</code>
    */
-  def addToSusVerb(complement: String) = new Function1[Any, Any] {
-    def apply(e: Any) = { 
-      current match { 
-        case Some(sus: Sus) => sus.verb += " " + complement 
-        case _ => 
-      }
-      e
-    }
-  }
+  def addToSusVerb(complement: String) = new PrefixedExamples(complement)
 }
+/**
+ * This class represents a list of examples which a prefixed by a common word, like "provide".
+ * 
+ * When passed to the "should" or "can" method of a sus, the prefix is added to the sus verb
+ * to form the expected full verb like "should provide"
+ */
+private [specification] case class PrefixedExamples(prefix: String, example: Option[() => Examples] = None) {
+  def apply(e: =>Examples) = PrefixedExamples(prefix, Some(() => e))
+  def prepend(verb: String) = verb + " " + prefix 
+}
+/**
+ * Those exceptions are thrown when there is an issue during the construction of a Specification
+ */
+ class SpecificationBuildException(message: String) extends Exception(message)

@@ -23,7 +23,7 @@ import org.scalacheck._
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen
 import org.scalacheck.Gen._
-import org.scalacheck.Prop.forAll
+import org.scalacheck.Prop._
 import org.specs.mock._
 import org.specs.io._
 
@@ -34,6 +34,9 @@ class scalacheckMatchersSpec extends MatchersSpecification with ScalaCheckExampl
     }
     "be ok with a true property" in {
       alwaysTrueProp must pass
+    }
+    "be ok with a true function" in {
+      { a: Boolean => true }.forAll must pass
     }
     "be ko with a false property" in {
       expectation(identityProp must pass) must failWithMatch("A counter-example is 'false' \\(after \\d+ tr(y|ies)\\)")
@@ -56,6 +59,40 @@ class scalacheckMatchersSpec extends MatchersSpecification with ScalaCheckExampl
     "accept properties based on scalacheck commands" in  {
       expectation(CounterSpecification must pass) must failWithMatch("A counter-example is .*")
     }
+    "display one label in case of a failure" in  {
+      expectation((forAll((n: Int) => n == n+1) :| "label") must pass ) must failWithMatch("labels of failing property: label")
+    }
+    "display several labels in case of a failure" in  {
+      import org.scalacheck.Prop._
+      val multiply = forAll { (n: Int, m: Int) =>
+        val res = n*m
+        ("evidence = " + res) |: all(
+          "div1" |: m != 0 ==> (res / m == n),
+          "div2" |: n != 0 ==> (res / n == m),
+          "lt1"  |: res > m,
+          "lt2"  |: res > n
+        )
+      }
+      expectation(multiply must pass) must failWithMatch("evidence")
+      expectation(multiply must pass) must failWithMatch("lt1")
+    }
+  }
+  val constantPair: Gen[(Double, Double)] = Gen.value((0.0, 0.0))
+  "a validate matcher" should {
+    "accept a partial function with an untyped partial function returning a SuccessValue" in {
+      constantPair must validate { case (x, y) => 1 must_== 1 }
+    }
+    "accept a partial function with an untyped partial function returning a boolean" in {
+      constantPair must validate { case (x, y) => true }
+    }
+    "be ko if the partial function is false for some value" in {
+      expectation(constantPair must validate { case (x, y) => x > 1 }) must failWithMatch("A counter-example is .*")
+    }
+  }
+  "a validate matcher" can {
+    "be used with a 'validates' shorthand: gen validates partialFunction" in {
+	  constantPair validates { case (x, y) => true }
+	}
   }
   "A ScalaCheck property" should {
     "not add new expectations during evaluation if isExpectation is off" in {
@@ -74,11 +111,6 @@ class scalacheckMatchersSpec extends MatchersSpecification with ScalaCheckExampl
   "Functions" can {
     "be checked directly, without creating an example, using the verifies operator. startsWith" verifies { (a: String, b: String) => (a+b).startsWith(a) }
   }
-  "A property throwing an exception" should {
-    "display the exception message" in {
-      specWithException.examples(0).failures(0).getMessage must include("Bang")
-    }
-  }
 }
 object spec extends Specification with ScalaCheck {
   dontExpectProperties()
@@ -96,21 +128,20 @@ object specWithFailure extends Specification with ScalaCheck {
   var counter = 0
   forAll((a:Int) => {counter +=1; counter < 10}) must pass
 }
-object specWithException extends Specification with ScalaCheck {
-  forAll((a:Int) => { error("Bang"); a == a }) must pass
-}
 
-trait ScalaCheckExamples extends Specification with ScalaCheck {
+trait ScalaCheckExamples extends ScalaCheck {  this: Specification =>
   val identityProp = forAll((a:Boolean) => a)
-  val alwaysTrueProp = forAll((a:Int) => true)
-  val alwaysTrue: Gen[Boolean] = Gen.oneOf(true)
-  val alwaysFalse = Gen.oneOf(false)
+  val alwaysTrueProp = proved
+  val alwaysTrueFunction: Boolean => Boolean = { a: Boolean => true }
+  val alwaysTrue = Gen.value(true)
+  val alwaysFalse = Gen.value(false)
   val random = Gen.oneOf(true, false)
-  val exceptionValues = Gen(p => throw new Exception("e"))
+  val exceptionValues = Gen(p => throw new java.lang.Exception("e"))
   val trueFunction = ((x: Boolean) => true)
+  val partialFunction: PartialFunction[Boolean, Boolean] = { case (x: Boolean) => true }
   val falseFunction = ((x: Boolean) => false)
   val identityAssert: Boolean => Boolean = ((x: Boolean) => x mustBe true)
-  val exceptionProperty = ((x: Boolean) => {throw new Exception("e"); true})
+  val exceptionProperty = ((x: Boolean) => {throw new java.lang.Exception("e"); proved})
 }
 object CounterSpecification extends Commands {
 

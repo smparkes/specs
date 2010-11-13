@@ -18,6 +18,7 @@
  */
 package org.specs.specification
 import org.specs.util._
+import org.specs.util.Control._
 import org.specs.util.ExtendedString._
 import scala.xml._
 import org.specs.matcher._
@@ -27,7 +28,7 @@ import org.specs.matcher.MatcherUtils._
 import org.specs.SpecUtils._
 import org.specs.specification._
 import org.specs.util.ExtendedThrowable._
-import scala.reflect.Manifest
+import scala.reflect.ClassManifest
 import org.specs.execute._
 
 /**
@@ -42,16 +43,16 @@ trait BeforeAfter { outer: BaseSpecification =>
   /**  adds an "after" function to the last sus being defined */
   def doAfter(actions: =>Any) = usingAfter(() => actions)
   /** adds a "firstActions" function to the last sus being defined */
-  def doFirst(actions: =>Any) = current.map(stackFirstActions(_, sequentially(actions)))
+  def doFirst(actions: =>Any) { current.map(stackFirstActions(_, sequentially(actions))) }
   /** adds a "lastActions" function to the last sus being defined */
-  def doLast(actions: =>Any) = current.map(stackLastActions(_, sequentially(actions))) 
+  def doLast(actions: =>Any) { current.map(stackLastActions(_, sequentially(actions))) }
   /** adds a "beforeSpec" function to the current specification */
   def doBeforeSpec(actions: =>Any) = beforeSpec = stackActions(() => sequentially(actions), beforeSpec)
   /** this method is added to make sure that expectation declared in beforeSpec blocks are executed right away */
   private def sequentially(actions: =>Any) = {
-    val isSeq = isSequential
-    setSequential()
-    try { actions } finally { sequential = isSeq }
+    setTemporarily(isSequential, true, (b:Boolean) => sequential = b) {
+      actions 
+    }
   }
   /** adds a "afterSpec" function to the current specification */
   def doAfterSpec(actions: =>Any) = afterSpec = reverseStackActions(() => sequentially(actions), afterSpec)
@@ -320,14 +321,14 @@ trait Contexts extends BaseSpecification with BeforeAfter { outer =>
    * When a sus is specified, transfer the context actions to it
    */
   override implicit def specifySus(desc: String): SpecifiedSus = {
-    val sus = new Sus(desc, this)
+    val sus = createSus(desc)
     specContext map { c => transferActionsToSus(sus, c) }
-    new SpecifiedSus(addSus(sus))
+    new SpecifiedSus(sus)
   }
 
 }
 /** 
- * Case class holding before and after functions to be set on a system under test.<p>
+ * class holding before and after functions to be set on a system under test.<p>
  * Context objects are usually created using the factory methods of the Contexts trait:<pre>
  * 
  * // this method returns a context object which can be passed to a System under test (with "a system" ->(context) should {... )
@@ -335,7 +336,7 @@ trait Contexts extends BaseSpecification with BeforeAfter { outer =>
  * beforeContext(initSystem).until(enoughTestsAreExecuted)
  * </pre>
  */
-case class Context() {
+class Context {
   private[specs] var firstActions: () => Any = () => () 
   private[specs] var lastActions: () => Any = () => ()
   private[specs] var beforeActions: () => Any = () => () 

@@ -25,6 +25,7 @@ import org.specs.specification._
 import org.specs.runner._
 import org.hamcrest.core._
 import org.specs.matcher._
+import org.specs._
 
 class jmockSpec extends SpecificationWithJUnit {
   "The jMock integration".isSpecifiedBy(jmockGoodSpecification, jmockBadSpecification, countingNamingSchemeSpecification)
@@ -84,12 +85,12 @@ object jmockGoodSpecification extends Mocked {
       expect { 1.of(list).get(anyInt) }
       list.get(0)
     }
+    class Param(name: String)
+    class ToMockWithParams { def method(p: Param*) = () }
     "provide an any[Type] matcher which can match any parameter of a given type with vargs" in {
-      case class Param(name: String)
-      trait ToMock { def method(p: Param*) = () }
-      val mocked: ToMock = mock[ToMock]
+      val mocked: ToMockWithParams = mock[ToMockWithParams]
       expect { 1.of(mocked).method(any[Param]) }
-      mocked.method(Param("hello"))
+      mocked.method(new Param("hello"))
     }
     "provide an a[T] matcher which can be used to specify that any instance of type T will match - alias an[T]" in {
       val listString: List[String] = mock[List[String]]
@@ -106,8 +107,8 @@ object jmockGoodSpecification extends Mocked {
       expect { 1.of(list).get(equal(0)) }
       list.get(0)
     }
+    class ParamMock { def method(p1: Int, p2: Int) = () }
     "provide an equal matcher which can be used to specify that a specific value will be used as a parameter - with 2 paramters" in {
-      trait ParamMock { def method(p1: Int, p2: Int) = () }
       val mocked: ParamMock = mock[ParamMock]
       expect { 1.of(mocked).method(equal(0), equal(1)) }
       mocked.method(0, 1)
@@ -130,8 +131,8 @@ object jmockGoodSpecification extends Mocked {
     }
     "provide a willReturn method to specify the a returned iterator" in {
       val expected = List[String]("hey")
-      expect { 1.of(scalaList).elements willReturn expected.elements }
-      scalaList.elements.next must_== "hey"
+      expect { 1.of(scalaList).iterator willReturn expected.iterator }
+      scalaList.iterator.next must_== "hey"
     }
     "provide a willReturn method to specify a returned iterable" in {
       expect { 1.of(scalaList).take(anyInt) willReturn List("hey") }
@@ -326,11 +327,11 @@ object jmockBadSpecification extends BadMocked {
     }
   }
 }
-trait BadMocked extends Mocked {
+class BadMocked extends Mocked {
   var checkAfterExpectations = true
   override def executeExpectations(ex: Examples, t: => Any) = {
     try {
-      current = Some(ex)
+      setCurrent(Some(ex))
       t
     } catch {
       case e: org.jmock.api.ExpectationError => {checkAfterExpectations = false}
@@ -346,7 +347,7 @@ trait BadMocked extends Mocked {
         checkAfterExpectations = true
   }
 }
-trait Mocked extends Specification with JMocker with ClassMocker {
+class Mocked extends Specification with JMocker with ClassMocker {
   class ToMock {
     def isEmpty = true
     def isEmpty2 = false

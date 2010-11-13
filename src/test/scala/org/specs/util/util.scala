@@ -21,15 +21,17 @@ import org.specs._
 
 object utilSpecifications extends Specification {
     "The util specifications" areSpecifiedBy (
-        new classSpec,
+        new classesSpec,
         new configurationSpec,
         new controlSpec,
         new editDistanceSpec,
+		new extendedFunctionSpec,
 		new extendedStringSpec,
         new includeExcludeSpec,
+        new lazyParamSpec,
         new matchingSpec,
         new propertySpec,
-     //   new scalaInterpreterSpec,
+        (new scalaInterpreterSpec).tag("slow"),
         new timeSpec,
         new timerSpec
     )

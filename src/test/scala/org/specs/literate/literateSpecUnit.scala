@@ -18,10 +18,11 @@
  */
 package org.specs.literate
 import org.specs.form._
+import org.specs.HtmlSpecification
 
-class literateSpecUnit extends spex.Specification { outer =>
+class literateSpecUnit extends org.spex.Specification { outer =>
   "a literate spec can include forms with a report method" in {
-    val l = new HtmlSpecification { 
+    object l extends HtmlSpecification { 
       new Form {
         prop(1)(1)
       }.report

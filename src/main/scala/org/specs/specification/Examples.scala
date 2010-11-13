@@ -28,7 +28,7 @@ import org.specs.matcher.MatcherUtils._
 import org.specs.SpecUtils._
 import org.specs.specification._
 import org.specs.util.ExtendedThrowable._
-import scala.reflect.Manifest
+import scala.reflect.ClassManifest
 import org.specs.execute._
 
 /**
@@ -92,9 +92,12 @@ abstract class Examples(var exampleDescription: ExampleDescription, val parentCy
   /** @return the example for a given Tree path */
   def getExample(path: TreePath): Option[Examples] = {
     path match {
-      case TreePath(Nil) => Some(this)
-      case TreePath(i :: rest) if !this.examples.isEmpty => this.examples(i).getExample(TreePath(rest))
-      case _ => None
+      case TreePath(List()) => 
+        return Some(this)
+      case TreePath(i :: rest) if !this.examples.isEmpty => 
+        this.examples(i).getExample(TreePath(rest))
+      case _ => 
+        None
     }
   }
   /** 

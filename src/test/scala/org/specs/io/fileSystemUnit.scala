@@ -28,23 +28,22 @@ class fileSystemUnit extends TestData {
     }
   }
 }
-import scalacheck.Gen._
-import scalacheck.Gen
-import scalacheck._
+import org.scalacheck.Gen._
+import org.scalacheck._
 import scala.collection.mutable.Queue
 import java.util.regex._
 import org.specs._
 import org.specs.Sugar._
 
-trait TestData extends SpecificationWithJUnit with FileSystem with ConsoleOutput with ScalaCheck {
+class TestData extends SpecificationWithJUnit with FileSystem with ConsoleOutput with ScalaCheck {
   case class MatchingPath(path: String, glob: String)
   def paths = for { glob <- Gen.oneOf("src/**/*.*", "src/**/hello/**/*.*", "src/test/*.*")
-                    path <- Gen.oneOf(pathsMatchingGlob(glob).map(Gen.value(_)):_*)
+                    path <- Gen.oneOf(pathsMatchingGlob(glob))
                   } yield MatchingPath(path, glob)
 
   def pathsMatchingGlob(glob: String): List[String] = {
     for { doubleStar   <- List("dir", "dir1/dir2")
-          specialChar <-  "!@#$%^&';{}[]".elements.toList
+          specialChar <-  "!@#$%^&';{}[]".iterator.toList
           name         <- List("name", "name" + specialChar, "name2")
           ext          <- List("ext1", "ext2")
         } yield "./" + glob.replace("**", doubleStar).replace(".*", "." + ext).replace("*", name)

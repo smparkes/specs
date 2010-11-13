@@ -20,10 +20,8 @@ package org.specs.samples
 import org.specs.runner._
 import org.scalacheck.Commands
 import org.specs.util._
+import org.specs._
 
-/**
- * Note that this example show the use of different methods to pass the context, like definedAs, when or ->-
- */
 class stackSpec extends StackSpecification {
   var stack = emptyStack 
   val nonEmptyStack = beforeContext(stack = nonEmpty)
@@ -38,7 +36,7 @@ class stackSpec extends StackSpecification {
       stack.pop must throwA[NoSuchElementException]
     }
   }
-  "A non-empty stack below full capacity" definedAs nonEmptyStack should {
+  "A non-empty stack below full capacity" ->-(nonEmptyStack) should {
     "not be empty" in { 
       stack verifies (!_.isEmpty)
     }
@@ -65,7 +63,7 @@ class stackSpec extends StackSpecification {
       stack.top mustBe 3
     }
   }
-  "A full stack" when (fullStack) should {
+  "A full stack"->-(fullStack) should {
     behave like "A non-empty stack below full capacity"
     "throw an exception when sent #push" in {
       stack.push(11) must throwAn[Error]
@@ -77,7 +75,7 @@ class StackSpecification extends SpecificationWithJUnit {
   case class SampleStack(name: String, stackCapacity: Int, itemsNb: Int) extends LimitedStack[Int](stackCapacity) {
     def this(name: String, capacity: Int) = this(name, capacity, 0)
     var lastItemAdded = 0
-    for (i <- 1 to itemsNb) { this += i; lastItemAdded = i }
+    for (i <- 1 to itemsNb) { super.push(i); lastItemAdded = i }
     override def toString = name
   }
   def emptyStack = new SampleStack("empty stack", 10)
@@ -87,7 +85,7 @@ class StackSpecification extends SpecificationWithJUnit {
 }
 
 class LimitedStack[T](val capacity: Int) extends scala.collection.mutable.Stack[T] {
-  override def push(a: T*) = {
-    if (size >= capacity) throw new Error("full stack") else this ++= a
+  override def push(a: T) = {
+    if (size >= capacity) throw new Error("full stack") else super.push(a)
   }
 }

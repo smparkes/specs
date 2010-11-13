@@ -48,6 +48,11 @@ class anyMatchersUnit extends MatchersSpecification {
     "display a precise failure message if there is an alias" in {
       expectation(1 aka "the number" must be(2)) must failWith("the number '1' is not the same as '2'")
     }
+    "be ok when matching a Class object" in {
+      class Baz
+	  def calcBar = classOf[Baz]
+	  calcBar mustEqual classOf[Baz]
+	}
   }
   "An '==' matcher" should {
     "be ok if comparing 2 objects which are equals with ==" in {
@@ -76,7 +81,7 @@ class anyMatchersUnit extends MatchersSpecification {
       expectation(f must_== d) must failWith("'0.1': Float is not equal to '0.1': Double")
     }
     "provide the type of the objects in the failure message when their toString method return the same value, with containers" in {
-	  expectation(List(1) must_== List("1")) must failWith("'List(1)' is not equal to 'List(1)'. Values have the same string representation but possibly different types like List[Int] and List[String]")
+      expectation(List(1) must_== List("1")) must failWith("'List(1)' is not equal to 'List(1)'. Values have the same string representation but possibly different types like List[Int] and List[String]")
     }
   }
   "An 'beEqualTo' matcher" should {
@@ -144,7 +149,7 @@ class anyMatchersUnit extends MatchersSpecification {
   }
   "A 'beEmpty' matcher" should {
     "be ok when testing an empty string" in {
-      stringWrapper("") must beEmpty
+      "" must be empty
     }
   }
   "A throwA + exception matcher" should {

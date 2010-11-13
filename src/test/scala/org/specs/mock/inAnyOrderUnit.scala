@@ -20,8 +20,8 @@ package org.specs.mock
 import org.specs.runner._
 import org.specs.Sugar._
 import org.specs.mock._
-import scalacheck.Gen._
-import scalacheck.Gen
+import org.scalacheck.Prop._
+import org.scalacheck.Gen._
 import org.specs.collection.ExtendedList._
 import org.specs._
 
@@ -52,30 +52,28 @@ class inAnyOrderUnit extends SpecificationWithJUnit with TestData with ScalaChec
         exp.forall(_.passes) && r.consumed && !r1.consumed
       }
     }
-   "not consume all expected calls if it is a strict sublist of expected calls" in {
-      val lessReceivedCalls = receivedSizeIs(_ < _)
-      lessReceivedCalls must pass { t: (List[ExpectedCall], List[ReceivedCall]) => val (expected, received) = t
+    "not consume all expected calls if it is a strict sublist of expected calls" in {
+      expectedAndReceived must pass { t: Calls => val (expected, received) = t
         inAnyOrder.consume(expected, received)
-        expected.forall(_.passes) must beFalse.unless(expected.isEmpty || received.isEmpty)
+        expected.forall(_.passes) must beFalse.unless(expected.isEmpty || received.isEmpty || (expected.size <= received.size))
       }(set(maxSize->5))
     }
     "consume all received calls if it is a the same list of calls in a different order" in {
-      val sameReceivedCalls = receivedSizeIs(_ == _)
-      sameReceivedCalls must pass { t: (List[ExpectedCall], List[ReceivedCall]) => val (expected, received) = t
+      expectedAndReceived must pass { t: Calls => val (expected, received) = t
         inAnyOrder.consume(expected, received)
-        expected.forall(_.passes) must beTrue
-        received.forall(_.consumed) must beTrue
+        expected.forall(_.passes) must beTrue.unless(expected.size != received.size)
+        received.forall(_.consumed) must beTrue.unless(expected.size != received.size)
       }(set(maxSize->5, maxDiscarded->1000))
     }
     "consume all expected calls if the received calls are a the superset of the expected calls" in {
-      val moreReceivedCalls = receivedSizeIs(_ > _)
-      moreReceivedCalls must pass { t: (List[ExpectedCall], List[ReceivedCall]) => val (expected, received) = t
-        inAnyOrder.consume(expected, received)
-        expected.forall(_.passes) mustBe true
+      expectedAndReceived must pass { t: Calls => val (expected, received) = t
+	    inAnyOrder.consume(expected, received)
+		expected.forall(_.passes) must beTrue.unless(received.isEmpty || expected.size >= received.size)
       }(set(maxSize->5))
     }
   }
 }
+import org.scalacheck.Gen
 trait TestData extends ProtocolTypes {
   val (e, e1, e2) = (ExpectedCall("m"), ExpectedCall("m1"), ExpectedCall("m2"))
   val (r, r1, r2, rprime) = (ReceivedCall("m"), ReceivedCall("m1"), ReceivedCall("m2"), ReceivedCall("m"))
@@ -86,14 +84,14 @@ trait TestData extends ProtocolTypes {
     (e, e1, e2).foreach(_.callsNumber = 0)
     (r, r1, r2).foreach(_.consumedBy = None)
   }
-  def sameCalls = for (expected <- listOf(Gen.oneOf(methods.map(value(_)): _*)))
+  def sameCalls = for (expected <- listOf(Gen.oneOf(methods)))
                     yield (expected.map(new ExpectedCall(_)), expected.scramble.map(new ReceivedCall(_)))
 
-  def receivedSizeIs(f: (Int, Int) => Boolean) = {
-    for (expected <- listOf(Gen.oneOf(methods.map(value(_)): _*));
-         n <- choose(-2, 2);
-         val received = (expected.scramble:::expected.scramble).take(expected.size + n)
-                        if (f(n + expected.size, expected.size)))
-     yield (expected.map(new ExpectedCall(_)), received.map(new ReceivedCall(_)))
+  def expectedAndReceived = {
+    for { expected <- listOf(Gen.oneOf(methods))
+          n <- choose(-2, 2)
+	} yield (expected.map(new ExpectedCall(_)), (expected.scramble:::expected.scramble).take(expected.size + n).map(new ReceivedCall(_)))
   }
+  type Calls = (List[ExpectedCall], List[ReceivedCall])
+
 }

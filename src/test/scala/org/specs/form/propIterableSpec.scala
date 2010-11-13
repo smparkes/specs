@@ -18,7 +18,7 @@
  */
 package org.specs.form
 
-class propIterableSpec extends spex.Specification {
+class propIterableSpec extends org.specs.SpecificationWithJUnit {
   "An iterable Prop toString function" should {
     "display iterable values" in {
       PropIterable("label", List(1.234, 2.456)).toString must_== "label: 1.234, 2.456 (expected: _)"
@@ -26,7 +26,7 @@ class propIterableSpec extends spex.Specification {
   }
   "An iterable Prop" should {
     "be able to change its value formatter" in {
-      val p = PropIterable("label", List(1, 2))
+      val p = PropIterable[Int]("label", List(1, 2))
       p.formatterIs((i:Int) => "v: "+i.toString)
       p.formattedValue.toString must_== "v: 1, v: 2"
     }
@@ -46,7 +46,7 @@ class propIterableSpec extends spex.Specification {
     }
     "display values with another separator if the valuesFormatter is changed" in {
       val p = PropIterable("", l)
-      p.formatIterableWith((l:Option[Iterable[Double]]) => l match { 
+      p.formatWith((l:Option[Iterable[Double]]) => l match { 
         case None => ""
         case Some(x) => x.map(p.formatValue(_)).mkString("/")
       })
@@ -61,6 +61,4 @@ class propIterableSpec extends spex.Specification {
       p.toXhtml must ==/(<td class="info">1.2, 2.3</td>)
     }
   }
-
-
 }

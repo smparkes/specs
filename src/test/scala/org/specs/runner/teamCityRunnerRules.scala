@@ -20,6 +20,7 @@ package org.specs.runner
 import org.specs.specification._
 import org.specs.io.mock._
 import org.specs.util.Property
+import org.specs._
 
 class teamCityRunnerRules extends HtmlSpecificationWithJUnit("Team city runner") {
   override def htmlDir = "target"
@@ -32,7 +33,6 @@ class teamCityRunnerRules extends HtmlSpecificationWithJUnit("Team city runner")
 } 
 
 object testingSpecification extends Specification("specification name") {
-
   "sus1 description" should {
     "good example" in { true must beTrue }
     "failed example" in { true must beFalse }

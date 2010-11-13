@@ -47,7 +47,6 @@ trait Tabs extends Layout { outer =>
       }
     }
   }
-  
   /**
    * create tabs with an overall title from a list of forms
    */

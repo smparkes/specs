@@ -77,7 +77,13 @@ class Property[T](var value: () => Option[T]) {
    * This avoids stack overflow errors when doing property(property() + 1) for example
    */
   def forceUpdate(newValue: T): this.type = withValue(newValue)
-
+  /**
+   * updates the value with a mapping function
+   */
+  def update(f: T => T): this.type = this.value() match {
+	  case Some(v) => forceUpdate(f(v))
+	  case _ => this
+  }
   /**
    * sets a new getter function
    */
@@ -99,7 +105,7 @@ class Property[T](var value: () => Option[T]) {
   override def toString = toStringer(get)
   
   /** @return an iterator containing the value if present */
-  def elements = optionalValue.elements
+  def iterator = optionalValue.iterator
   /** return the property with the value being filtered according to a predicate */
   def filter(p: T => Boolean): this.type = { 
     val v = value() 
@@ -124,6 +130,8 @@ class Property[T](var value: () => Option[T]) {
   def toLeft[R](right: R) = optionalValue.toLeft(right)
   /** option-like toRight */
   def toRight[L](left: L) = optionalValue.toRight(left)
+  /** to a list */
+  def toList = optionalValue.toList
   
   
   override def equals(other: Any) = {
@@ -166,10 +174,10 @@ trait Properties {
   implicit def anyToAs[T](a: T) = new AsProperty(a)
   implicit def propertyToValue[T](p: Property[T]):T = p()
   case class AsProperty[T](a: T) { 
-    def as(p: Property[T]): T = {p() = a; a }
-    def apply(p: Property[T]): T = {p() = a; a}
-    def apply(f: T => Any): T = {f(a); a }
-    def as(f: T => Any): T= {f(a); a }
+    def as(p: Property[T]) = {p() = a; a }
+    def apply(p: Property[T]) = {p() = a; a}
+    def apply(f: T => Any)= {f(a); a }
+    def as(f: T => Any)= {f(a); a }
   }
 
 }

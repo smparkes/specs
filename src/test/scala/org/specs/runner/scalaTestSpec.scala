@@ -29,7 +29,7 @@ import org.specs.mock.Mockito
 import org.mockito.Mockito._
 import scala.collection.immutable._
 
-class scalaTestSpec extends SpecificationWithJUnit with ScalaTestMocks {
+class scalaTestSpec extends SpecificationWithJUnit with ScalaTestMocks with Contexts {
   "A ScalaTest runner" should {
     "create a ScalaTest suite named after the specification description" in {
       val spec = new SimpleSpecification(that.isOk)
@@ -45,7 +45,7 @@ class scalaTestSpec extends SpecificationWithJUnit with ScalaTestMocks {
       suiteWithGroups.nestedSuites.size must_== 2
     }
     "return groups corresponding to the tags on the specification" in {
-      val first = suiteWithGroups.nestedSuites.first
+      val first = suiteWithGroups.nestedSuites.head
       first.tags must_== Map("have a tag for the second example" -> Set("unit"))
     }
   }
@@ -53,34 +53,34 @@ class scalaTestSpec extends SpecificationWithJUnit with ScalaTestMocks {
     "report failures and errors as test failed, skipped as ignored and the rest as success" in {
       sampleSuite.run(None, reporter, stopper, Filter(), Map(), None, new Tracker())
       got {
-        atLeastOne(reporter).apply(any[SuiteStarting])
-        atLeastOne(reporter).apply(any[TestFailed])
+        one(reporter).apply(any[SuiteStarting])
+        two(reporter).apply(any[TestFailed])
         one(reporter).apply(any[TestIgnored])
         one(reporter).apply(any[TestSucceeded])
-        atLeastOne(reporter).apply(any[SuiteCompleted])
+        one(reporter).apply(any[SuiteCompleted])
      }
     }
     "use the tags defined on the examples when executing included groups only" in {
       suiteWithGroups.run(None, reporter, stopper, new Filter(Some(Set("unit")), Set()), Map(), None, new Tracker())
       got {
-	    atLeastOne(reporter).apply(any[SuiteStarting])
+        two(reporter).apply(any[SuiteStarting])
         one(reporter).apply(any[TestSucceeded]) 
-        atLeastOne(reporter).apply(any[SuiteCompleted]) 
+        two(reporter).apply(any[SuiteCompleted]) 
 	  }
     }
     "use the tags defined on the examples, and not executing excluded groups" in {
       suiteWithGroups.run(None, reporter, stopper, new Filter(None, Set("functional")), Map(), None, new Tracker())
       got {
-	    atLeastOne(reporter).apply(any[SuiteStarting]) 
-        two(reporter).apply(any[TestSucceeded])
-        atLeastOne(reporter).apply(any[SuiteCompleted])
+        two(reporter).apply(any[SuiteStarting])
+        two(reporter).apply(any[TestSucceeded]) 
+        two(reporter).apply(any[SuiteCompleted]) 
 	  }
     }
   }
   def suite(behaviours: that.Value*) = new ScalaTestSuite(new SimpleSpecification(behaviours.toList))
   object sampleSuite extends ScalaTestSuite(sampleSpecification)
   object sampleSpecification extends Specification {
-    "the first system" should {
+	"the first system" should {
       "skip one example" in { skip("skipped") }
       "have one example ok" in {  1 must_== 1 }
       "have one example ko" in { 1 mustBe 2 }
@@ -99,11 +99,18 @@ class scalaTestSpec extends SpecificationWithJUnit with ScalaTestMocks {
     }
   }
 }
-trait ScalaTestMocks extends BaseSpecification with Mockito with Contexts {
+trait ScalaTestMocks extends Mockito { this: BaseSpecification with Contexts =>
    var reporter = mock[org.scalatest.Reporter]
    var stopper = mock[org.scalatest.Stopper]
    val c = beforeContext {
      reporter = mock[org.scalatest.Reporter]
      stopper = mock[org.scalatest.Stopper]
    }
+}
+/** this class can be used to print out the events that will be applied to a reporter */
+case class ReporterSpy(r: org.scalatest.Reporter) extends org.scalatest.Reporter {
+  def apply(e: Event) = {
+	println("got "+e)
+	r.apply(e)
+  }
 }

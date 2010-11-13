@@ -76,9 +76,9 @@ trait MockFileSystem extends FileSystem {
   def setWritable(path: String) = if (!canWrite(path)) (writableFiles ::= path)
 
   /** sets a file as not readable */
-  def setNotReadable(path: String) = readableFiles = readableFiles.remove(_ == path)
+  def setNotReadable(path: String) = readableFiles = readableFiles.filterNot(_ == path)
   /** sets a file as not writable */
-  def setNotWritable(path: String) = writableFiles = writableFiles.remove(_ == path)
+  def setNotWritable(path: String) = writableFiles = writableFiles.filterNot(_ == path)
 
   /** overrides the canRead definition checking in the readableFiles list */
   override def canRead(path: String) = readableFiles.exists(_ == path)
@@ -93,7 +93,7 @@ trait MockFileSystem extends FileSystem {
   /** overrides the isDirectory definition checking if it ends with / (partial definition) */
   override def isDirectory(path: String) = !isFile(path)
   /** overrides the listFiles definition */
-  override def listFiles(path: String) = children.get(path.replaceAll("\\\\", "/")).getOrElse(List[String]()).toList
+  override def listFiles(path: String) = children.get(path.replaceAll("\\\\", "/")).map(_.toList).getOrElse(List[String]())
 
   /** @return a default file path. All default file paths will be different from each other */
   def defaultFilePath = "name" + files.size + defaultExtension
@@ -123,7 +123,12 @@ trait MockFileSystem extends FileSystem {
   
   override def exists(path: String) = files.contains(path)
   
-  override def inputStream(filePath: String) = new java.io.StringBufferInputStream(readFile(filePath))
+  override def inputStream(filePath: String) = new java.io.InputStream {
+	val reader = new java.io.StringReader(readFile(filePath))
+	def read() = {
+	  reader.read()
+	}
+  }
 }
 
 /**
@@ -132,19 +137,23 @@ trait MockFileSystem extends FileSystem {
 trait MockOutput extends Output {
 
   /** list of messages representing the output */
-  val messages : Queue[String] = new Queue[String]
-
+  private val someMessages : Queue[String] = new Queue[String]
+  def messages: List[String] = someMessages.toList
+  
+  /** clear the list of current messages */
+  def clearMessages = someMessages.clear
+  
   /** adds <code>m.toString</code> to a list of messages */
-  override def println(m : Any) : Unit = messages += m.toString
+  override def println(m : Any) : Unit = someMessages += m.toString
 
   /** prints several objects according to a format string (see <code>Console.printf</code>) */
-  override def printf(format: String, args: Any*) = messages += (format + ":" + args)
+  override def printf(format: String, args: Any*) = someMessages += (format + ":" + args)
 
   /** doesn't flush */
   override def flush = ()
   
   /** doesn't print anything */
-  override def printStackTrace(t: Throwable) = t.getStackTrace.foreach { messages += _.toString }
+  override def printStackTrace(t: Throwable) = t.getStackTrace.foreach { someMessages += _.toString }
 }
 
 /**
@@ -153,11 +162,12 @@ trait MockOutput extends Output {
 trait MockWriter extends java.io.Writer {
 
   /** list of messages representing the output */
-  val messages : Queue[String] = new Queue[String]
-
+  private val someMessages : Queue[String] = new Queue[String]
+  def messages: List[String] = someMessages.toList
+  
   /** is the Writer closed? */
   var closed = false
-  override def write(m: String) : Unit = messages += m
+  override def write(m: String) : Unit = someMessages += m
 
   /** closes the Writer */
   override def close = closed = true

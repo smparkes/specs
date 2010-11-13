@@ -26,16 +26,25 @@ import _root_.junit.framework._
 import org.junit.runner.notification.RunNotifier
 import org.junit.runner.Description
 import org.specs.specification._
+import org.specs._
 
 class junitTestSuiteSpec extends SpecificationWithJUnit {
+  "A junit test suite execution" should {
+	"trigger the afterSpec actions after all the examples if the specification is sequential" in {
+	  val sequential = new SequentialSpecification
+      val result = new TestResult
+      sequential.run(result)
+      sequential.messages must containInOrder("ex2", "afterSpec")
+    }
+  }
   "A junit test suite for a composite specification" should {
     "create one test suite per specification" in {
-      object S1 extends Specification { 1 must_== 1 }
-      object S2 extends Specification { 1 must_== 1 }
-      object Composite extends Specification { "this composite spec" isSpecifiedBy (S1, S2) }
+      val S1 = new Specification { 1 must_== 1 }
+      val S2 = new Specification { 1 must_== 1 }
+      val Composite = new Specification { "this composite spec" isSpecifiedBy (S1, S2) }
 
       makeRunners(Composite) foreach { r =>
-        r.suites.map(_.asInstanceOf[JUnitSuite].getName) must_== List("S1", "S2")
+        r.suites must have size(2)
       }
     }
   }
@@ -51,7 +60,7 @@ class junitTestSuiteSpec extends SpecificationWithJUnit {
       }
     }
     "create one test suite per sus" in {
-      object S1 extends Specification {
+      val S1 = new Specification {
         "sus1" should { "ex" in { 1 must_== 1 } }
         "sus2" should { "ex" in { 1 must_== 1 } }
       }
@@ -60,11 +69,11 @@ class junitTestSuiteSpec extends SpecificationWithJUnit {
       }
     }
     "create one test case per example" in {
-      object S1 extends Specification {
+      val S1 = new Specification {
         "sus1" should { "ex1" in { 1 must_== 1 }; "ex2" in { 1 must_== 1 }}
       }
       makeRunners(S1) foreach { r =>
-        val test1 = r.suites.flatMap(_.asInstanceOf[JUnitSuite].testCases).first
+        val test1 = r.suites.flatMap(_.asInstanceOf[JUnitSuite].testCases).head
         val test2 = r.suites.flatMap(_.asInstanceOf[JUnitSuite].testCases).last
         test1.toString must include("ex1")
         test2.toString must include("ex2")
@@ -105,7 +114,7 @@ class junitTestSuiteSpec extends SpecificationWithJUnit {
       listener.desc must beSome[Description]
     }
     "create one test per nested example whatever the depth" in {
-      object specsWithNestedExamples extends Specification {
+      val specsWithNestedExamples = new Specification {
         "sus1" should { 
           "ex" in { 
             "first nested" in { 
@@ -132,29 +141,32 @@ class junitTestSuiteSpec extends SpecificationWithJUnit {
   }
   "An example test suite" should {
     "append the description of the sus to the example description if the runner is Maven" in {
-      object s extends Specification {
+      val s = new Specification {
         val e = "be ok" in { 1 must_== 1 }
       }
-      val suite = new ExamplesTestSuite("it should", List(s.e), None) {
+      val suite = new ExamplesTestSuite(s, "it should", List(s.e), None) {
         override lazy val isExecutedFromMaven = true
       }
-      suite.tests.first.toString aka "the example description" must include("it should be ok")
+      suite.tests.head.toString aka "the example description" must include("it should be ok")
     }
   }
   "A test description" should {
+    val description = new TestDescription() {
+      override lazy val isExecutedFromMaven = false
+    }
+    import _root_.junit.framework._
+    class ATest() extends TestCase("name")
     "append the hashcode of the test to its description if not run from Maven or Intellij" in {
-      val description = new TestDescription() {
-        override lazy val isExecutedFromMaven = false
-      }
-      import _root_.junit.framework._
-      case class aTest() extends TestCase("name")
-      description.asDescription(aTest()).toString must beMatching(".*\\(.*\\)")
+      description.asDescription(new ATest()).toString must beMatching(".*\\(.*\\)")
+    }
+    "not have null annotations" in {
+      description.asDescription(new ATest()).getAnnotations() must not be(null)
     }
   }
   "A sus" should {
     "report its exceptions if any" in {
       val messages = new SpecificationWithJUnit with MockOutput {
-        "a failing system"  should { error("bad") }
+        "a failing system"  should { error("bad"); "an example" in { 1 must_== 1 } }
       }.reportSpecs.messages 
       messages must containMatch("bad")
     }
@@ -165,5 +177,15 @@ class SimpleSpecification(behaviours: List[(that.Value)]) extends TestSpecificat
     "have example 1 ok" in {
       expectations(behaviours) foreach {_.apply}
     }
+  }
+}
+class SequentialSpecification extends SpecificationWithJUnit with MockOutput {
+  setSequential()
+  shareVariables()
+  doAfterSpec(println("afterSpec"))
+  "sus1" should {
+	println("sus1");
+	"ex1" in { println("ex1"); 1 must_== 1 }
+	"ex2" in { println("ex2"); 1 must_== 1 }
   }
 }

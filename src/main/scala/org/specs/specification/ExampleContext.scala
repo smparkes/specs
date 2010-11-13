@@ -38,27 +38,34 @@ trait ExampleContext extends ExampleLifeCycle {
   var after: Option[() => Any] = None
   /** the lastActions function will be invoked after all examples */
   var lastActions: Option[() => Any] = None
+  private lazy val executeOneExampleOnly = parent match {
+    case Some(s: BaseSpecification) => s.executeOneExampleOnly
+    case _ => false
+  }
   /** calls the before method of the "parent" cycle, then the sus before method before an example if that method is defined. */
   override def beforeExample(ex: Examples): Unit = {
     beforeSystemFailure.map(throw _)
     parent.map(_.beforeExample(ex))
     if (!(ex eq this)) {
-      if (!exampleList.isEmpty && ex == exampleList.first) {
-        val susListener = new Sus("", new org.specs.Specification {})
-        firstActions.map { a =>
-          withCurrent(susListener)(a.apply) 
-        }
-        firstActions.map { b => 
-          val initErrors = susListener.failureAndErrors
-          if (!initErrors.isEmpty) {
-            val failure = new FailureException("Before system:\n" + 
-                                             initErrors.map(_.getMessage).mkString("\n")).setAs(initErrors(0))
-            beforeSystemFailure = Some(failure)
-            beforeSystemFailure.map(throw _)
-          }
-        }
+      if (!exampleList.isEmpty && ex == exampleList.head && !(executeOneExampleOnly && ex.hasSubExamples)) {
+        executeActions(firstActions, "Before system:\n")
       }
-      before.map(_.apply())
+      if (!ex.hasSubExamples) executeActions(before, "Before example:\n" )
+    }
+  }
+  private def executeActions(actions: Option[() => Any], msg: String) = {
+    val susListener = new Sus("", new org.specs.Specification {})
+    actions.map { a =>
+      withCurrent(susListener)(a.apply) 
+    }
+    actions.map { b => 
+      val initErrors = susListener.failureAndErrors
+      if (!initErrors.isEmpty) {
+        val failure = new FailureException(msg+ 
+                                         initErrors.map(_.getMessage).mkString("\n")).setAs(initErrors(0))
+        beforeSystemFailure = Some(failure)
+        beforeSystemFailure.map(throw _)
+      }
     }
   }
   /** 
@@ -69,7 +76,8 @@ trait ExampleContext extends ExampleLifeCycle {
   override def executeExpectations(ex: Examples, t: =>Any): Any = {
     ex match {
       case sus: Sus => parent.map(_.executeExpectations(ex, t))
-      case e: Example => aroundExpectations.map { (f: (=>Any) =>Any) => 
+      case e: Example if (ex.hasSubExamples) => parent.map(_.executeExpectations(ex, t))
+      case e: Example if (!ex.hasSubExamples) => aroundExpectations.map { (f: (=>Any) =>Any) => 
           f(parent.map(_.executeExpectations(ex, t)))
         }.orElse(parent.map(_.executeExpectations(ex, t)))
     }
@@ -78,14 +86,15 @@ trait ExampleContext extends ExampleLifeCycle {
   /** calls the after method of the "parent" cycle, then the sus after method after an example if that method is defined. */
   override def afterExample(ex: Examples): Unit = { 
     if (!(ex eq this)) {
-      after.map {_.apply()}
+      if (!ex.hasSubExamples)
+        executeActions(after, "After example:\n")
       this match {
-        case sus: Sus => if (!exampleList.isEmpty && ex == exampleList.last) {
-          lastActions.map { actions =>
-            // force the execution of nested examples if there are last actions
-            ex.exampleList.foreach(_.failures)
-            actions.apply
-          }
+        case composite: Examples => if (!exampleList.isEmpty && ex == exampleList.last && !(executeOneExampleOnly && ex.hasSubExamples)) {
+          // force the execution of nested examples if there are last actions
+          ex.exampleList.foreach(_.failures)
+          executeActions(Some(() => {
+            lastActions.map(_.apply)
+          }), "After system:\n")
         }
         case other => ()
       }

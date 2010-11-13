@@ -20,8 +20,9 @@ package org.specs.samples
 import org.specs.runner._
 import org.specs.io.mock._
 import org.junit.runner._
+import org.specs._
 
-object sampleSpec1 extends sampleSpec1
+object sampleSpecification1 extends sampleSpec1
 class sampleSpec1 extends SpecificationWithJUnit {
   "A sample specification1" should {
     "return something" in {

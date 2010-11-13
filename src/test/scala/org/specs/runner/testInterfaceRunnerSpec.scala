@@ -17,13 +17,13 @@
  * DEALINGS IN THE SOFTWARE.
  */
 package org.specs.runner
-import org.spex._
+import org.specs._
 import org.scalatools.testing._
 import scala.collection.mutable._
 import org.specs.literate._
 import org.specs.io.mock._
 
-class testInterfaceRunnerSpec extends Specification {
+class testInterfaceRunnerSpec extends SpecificationWithJUnit {
   "the test interface runner" should {
     "report an error for a specification class that could not be loaded or instantiated" in {
       testRunner.run("missing", null, handler, Array())
@@ -34,25 +34,25 @@ class testInterfaceRunnerSpec extends Specification {
       }
     }
     "report a sus" in {
-      logOutput must include("[info] this sus should")      
+      logOutput must include("[error] x this sus should")      
     }
     "report a success" in {
       logOutput must include("[info]   + success")      
     }
     "report a failure" in {
-      logOutput must include("[info]   x failure")      
+      logOutput must include("[error]   x failure")      
     }
     "report a message" in {
-      logOutput must include("[info]     '1' is not equal to '2'")      
+      logOutput must include("[error]     '1' is not equal to '2'")      
     }
     "report the location of the failure" in {
       logOutput must beMatching("'1' is not equal to '2'.*testInterfaceRunnerSpec.scala")      
     }
     "report an error" in {
-      logOutput must include("[info]   x error")      
+      logOutput must include("[error]   x error")      
     }
     "report the stacktrace of an error" in {
-      logOutput must include("[info]     " + testInterfaceSpecification.exception.getStackTrace()(0))      
+      logOutput must include("[error]     " + testInterfaceSpecification.exception.getStackTrace()(0))      
     }
     "report the location of the error" in {
       logOutput must beMatching("bad.*testInterfaceRunnerSpec.scala")      
@@ -76,10 +76,10 @@ class testInterfaceRunnerSpec extends Specification {
       events must include("Skipped")      
     }
     "work ok with a specification created as an object" in {
-      logOutput$ must include("[info] this sus should")      
+      logOutput$ must include("[error] x this sus should")      
     }
-    "work ok if an error is thrown before any example is specified - issue 111" in {
-      logOutput("org.specs.runner.issue111Specification") must not(throwAn[Error])
+    "display a failure message for a failing sus - issue 111" in {
+      logOutput("org.specs.runner.issue111Specification") must include("error in sus")
     }
     "create the html page for a literate spec" in {
       testRunner.run(Some(sbtLiterateSpecification))
@@ -156,10 +156,11 @@ class testInterfaceSpecification extends Specification {
 object testInterfaceSpecification extends testInterfaceSpecification with MockOutput
 class issue111Specification extends Specification with MockOutput {
   "this sus" should {
-    throw new Error("here")
+    fail("error in sus")
+    "an example" in { 1 must_== 2 }
   }
 }
-
+import org.specs._
 object sbtLiterateSpecification extends HtmlSpecification with MockOutput with MockFileSystem {
  "this" is <t>
    A literate specification with an example { 1 must_== 1 }

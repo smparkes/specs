@@ -19,8 +19,8 @@
 package org.specs.runner
 import org.scalatools.testing._
 import org.specs.util._
+import org.specs._
 import org.specs.util.ExtendedThrowable._
-
 /**
  * Implementation of the Framework interface for the sbt tool.
  * It declares the classes which can be executed by the specs library.
@@ -35,7 +35,7 @@ class SpecsFramework extends Framework {
     def superClassName = "org.specs.Specification"
     def isModule = true
   }
-  def tests = Array[TestFingerprint](specificationClass, specificationObject)
+  def tests = Array[Fingerprint](specificationClass, specificationObject)
   def testRunner(classLoader: ClassLoader, loggers: Array[Logger]) = new TestInterfaceRunner(classLoader, loggers)
 }
 
@@ -45,18 +45,20 @@ class SpecsFramework extends Framework {
  * 
  * Then it uses a NotifierRunner to notify the EventHandler of the test events.
  */
-class TestInterfaceRunner(loader: ClassLoader, val loggers: Array[Logger]) extends org.scalatools.testing.Runner with Classes 
+class TestInterfaceRunner(loader: ClassLoader, val loggers: Array[Logger]) extends org.scalatools.testing.Runner
   with HandlerEvents with TestLoggers {
+  import Classes._
+  
   def run(classname: String, fingerprint: TestFingerprint, handler: EventHandler, args: Array[String]) = {
-    val specification: Either[Throwable, Specification] = create[Specification](classname + "$") match {
+    val specification: Either[Throwable, Specification] = create[Specification](classname + "$", loader) match {
       case Right(s) => Right(s)
-      case Left(e) => create[Specification](classname)
+      case Left(e) => create[Specification](classname, loader)
     }
     specification.left.map { e =>
       handler.handle(error(classname, e))
       logError("Could not create an instance of "+classname+"\n")
       logError("  "+e.getMessage+"\n")
-      e.getStackTrace foreach { s => logError("  "+s.toString) }
+      e.getFullStackTrace foreach { s => logError("  "+s.toString) }
     }
     val specificationOption = specification.right.toOption
     specificationOption.map(_.args = args)
@@ -86,50 +88,42 @@ class TestInterfaceNotifier(handler: EventHandler, val loggers: Array[Logger], c
   def exampleCompleted(exampleName: String) = decrementPadding
 
   def exampleSucceeded(testName: String) = {
-    logStatus(testName, AnsiColors.green, "+")
+    logInfoStatus(testName, AnsiColors.green, "+")
     handler.handle(succeeded(testName))
   }
   def exampleFailed(testName: String, e: Throwable) = {
-    logStatus(testName, AnsiColors.red, "x")
-    logStatus(e.getMessage + " (" + e.location + ")", AnsiColors.red, " ")
+    logErrorStatus(testName, AnsiColors.red, "x")
+    logErrorStatus(e.getMessage + " (" + e.location + ")", AnsiColors.red, " ")
     handler.handle(failure(testName, e))
   }
   def exampleError(testName: String, e: Throwable) = {
-    logStatus(testName, AnsiColors.red, "x")
-    logStatus(e.getMessage + " (" + e.location + ")", AnsiColors.red, " " )
-    if (configuration.stacktrace) {
-      e.getStackTrace().foreach { trace =>
-        logStatus(trace.toString, AnsiColors.red, " ")
-      }
-    }
+    logErrorStatus(testName, AnsiColors.red, "x")
+    logErrorDetails(e, configuration)
     handler.handle(error(testName, e))
   }
   def exampleSkipped(testName: String) = {
-    logStatus(testName, AnsiColors.yellow, "o")
+    logInfoStatus(testName, AnsiColors.yellow, "o")
     handler.handle(skipped(testName))
   }
-  def systemStarting(systemName: String) = {
-    logInfo(systemName, AnsiColors.blue)
-  }
+  def systemStarting(systemName: String) = {}
+
   def systemSucceeded(testName: String) = {
-    logStatus(testName, AnsiColors.green, "+")
+    logInfoStatus(testName, AnsiColors.green, "+")
     handler.handle(succeeded(testName))
   }
   def systemFailed(testName: String, e: Throwable) = {
-    logStatus(testName, AnsiColors.red, "x")
-    logStatus(e.getMessage, AnsiColors.red, "  ")
+    logErrorStatus(testName, AnsiColors.red, "x")
     handler.handle(failure(testName, e))
   }
   def systemError(testName: String, e: Throwable) = {
-    logStatus(testName, AnsiColors.red, "x")
-    logStatus(e.getMessage, AnsiColors.red, "  ")
+    logErrorStatus(testName, AnsiColors.red, "x")
     handler.handle(error(testName, e))
   }
   def systemSkipped(testName: String) = {
-    logStatus(testName, AnsiColors.yellow, "o")
+    logInfoStatus(testName, AnsiColors.yellow, "o")
     handler.handle(skipped(testName))
   }
-  def systemCompleted(systemName: String) = decrementPadding
+  def systemCompleted(systemName: String) = {}
 }
 class DefaultEventHandler extends EventHandler {
   import scala.collection.mutable._
@@ -159,9 +153,9 @@ trait HandlerEvents {
 }
 trait TestLoggers {
   val loggers: Array[Logger]
-  def logError(message: String) = loggers.foreach { logger =>
+  def logError(message: String, color: String = AnsiColors.red) = loggers.foreach { logger =>
     if (logger.ansiCodesSupported)
-      logger.error(AnsiColors.red + message + AnsiColors.reset)
+      logger.error(color + message + AnsiColors.reset)
     else
       logger.error(message)
   }
@@ -171,11 +165,22 @@ trait TestLoggers {
     else
       logger.info(message)
   }
-  def logStatus(name: String, color: String, status: String) = {
+  def logInfoStatus(name: String, color: String, status: String) = {
     logInfo(padding + status + " " + name, color)
   }
- 
-  var padding = ""
+  def logErrorStatus(name: String, color: String, status: String) = {
+    logError(padding + status + " " + name, color)
+  }
+  def logErrorDetails(e: Throwable, configuration: Configuration) = {
+    logErrorStatus(e.getMessage + " (" + e.location + ")", AnsiColors.red, " ")
+    if (configuration.stacktrace) {
+      e.getStackTrace().foreach { trace =>
+        logErrorStatus(trace.toString, AnsiColors.red, " ")
+      }
+    }
+  }
+
+var padding = ""
   def incrementPadding = padding += "  " 
   def decrementPadding = if (padding.size >= 2) padding = padding.take(padding.size - 2)
 } 

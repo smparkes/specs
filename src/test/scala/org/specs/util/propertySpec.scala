@@ -19,7 +19,7 @@
 package org.specs.util
 import org.specs.execute._
 
-class propertySpec extends spex.Specification {
+class propertySpec extends org.spex.Specification {
   "A property" should {
     "not be evaluate its update value until it is queried" in  {
       val p = Property(1)
@@ -36,8 +36,8 @@ class propertySpec extends spex.Specification {
       p.withValue(2).get must_== 2
     }
     "behave like an Option" in {
-      "have an elements method" >> {
-        Property(1).elements.toList must_== List(1)
+      "have an iterator method" >> {
+        Property(1).iterator.toList must_== List(1)
       }
       "have a isDefined method" in {
         Property(1).isDefined must beTrue

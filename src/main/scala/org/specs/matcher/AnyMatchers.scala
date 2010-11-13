@@ -27,7 +27,7 @@ import org.specs.util.Classes._
 import org.specs.collection.ExtendedIterable._
 import scala.collection.immutable.{Set => Removed}
 import scala.collection.Set
-import scala.reflect.Manifest
+import scala.reflect.ClassManifest
 import org.specs.execute._
 
 /**
@@ -42,7 +42,9 @@ trait AnyMatchers extends AnyBaseMatchers with AnyBeHaveMatchers
 /**
  * The <code>AnyBaseMatchers</code> trait provides matchers which are applicable to any scala reference or value
  */
-trait AnyBaseMatchers {
+trait AnyBaseMatchers extends StructuralMatchers {
+  /** adapt a matcher to another one having the expected type */
+  implicit def adapt[T, S](m: Matcher[T])(implicit c: S => T): Matcher[S] = m ^^ c
 
   /**
    * Matches if (a eq b)
@@ -86,17 +88,18 @@ trait AnyBaseMatchers {
       val (x, y) = (a, v)
       var dy = d(y)
       var qx = q(x)
-	  var differentTypesWarning = ""
+   	  var differentTypesWarning = ""
       if (dy == qx) {
-  	    val xClass = getClassName(x)
+	    val xClass = getClassName(x)
 	    val yClass = getClassName(y)
 	    if (xClass != yClass) {
           dy = dy + ": " + yClass
           qx = qx + ": " + xClass
-		} else differentTypesWarning = ". Values have the same string representation but possibly different types like List[Int] and List[String]"
+	    } else differentTypesWarning = ". Values have the same string representation but possibly different types like List[Int] and List[String]"
       }
       import org.specs.util.Products._
-      def isNull[T](a: T) = a match { case x: AnyVal => false; case y => y.asInstanceOf[AnyRef] eq null }
+      def isNull[T](a: T) = null == a
+
       val failureMessage = details match {
         case full: fullDetails if (!isNull(x) && full.startDiffSize <= x.toString.size) => {
           EditMatrix(dy, qx).showDistance(full.separators, full.shortenSize).toList.mkString(" is not equal to ")
@@ -229,33 +232,6 @@ trait AnyBaseMatchers {
    * Matches notBeOneOf
    */
   def notOneOf[T](t: T*): Matcher[T] = notBeOneOf(t:_*)
-
-  type T1 = Any { def isEmpty: Boolean }
-  /**
-   * Matches if any object with an <code>isEmpty</code> method returns true: (Any {def isEmpty: Boolean}).isEmpty
-   */
-  def beEmpty[S <: T1] = new Matcher[S](){
-    def apply(v: => S) = {
-      val iterable = v
-      (iterable.isEmpty, dUnquoted(iterable) + " is empty", dUnquoted(iterable) + " is not empty")
-    }
-  }
-  /**
-   * Matches if not(beEmpty(a))
-   */
-  def notBeEmpty[S <: T1] = beEmpty[S].not
-  /**
-   * Alias of notBeEmpty
-   */
-  def isNotEmpty[S <: T1] = notBeEmpty[S]
-  /**
-   * Alias of notBeEmpty
-   */
-  def notEmpty[S <: T1] = notBeEmpty[S]
-  /**
-   * Alias of beEmpty
-   */
-  def isEmpty[S <: T1] = beEmpty[S]
   /**
    * Matches if the function f returns true
    */
@@ -263,18 +239,17 @@ trait AnyBaseMatchers {
      def apply(v: => T) = {val x = v; (f(x), description.getOrElse(x) + " verifies the property",
                                              description.getOrElse(x) + " doesn't verify the expected property")}
   }
-
   /**
    * Matches if value if an exception is thrown with the expected type
    * <br>Otherwise rethrow any other exception
    * <br>Usage: <code>value must throwA[SpecialException]</code>
    */
-  def throwAnException[E <: Throwable](implicit m: Manifest[E]): ExceptionClassMatcher[E] = new ExceptionClassMatcher[E](m.erasure.asInstanceOf[Class[E]])
+  def throwAnException[E <: Throwable](implicit m: ClassManifest[E]): ExceptionClassMatcher[E] = new ExceptionClassMatcher[E](m.erasure.asInstanceOf[Class[E]])
 
   /**
    * return a matcher which will be ok if an exception of that type is thrown
    */
-  def throwA[E <: Throwable](implicit m: Manifest[E]): ExceptionClassMatcher[E] = throwAnException[E]
+  def throwA[E <: Throwable](implicit m: ClassManifest[E]): ExceptionClassMatcher[E] = throwAnException[E]
   /**
    * @see throwException description
    */
@@ -282,7 +257,7 @@ trait AnyBaseMatchers {
   /**
    * return a matcher which will be ok if an exception of that type is thrown
    */
-  def throwAn[E <: Throwable](implicit m: Manifest[E]): ExceptionClassMatcher[E] = throwAnException[E]
+  def throwAn[E <: Throwable](implicit m: ClassManifest[E]): ExceptionClassMatcher[E] = throwAnException[E]
   /**
    * Alias for throwA(new Exception)
    * @see throwException description
@@ -313,13 +288,13 @@ trait AnyBaseMatchers {
        (isThrown(value, exception, (e => exception.isAssignableFrom(e.getClass)), description).isDefined,
         okMessage(exception, description), koMessage(exception, description))
      }
-    def like(f: =>PartialFunction[Throwable, Boolean]) = new Matcher[Any](){
+    def like(f: =>PartialFunction[E, Boolean]) = new Matcher[Any](){
       def apply(v: => Any) = {
         val thrown = isThrown(v, exception, (e => exception.isAssignableFrom(e.getClass)), description)
         if (!thrown.isDefined)
           (false, okMessage(exception, description), koMessage(exception, description))
         else
-          beLike(f)(thrown.get)
+          beLike(f).apply(thrown.get.asInstanceOf[E])
       }
     }
   }
@@ -338,7 +313,7 @@ trait AnyBaseMatchers {
          if (!thrown.isDefined)
            (false, okMessage(exception, description), koMessage(exception, description))
          else
-           beLike(f)(thrown.get.asInstanceOf[E])
+           beLike(f).apply(thrown.get.asInstanceOf[E])
        }
      }
   }
@@ -390,7 +365,7 @@ trait AnyBaseMatchers {
   /**
    * Matches if v.getClass == c
    */
-  def haveClass[T](implicit m: Manifest[T]) = new Matcher[Any](){
+  def haveClass[T](implicit m: ClassManifest[T]) = new Matcher[Any](){
     def apply(v: =>Any) = {
       val x: Any = v
       val c = m.erasure
@@ -402,12 +377,12 @@ trait AnyBaseMatchers {
   /**
    * Matches if v.getClass != c
    */
-  def notHaveClass[T](implicit m: Manifest[T]) = haveClass(m).not
+  def notHaveClass[T](implicit m: ClassManifest[T]) = haveClass(m).not
 
   /**
    * Matches if v.isAssignableFrom(c)
    */
-  def beAssignableFrom[T](implicit m: Manifest[T]) = new Matcher[Class[_]](){
+  def beAssignableFrom[T](implicit m: ClassManifest[T]) = new Matcher[Class[_]](){
     def apply(v: =>Class[_]) = {
       val x: Class[_] = v
       val c = m.erasure
@@ -418,12 +393,12 @@ trait AnyBaseMatchers {
   /**
    * Matches if v.isAssignableFrom(c)
    */
-  def notBeAssignableFrom[T](implicit m: Manifest[T]) = beAssignableFrom(m).not
+  def notBeAssignableFrom[T](implicit m: ClassManifest[T]) = beAssignableFrom(m).not
 
   /**
    * Matches if c.isAssignableFrom(v)
    */
-  def haveSuperClass[T](implicit m: Manifest[T]) = new Matcher[Any](){
+  def haveSuperClass[T](implicit m: ClassManifest[T]) = new Matcher[Any](){
     def apply(v: =>Any) = {
       val x: Any = v
       val c = m.erasure
@@ -435,7 +410,7 @@ trait AnyBaseMatchers {
   /**
    * Matches if c.isAssignableFrom(v)
    */
-  def notHaveSuperClass[T](implicit m: Manifest[T]) = haveSuperClass(m).not
+  def notHaveSuperClass[T](implicit m: ClassManifest[T]) = haveSuperClass(m).not
 
   /**
    * Adds functionalities to functions returning matchers so that they can be combined before taking a value and
@@ -532,11 +507,16 @@ trait AnyBaseMatchers {
    */
   class SeqMatcher[S, T](s: Seq[S], f: S => Matcher[T]) extends Matcher[Seq[T]] {
     def apply(t: => Seq[T]) = {
-      val bothSequences = t.toList zip s.toList
-      val results = bothSequences map { st => val (t1, s1) = st
-                                        f(s1).apply(t1) }
-      (results.map(_._1).reduceLeft(_ && _), results.filter(_._1).map(_._2).mkString("; "),
-                                             results.filter(!_._1).map(_._3).mkString("; "))
+      val (l1, l2) = (t, s)
+      if (l1.size != l2.size) {
+        (false, l1+" has the same size as "+l2, l1+" doesn't have the same size as "+l2)
+      } else {
+        val bothSequences = l1.toList zip l2.toList
+        val results = bothSequences map { case (t1, s1) => f(s1).apply(t1) }
+        (results.isEmpty || results.map(_._1).reduceLeft(_ && _), 
+         results.filter(_._1).map(_._2).mkString("; "),
+         results.filter(!_._1).map(_._3).mkString("; "))
+      }
     }
   }
 
@@ -557,8 +537,9 @@ trait AnyBaseMatchers {
             case Some(x) => (true, q(element) + " matches with " + x, "no match for element " + q(element))
           }
         }
-        (results.map(_._1).reduceLeft(_ && _), results.filter(_._1).map(_._2).mkString("; "),
-                                               results.filter(!_._1).map(_._3).mkString("; "))
+        (results.isEmpty || results.map(_._1).reduceLeft(_ && _), 
+         results.filter(_._1).map(_._2).mkString("; "),
+         results.filter(!_._1).map(_._3).mkString("; "))
       }
     }
   }
@@ -570,6 +551,47 @@ trait AnyBaseMatchers {
    * Matches if (a != b)
    */
   def !=(a: =>Any)(implicit d: Detailed) = is_!=(a)(d)
+}
+trait StructuralMatchers {
+  /** anything that can be empty */
+  type HasIsEmptyMethod = Any { def isEmpty: Boolean }
+  /** anything that can have a size */
+  type HasSizeMethod = Any { def size: Int }
+  class SizeMatcher(n: Int) extends Matcher[HasSizeMethod] {
+	def apply(v: => HasSizeMethod) = {
+	  val collection = v
+	  (collection.size == n, d(collection) + " has size " + n, d(collection) + " doesn't have size " + n + ". It has size " + collection.size)
+	}
+  }
+  /**
+   * Matches if any object with an <code>isEmpty</code> method returns true: (Any {def isEmpty: Boolean}).isEmpty
+   */
+  def beEmpty = new Matcher[HasIsEmptyMethod](){
+    def apply(v: => HasIsEmptyMethod) = {
+      val iterable = v
+      (iterable.isEmpty, dUnquoted(iterable) + " is empty", dUnquoted(iterable) + " is not empty")
+    }
+  }
+  /**
+   * Matches if not(beEmpty(a))
+   */
+  def notBeEmpty = beEmpty.not
+  /**
+   * Alias of notBeEmpty
+   */
+  def isNotEmpty = notBeEmpty
+  /**
+   * Alias of notBeEmpty
+   */
+  def notEmpty = notBeEmpty
+  /**
+   * Alias of beEmpty
+   */
+  def isEmpty = beEmpty
+  /**
+   * Matches if the size is n
+   */
+  def haveSize(n: Int) = new SizeMatcher(n)
 }
 trait AnyBeHaveMatchers { this: AnyBaseMatchers =>
   /** dummy matcher to allow be + matcher syntax */
@@ -591,16 +613,22 @@ trait AnyBeHaveMatchers { this: AnyBaseMatchers =>
     def asNullAs(a: =>T) = result.matchWith(beAsNullAs(a))
     def in(iterable: =>Iterable[T]) = result.matchWith(beIn(iterable))
     def oneOf(t: T*) = result.matchWith(beOneOf(t:_*))
-    def throwA[E <: Throwable](implicit m: Manifest[E]) = result.matchWith(throwAnException[E](m))
+    def throwA[E <: Throwable](implicit m: ClassManifest[E]) = result.matchWith(throwAnException[E](m))
     def throwA[E <: Throwable](e: E) = result.matchWith(throwException(e))
-    def throwAn[E <: Throwable](implicit m: Manifest[E]) = result.matchWith(throwAnException[E](m))
+    def throwAn[E <: Throwable](implicit m: ClassManifest[E]) = result.matchWith(throwAnException[E](m))
     def throwAn[E <: Throwable](e: E) = result.matchWith(throwException(e))
   }
   /** implicit definition to add 'empty' matchers */
-  implicit def toAnyEmptyResultMatcher[S <: T1](result: Result[S]) = new AnyEmptyResultMatcher(result)
+  implicit def toAnyEmptyResultMatcher[S](result: Result[S])(implicit c: S => HasIsEmptyMethod): AnyEmptyResultMatcher[S] = new AnyEmptyResultMatcher(result)(c)
   /** functions which can be used with 'empty' matchers */
-  class AnyEmptyResultMatcher[S <: T1](result: Result[S]) {
-    def empty = result.matchWith(beEmpty[S])
+  class AnyEmptyResultMatcher[S](result: Result[S])(implicit c: S => HasIsEmptyMethod) {
+    def empty = result.matchWith(beEmpty ^^ c)
+  }
+  /** implicit definition to add 'size' matchers */
+  implicit def toAnySizeResultMatcher[S](result: Result[S])(implicit c: S => HasSizeMethod): AnySizeResultMatcher[S] = new AnySizeResultMatcher(result)(c)
+  /** functions which can be used with 'size' matchers */
+  class AnySizeResultMatcher[S](result: Result[S])(implicit c: S => HasSizeMethod) {
+    def size(n: Int) = result.matchWith(haveSize(n) ^^ c)
   }
   /**
    * Alias of is_==
@@ -621,9 +649,8 @@ trait AnyBeHaveMatchers { this: AnyBaseMatchers =>
   /**
    * Alias of beEmpty
    */
-  def empty[S <: T1] = beEmpty[S]
+  def empty = beEmpty
 }
-
 /**
  * Reusable equalTo matcher
  */
@@ -632,15 +659,15 @@ class BeEqualTo[T](a: =>T) extends Matcher[T] {
     val (x, y) = (a, v)
     var dy = d(y)
     var qx = q(x)
-	var differentTypesWarning = ""
+   	var differentTypesWarning = ""
     if (dy == qx) {
 	  val xClass = getClassName(x)
 	  val yClass = getClassName(y)
 	  if (xClass != yClass) {
         dy = dy + ": " + yClass
         qx = qx + ": " + xClass
-	  } else differentTypesWarning = ". Values have the same string representation but possibly a different type like List[Int] and List[String]"
-    }
+	  } else differentTypesWarning = ". Values have the same string representation but possibly different types like List[Int] and List[String]"
+	}
     (x == y, dy + " is equal to " + qx, dy + " is not equal to " + qx + differentTypesWarning)
   }
 }

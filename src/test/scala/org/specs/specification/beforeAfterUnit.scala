@@ -20,6 +20,7 @@ package org.specs.specification
 import org.specs.specification
 import org.specs.io.mock._
 import org.specs.Sugar._
+import org.specs._
 
 class beforeAfterUnit extends SpecificationWithJUnit {
   "A specification with 2 expectations in the doBefore clause must fail all examples if the expectations are wrong" in {
@@ -65,5 +66,30 @@ class beforeAfterUnit extends SpecificationWithJUnit {
     s.reportSpecs
     s.failures.size aka "the number of system failures" must_== 2
     s.failures(0).toString must include("Before system") and include("not equal to '2'")
+  }
+  "A specification with sharedVariables must trigger doBeforeSpec and doAfterSpec as expected" in {
+    object s extends Specification with MockOutput {
+      shareVariables()
+      
+      doBeforeSpec(println("beforeSpec")) 
+      doAfterSpec(println("afterSpec")) 
+      "sys1" should {
+        "ex1" in { 1 must_== 1 }
+        "ex2" in { 1 must_== 1 }
+      }
+    }
+    s.reportSpecs
+    s.messages must containInOrder("beforeSpec", "  sys1 should", "  + ex1", "  + ex2", "afterSpec") 
+  }
+  "A specification with setSequential inside a sus must not execute examples twice" in {
+    object s extends Specification with MockOutput {
+      "sys1" should {
+        setSequential()
+        "ex1" in { 1 must_== 1 }
+        "ex2" in { 1 must_== 1 }
+      }
+    }
+    s.reportSpecs
+    s.messages must containInOrder("ex1", "ex1").not 
   }
 }

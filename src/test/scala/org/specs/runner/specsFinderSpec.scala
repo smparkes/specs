@@ -20,6 +20,7 @@ package org.specs.runner
 import org.specs.io.mock.{ MockOutput, MockFileSystem }
 import org.specs.io.ConsoleOutput
 import org.specs.runner._
+import org.specs._
 
 class specsFinderSpec extends SpecificationWithJUnit with Init {
   val finder = new MockFileSystem with SpecificationsFinder with MockOutput
@@ -75,8 +76,9 @@ class specsFinderSpec extends SpecificationWithJUnit with Init {
     "not fail when trying to create a spec for an object not inheriting the specification class" in {
       finder.createSpecification("org.specs.runner.NotASpecification") must beNone
     }
-    "print an error message when failing to instantiate a spec" in {
-      finder.createSpecification("org.specs.runner.NotASpecification", true, false)
+    "print an error message when failing load a spec class when the -DdebugLoadClass option is true" in {
+      System.setProperty("debugLoadClass", "true")
+	  finder.createSpecification("org.specs.runner.NotASpecification", true, false)
       finder.messages must containMatch("is not an instance of")
     }
   }

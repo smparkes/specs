@@ -46,10 +46,8 @@ class ClassRunner extends Classes with OutputReporter {
   override def main(arguments: Array[String]) = {
     if (arguments.length == 0)
       println("The first argument should be at least the specification class name")
-    else {
-      args = arguments
-      specs.foreach(_.main(args))
-    }
+    else 
+	  super.main(arguments)
   }
   override protected def displayUsage = {
     println("usage java <classpath> run [className|-k classNames]")
@@ -77,7 +75,7 @@ class ClassRunner extends Classes with OutputReporter {
     specificationClasses.flatMap(x => x)
   }
   def createSpecification(packageName: String, className: String) = {
-    createObject[Specification](fullClassName(packageName, className), true, args.contains("-v"))
+    tryToCreateObject[Specification](fullClassName(packageName, className), true, args.contains("-v"))
   }
   private def fullClassName(packageName: String, className: String) = {
     if (packageName.trim.isEmpty) 

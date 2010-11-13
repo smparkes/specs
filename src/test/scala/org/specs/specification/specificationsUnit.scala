@@ -25,9 +25,10 @@ import org.specs.runner._
 import org.specs.util._
 import org.specs.util.ExtendedThrowable._
 import scala.collection.mutable._
-import scalacheck.Gen
-import scalacheck.Gen._
+import org.scalacheck.Gen
+import org.scalacheck.Gen._
 import org.specs.matcher.MatcherUtils._
+import org.specs.specification._
 
 class specificationsUnit extends SpecificationWithJUnit with ScalaCheck {
 
@@ -64,14 +65,20 @@ class specificationsUnit extends SpecificationWithJUnit with ScalaCheck {
       nudeSpecification.systems.head.examples.size mustBe 1
     }
     "create a default example named 'example 1'" in {
-      nudeSpecification.systems.head.examples.first.description must_== "example 1"
+      nudeSpecification.systems.head.examples.head.description must_== "example 1"
     }
     "count 1 expectation" in {
       nudeSpecification.expectationsNb mustBe 1
     }
   }
+  "A specification with 2 nested sus" should {
+	object s extends Specification with io.mock.MockOutput { "it" should { specify("have a nested sus that") should { "work" in {} }} }
+	"be executed as nested examples" in {
+	  s.reportSpecs.systems(0).errors(0) must haveClass[SpecificationBuildException]
+	}
+  }
   "the location of a failure" should {
-    val startLine = 106
+    val startLine = 113
     "indicate the precise location if it is an anonymous example" in {
       anonymousSpecification.failures(0).location must_== "specificationsUnit.scala:" + startLine
     }

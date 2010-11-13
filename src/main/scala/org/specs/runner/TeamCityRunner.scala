@@ -21,6 +21,7 @@ import org.specs.specification._
 import org.specs.util.ExtendedThrowable._
 import org.specs.io._
 import org.specs.util._
+import org.specs._
 
 /**
  * TeamCity string formatting utilities.
@@ -81,6 +82,7 @@ trait TeamCityReporter extends OutputReporter with TeamCityOutput {
       super.report(spec.subSpecifications, padding)
       super.reportSystems(spec.systems, padding)
     }
+    spec.executeAfterSpec
     testSuiteFinished(spec.name)
     this
   }

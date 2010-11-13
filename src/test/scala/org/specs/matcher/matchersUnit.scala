@@ -19,6 +19,7 @@
 package org.specs.matcher
 import org.specs.specification._
 import org.specs.runner._
+import org.specs._
 
 class matchersUnit extends SpecificationWithJUnit with MatcherCases with ScalaCheck {
   "A matcher" should {
@@ -45,12 +46,12 @@ class matchersUnit extends SpecificationWithJUnit with MatcherCases with ScalaCh
   "A matcher" can {
     "be combined with another matcher with a logical 'and' to provide a new matcher" in {
       matcherCases must pass { t: TestCase => val (a, m1, m2) = t
-        result((m1 and m2)(a)) mustBe result(m1(a)) && result(m2(a))
+    	result((m1 and m2)(a)) mustBe result(m1(a)) && result(m2(a))
       }(set(minTestsOk->20))
     }
     "be combined with another matcher with a logical 'or' to provide a new matcher" in {
       matcherCases must pass { t: TestCase => val (a, m1, m2) = t
-        result((m1 or m2)(a)) mustBe result(m1(a)) || result(m2(a))
+    	result((m1 or m2)(a)) mustBe result(m1(a)) || result(m2(a))
       }(set(minTestsOk->20))
     }
     "be combined with another matcher with a logical 'xor' to provide a new matcher" in {
@@ -66,14 +67,13 @@ class matchersUnit extends SpecificationWithJUnit with MatcherCases with ScalaCh
   }
 }
 import org.specs.Specification
-import scalacheck.Gen
-import scalacheck.Gen._
+import org.scalacheck.Gen._
 import org.specs.Sugar._
 trait MatcherCases {
   type TestCase = (Boolean, Matcher[Boolean], Matcher[Boolean])
-  val matcherCases = for (b1 <- Gen.oneOf(true, false);
-                          b2 <- Gen.oneOf(true, false);
-                          a  <- Gen.oneOf(true, false);
+  val matcherCases = for (b1 <- oneOf(true, false);
+                          b2 <- oneOf(true, false);
+                          a  <- oneOf(true, false);
                           val m1 = new Matcher[Boolean](){ def apply(b: => Boolean) = (b, "ok1", "ko1") };
                           val m2 = new Matcher[Boolean](){ def apply(b: => Boolean) = (b, "ok2", "ko2")}
                         ) yield (a, m1, m2)

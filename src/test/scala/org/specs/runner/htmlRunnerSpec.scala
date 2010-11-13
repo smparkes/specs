@@ -17,8 +17,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 package org.specs.runner
+import org.specs.literate.Textile
 
-class htmlRunnerSpec extends htmlRunnerRules("Html Runner") with literate.Textile { "Html Runner Specification" is <t>
+class htmlRunnerSpec extends htmlRunnerRules("Html Runner") with Textile { "Html Runner Specification" is <t>
 
 A specification can be run and its output displayed as an Html page.
 On this html page we should be able to see:
@@ -85,7 +86,7 @@ h4. Literate descriptions
 
 h3. Summary
 
-<ex>A column with the list of systems should be available on the left to access a given system directly</ex>{listOfSystems}
+<ex>A column with the list of systems should be available on the left to access a given system directly</ex>{susList}
 <ex>Yet this column should only be displayed if there is more than one system</ex>{noSystemsListForOneOnly}
 <ex>This column should be collapsible/expensible by clicking on an icon</ex>{collapsibleColumn}
 
