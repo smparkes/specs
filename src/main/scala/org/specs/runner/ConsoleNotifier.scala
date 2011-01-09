@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2007-2010 Eric Torreborre <etorreborre@yahoo.com>
+ * Copyright (c) 2007-2011 Eric Torreborre <etorreborre@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -22,7 +22,7 @@ package org.specs.runner
  * Simple implementation of the Notifier trait to display messages in the console
  */
 class ConsoleNotifier extends Notifier {
-  def runStarting(examplesCount: Int) = println("runStarting - count is " + examplesCount)
+  def runStarting(examplesCount: =>Int) = println("runStarting - count is " + examplesCount)
   def exampleStarting(name: String) = println("exampleStarting: " + name)
   def exampleSucceeded(name: String) = println("exampleSucceeded: " + name)
   def exampleCompleted(name: String) = println("exampleCompleted: " + name)

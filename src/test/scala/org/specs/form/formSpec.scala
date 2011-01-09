@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2007-2010 Eric Torreborre <etorreborre@yahoo.com>
+ * Copyright (c) 2007-2011 Eric Torreborre <etorreborre@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -154,7 +154,7 @@ class formUnit extends SpecificationWithJUnit with PersonBusinessEntities {
       }
       "format its values when changed formatter" in {
         form.formatterIs(s => "v: "+s.toString)
-        form.p.formattedValue.toString must_== "v: 1"
+        form.p.formattedValue.toString must include("v: 1")
       }
     }
   }

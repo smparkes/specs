@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2007-2010 Eric Torreborre <etorreborre@yahoo.com>
+ * Copyright (c) 2007-2011 Eric Torreborre <etorreborre@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -245,7 +245,7 @@ object testNotifier extends Notifier {
   var errors = 0
   var succeeded = 0
   def reset = failures = Nil; errors = 0; succeeded = 0
-  def runStarting(examplesCount: Int) = ()
+  def runStarting(examplesCount: =>Int) = ()
   def exampleStarting(exampleName: String)  = ()
   def exampleSucceeded(testName: String) = {succeeded += 1}
   def exampleCompleted(testName: String) = {}

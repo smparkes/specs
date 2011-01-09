@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2007-2010 Eric Torreborre <etorreborre@yahoo.com>
+ * Copyright (c) 2007-2011 Eric Torreborre <etorreborre@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -247,7 +247,14 @@ trait OutputReporter extends Reporter with Output {
 	    else
 	      println(padding + errorType(f) + parens(f))
 	  }
-	  if (stacktrace() && example.errors.size > 0) example.errors foreach { printStackTrace(_) }
+	  if (stacktrace() && example.errors.size > 0) 
+	    example.errors foreach { e => 
+		  printStackTrace(e) 
+		  e.chainedExceptions.foreach { chained =>
+		    println(padding + " " + chained.getMessage)
+            printStackTrace(chained)
+		  }
+		}
     }
   }
   /** @return true if the results should be printed

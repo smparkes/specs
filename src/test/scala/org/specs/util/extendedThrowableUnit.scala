@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2007-2010 Eric Torreborre <etorreborre@yahoo.com>
+ * Copyright (c) 2007-2011 Eric Torreborre <etorreborre@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -76,8 +76,8 @@ class extendedThrowableUnit extends SpecificationWithJUnit with ExceptionSamples
 	  val cause2 = new Exception("cause2")
 	  val cause1 = new Exception("cause1", cause2)
 	  val e = new Exception("root", cause1)
-	  val fullStack = e.getFullStackTrace.map(_.toString).filter(_.contains("JUnitSuiteRunner"))
-	  fullStack.size must_== 3
+	  val fullStack = e.getFullStackTrace.map(_.toString)
+	  fullStack must contain("cause2")
 	}
   }
   def provide = addToSusVerb("provide")

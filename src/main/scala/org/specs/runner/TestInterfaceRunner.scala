@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2007-2010 Eric Torreborre <etorreborre@yahoo.com>
+ * Copyright (c) 2007-2011 Eric Torreborre <etorreborre@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -83,7 +83,7 @@ class TestInterfaceNotifier(handler: EventHandler, val loggers: Array[Logger], c
   with HandlerEvents with TestLoggers {
   def this(handler: EventHandler, loggers: Array[Logger]) = this(handler, loggers, new DefaultConfiguration)
 
-  def runStarting(examplesCount: Int) = {}
+  def runStarting(examplesCount: =>Int) = {}
   def exampleStarting(exampleName: String) = incrementPadding
   def exampleCompleted(exampleName: String) = decrementPadding
 
@@ -171,13 +171,14 @@ trait TestLoggers {
   def logErrorStatus(name: String, color: String, status: String) = {
     logError(padding + status + " " + name, color)
   }
-  def logErrorDetails(e: Throwable, configuration: Configuration) = {
+  def logErrorDetails(e: Throwable, configuration: Configuration): Unit = {
     logErrorStatus(e.getMessage + " (" + e.location + ")", AnsiColors.red, " ")
     if (configuration.stacktrace) {
-      e.getStackTrace().foreach { trace =>
+      e.getStackTrace.foreach { trace =>
         logErrorStatus(trace.toString, AnsiColors.red, " ")
       }
     }
+	e.chainedExceptions.foreach(logErrorDetails(_, configuration))
   }
 
 var padding = ""

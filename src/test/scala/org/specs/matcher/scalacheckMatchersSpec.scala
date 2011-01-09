@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2007-2010 Eric Torreborre <etorreborre@yahoo.com>
+ * Copyright (c) 2007-2011 Eric Torreborre <etorreborre@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -92,6 +92,9 @@ class scalacheckMatchersSpec extends MatchersSpecification with ScalaCheckExampl
   "a validate matcher" can {
     "be used with a 'validates' shorthand: gen validates partialFunction" in {
 	  constantPair validates { case (x, y) => true }
+	}
+    "be used with a 'validates' shorthand and fail if the function returns false" in {
+	   expectation(constantPair validates { case (x, y) => 1 must_== 2 }) must failWithMatch("'1' is not equal to '2'")
 	}
   }
   "A ScalaCheck property" should {

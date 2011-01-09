@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2007-2010 Eric Torreborre <etorreborre@yahoo.com>
+ * Copyright (c) 2007-2011 Eric Torreborre <etorreborre@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -48,6 +48,7 @@ class iterableMatchersSpec extends MatchersSpecification {
     }
     "provide a 'must containInOrder' matcher on iterables checking if one sequence is included inside another" in {
       List("one", "two", "three") must containInOrder(List("one", "two"))
+      List("one", "two", "three") must containInOrder("one", "two")
       expectation(List("one", "two") must containInOrder(List("two", "one"))) must failWith("'List(one, two)' doesn't contain all of 'List(two, one)' in order")
     }
     "provide a 'must beIn' matcher on iterables: 'one' must beIn(List('one', 'two'))" in {

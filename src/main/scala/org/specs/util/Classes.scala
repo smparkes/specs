@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2007-2010 Eric Torreborre <etorreborre@yahoo.com>
+ * Copyright (c) 2007-2011 Eric Torreborre <etorreborre@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -17,10 +17,12 @@
  * DEALINGS IN THE SOFTWARE.
  */
 package org.specs.util
+import ExtendedThrowable._
 import org.specs.io.Output
 import org.specs.io.ConsoleOutput
 import scala.reflect.ClassManifest
 import scala.reflect.NameTransformer
+
 /**
  * This object provides simple functions to instantiate classes.
  */
@@ -57,8 +59,15 @@ trait Classes extends ConsoleOutput {
       return createInstanceOf[T](loadClass[T](className))
     } catch {
       case e => {
-        if (printMessage || System.getProperty("debugCreateObject") != null) println("Could not instantiate class " + className + ": " + e.getMessage)
-        if (printStackTrace || System.getProperty("debugCreateObject") != null) e.getStackTrace() foreach (println(_))
+        val debugCreateObject = System.getProperty("debugCreateObject") != null
+        val shouldPrintStackTrace = printStackTrace || debugCreateObject
+        val shouldPrintMessage = printMessage || debugCreateObject
+        val msg = (shouldPrintMessage, shouldPrintStackTrace) match {
+          case (_, true) => "Could not instantiate class: " + e.getFullStackTraceAsString
+          case (true, false) => "Could not instantiate class: " + className + ": " + e.getMessage
+          case (false, false) => ""
+        }
+        println(msg)
       }
     }
     return None
@@ -75,9 +84,13 @@ trait Classes extends ConsoleOutput {
   private[util] def createInstanceFor[T <: AnyRef](klass: Class[T])(implicit m: ClassManifest[T]) = {
     val constructor = klass.getDeclaredConstructors()(0)
 	constructor.setAccessible(true)
-    val instance: AnyRef = constructor.newInstance().asInstanceOf[AnyRef]
-    if (!m.erasure.isInstance(instance)) error(instance + " is not an instance of " + m.erasure.getName)
-    instance.asInstanceOf[T]
+	try {
+      val instance: AnyRef = constructor.newInstance().asInstanceOf[AnyRef]
+      if (!m.erasure.isInstance(instance)) error(instance + " is not an instance of " + m.erasure.getName)
+      instance.asInstanceOf[T]
+	} catch {
+	  case e: java.lang.reflect.InvocationTargetException => throw e.getTargetException
+	}
   }
   /**
    * Load a class, given the class name
@@ -169,5 +182,4 @@ trait Classes extends ConsoleOutput {
    * @return the class name without the package name of any object
    */
   def getClassName[T](a: T): String = className(a.asInstanceOf[java.lang.Object].getClass)
-
 }

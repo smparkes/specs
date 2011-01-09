@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2007-2010 Eric Torreborre <etorreborre@yahoo.com>
+ * Copyright (c) 2007-2011 Eric Torreborre <etorreborre@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -69,27 +69,27 @@ class scalacheckMatchersUnit extends MatchersSpecification with ScalaCheckMock w
   "The checkScalaCheckProperty method" should {
     "call the printf function of Output to print the results if verbose=true" in {
       expect { matcher.printf(any[String], any[String]) }
-      matcher.checkScalaCheckProperty(forAllProp(Gen.value(true))(x => true))(Test.defaultParams, true)
+      matcher.checkScalaCheckProperty(forAllProp(Gen.value(true))(x => true))(Test.Params(), true)
     }
     "call the check function of scalacheck to check the property" in {
-      expect { matcher.checkProp(Test.defaultParams, Prop.proved, (s, d) => ()) }
-      matcher.checkScalaCheckProperty(forAllProp(Gen.value(true))(x => true))(Test.defaultParams, false)
+      expect { matcher.checkProp(Test.Params(), Prop.proved, new Test.TestCallback {}) }
+      matcher.checkScalaCheckProperty(forAllProp(Gen.value(true))(x => true))(Test.Params(), false)
     }
     "return a true status if the check function return a succeeded result" in {
-      expect { matcher.checkProp(any[Test.Params], any[Prop], (s, d) => ()) }
-      matcher.checkScalaCheckProperty(forAllProp(Gen.value(true))(x => true))(Test.defaultParams, false)._1 mustBe true
+      expect { matcher.checkProp(any[Test.Params], any[Prop], new Test.TestCallback {}) }
+      matcher.checkScalaCheckProperty(forAllProp(Gen.value(true))(x => true))(Test.Params(), false)._1 mustBe true
     }
     "return a false status if the check function return a failure" in {
-      matcherWithFailure.checkScalaCheckProperty(forAllProp(Gen.value(true))(x => true))(Test.defaultParams, false).success mustBe false
+      matcherWithFailure.checkScalaCheckProperty(forAllProp(Gen.value(true))(x => true))(Test.Params(), false).success mustBe false
     }
     "return a false status if the check function return a property exception" in {
-      matcherWithPropertyException.checkScalaCheckProperty(forAllProp(Gen.value(true))(x => true))(Test.defaultParams, false).success mustBe false
+      matcherWithPropertyException.checkScalaCheckProperty(forAllProp(Gen.value(true))(x => true))(Test.Params(), false).success mustBe false
     }
     "return a false status if the check function return an generation exception" in {
-      matcherWithGenerationException.checkScalaCheckProperty(forAllProp(Gen.value(true))(x => true))(Test.defaultParams, false).success mustBe false
+      matcherWithGenerationException.checkScalaCheckProperty(forAllProp(Gen.value(true))(x => true))(Test.Params(), false).success mustBe false
     }
     "return a false status if the check function return an exhausted status" in {
-      matcherWithExhaustedGeneration.checkScalaCheckProperty(forAllProp(Gen.value(true))(x => true))(Test.defaultParams, false).success mustBe false
+      matcherWithExhaustedGeneration.checkScalaCheckProperty(forAllProp(Gen.value(true))(x => true))(Test.Params(), false).success mustBe false
     }
   }
   "The afterNtries function" should {
@@ -112,7 +112,7 @@ class scalacheckMatchersUnit extends MatchersSpecification with ScalaCheckMock w
 trait ScalaCheckMock extends Mocker {
   trait ScalaCheckFunctionsMock extends ScalaCheckFunctions {
     def result = Test.Result(Test.Passed, 1, 2, FreqMap.empty[immutable.Set[Any]])
-    override def checkProp(params: Test.Params, prop: Prop, printResult: (Int, Int) => Unit) = {
+    override def checkProp(params: Test.Params, prop: Prop, callback: Test.TestCallback) = {
       recordAndReturn(result)
     }
     override def forAllProp[A,P](g: Gen[A])(f: A => Prop): Prop = recordAndReturn(Prop.proved)

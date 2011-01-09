@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2007-2010 Eric Torreborre <etorreborre@yahoo.com>
+ * Copyright (c) 2007-2011 Eric Torreborre <etorreborre@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -18,8 +18,7 @@
  */
 package org.specs.util
 import org.specs.util.ExtendedString._
-import java.io.StringWriter
-import java.io.PrintWriter
+import java.io. { StringWriter, PrintWriter }
 
 /**
  * This object allows to add some utility methods to </code>Throwable</code> objects.
@@ -101,6 +100,16 @@ object ExtendedThrowable {
 	 def getFullStackTrace: List[java.lang.StackTraceElement] = {
 	   (t :: t.chainedExceptions).flatMap(_.getStackTrace.toList)
 	 }
+	/**
+	 * @return the full stack trace as a string
+	 */
+	 def getFullStackTraceAsString: String = {
+       val stringWriter = new java.io.StringWriter
+       val pr = new PrintWriter(stringWriter)
+       try { t.printStackTrace(pr) } finally { pr.close }
+       stringWriter.toString
+     } 
+
 	/**
 	 * @return the list of chained exceptions
 	 */

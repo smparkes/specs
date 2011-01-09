@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2007-2010 Eric Torreborre <etorreborre@yahoo.com>
+ * Copyright (c) 2007-2011 Eric Torreborre <etorreborre@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation
@@ -65,7 +65,7 @@ trait IterableBaseMatchers { outer =>
   /**
    * Matches if all the elements of l are included in the actual iterable in that order
    */
-  def containInOrder[T](l: Iterable[T])(implicit details: Detailed) = new Matcher[Iterable[T]](){
+  def containInOrder[T](l: T*)(implicit details: Detailed) = new Matcher[Iterable[T]](){
     def apply(v: => Iterable[T]) = {
       val iterable = v;
       val failureMessage = if (iterable.toString.size >= 30) 
