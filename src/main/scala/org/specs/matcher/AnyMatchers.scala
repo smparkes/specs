@@ -557,10 +557,17 @@ trait StructuralMatchers {
   type HasIsEmptyMethod = Any { def isEmpty: Boolean }
   /** anything that can have a size */
   type HasSizeMethod = Any { def size: Int }
+  type HasSizePMethod = Any { def size(): Int }
   class SizeMatcher(n: Int) extends Matcher[HasSizeMethod] {
 	def apply(v: => HasSizeMethod) = {
 	  val collection = v
 	  (collection.size == n, d(collection) + " has size " + n, d(collection) + " doesn't have size " + n + ". It has size " + collection.size)
+	}
+  }
+  class SizePMatcher(n: Int) extends Matcher[HasSizePMethod] {
+	def apply(v: => HasSizePMethod) = {
+	  val collection = v
+	  (collection.size() == n, d(collection) + " has size " + n, d(collection) + " doesn't have size " + n + ". It has size " + collection.size())
 	}
   }
   /**
@@ -592,6 +599,7 @@ trait StructuralMatchers {
    * Matches if the size is n
    */
   def haveSize(n: Int) = new SizeMatcher(n)
+  def haveSizeP(n: Int) = new SizePMatcher(n)
 }
 trait AnyBeHaveMatchers { this: AnyBaseMatchers =>
   /** dummy matcher to allow be + matcher syntax */
@@ -625,10 +633,16 @@ trait AnyBeHaveMatchers { this: AnyBaseMatchers =>
     def empty = result.matchWith(beEmpty ^^ c)
   }
   /** implicit definition to add 'size' matchers */
-  implicit def toAnySizeResultMatcher[S](result: Result[S])(implicit c: S => HasSizeMethod): AnySizeResultMatcher[S] = new AnySizeResultMatcher(result)(c)
+  implicit def toAnySizeResultMatcher[S <: HasSizeMethod](result: Result[S])(implicit c: S => HasSizeMethod): AnySizeResultMatcher[S] = new AnySizeResultMatcher(result)(c)
   /** functions which can be used with 'size' matchers */
   class AnySizeResultMatcher[S](result: Result[S])(implicit c: S => HasSizeMethod) {
     def size(n: Int) = result.matchWith(haveSize(n) ^^ c)
+  }
+
+  implicit def toAnySizePResultMatcher[S <: HasSizePMethod](result: Result[S])(implicit c: S => HasSizePMethod): AnySizePResultMatcher[S] = new AnySizePResultMatcher(result)(c)
+  /** functions which can be used with 'size' matchers */
+  class AnySizePResultMatcher[S](result: Result[S])(implicit c: S => HasSizePMethod) {
+    def size(n: Int) = result.matchWith(haveSizeP(n) ^^ c)
   }
   /**
    * Alias of is_==
