@@ -9,7 +9,7 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
   override def javaCompileOptions = JavaCompileOption("-Xmx256m -Xms64m -Xss1M") :: Nil
   override def testJavaCompileOptions = JavaCompileOption("-Xmx256m -Xms64m") :: Nil
   override def includeTest(s: String) = { s.endsWith("Spec") || s.endsWith("Unit") }
-
+  
   val junit 		= "junit" % "junit" % "4.5"
   val wikitext 		= "org.eclipse.mylyn.wikitext" % "wikitext" % "0.9.4.I20090220-1600-e3x" 
   val wikitextile 	= "org.eclipse.mylyn.wikitext" % "wikitext.textile" % "0.9.4.I20090220-1600-e3x" 
@@ -25,10 +25,9 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
   val cglibnodep	= "cglib" % "cglib-nodep" % "2.1_3"  
   val objenesis 	= "org.objenesis" % "objenesis" % "1.0"
 
-
-  val scriptapi 	= "javax.script" % "script-api" % "1.0"
-  val scriptjs   	= "javax.script" % "script-js" % "1.0"
-  val jsengine  	= "javax.script" % "js-engine" % "1.0"
+  // val scriptapi 	= "javax.script" % "script-api" % "1.0"
+  // val scriptjs   	= "javax.script" % "script-js" % "1.0"
+  // val jsengine  	= "javax.script" % "js-engine" % "1.0"
 
   override def managedStyle = ManagedStyle.Maven
   override def defaultPublishRepository = {
